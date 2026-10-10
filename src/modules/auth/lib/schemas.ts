@@ -27,9 +27,18 @@ export const registerSchema = z
 
 export type RegisterInput = z.infer<typeof registerSchema>;
 
-/** Solo rutas internas: un callbackUrl externo sería un open redirect. */
+/** Solo rutas internas: un callbackUrl externo sería un open redirect. El
+ *  middleware de next-auth manda la URL absoluta; se conserva solo su ruta. */
 export function safeCallbackUrl(value: string | undefined, fallback: string): string {
   if (!value) return fallback;
+  if (/^https?:\/\//i.test(value)) {
+    try {
+      const url = new URL(value);
+      return `${url.pathname}${url.search}`;
+    } catch {
+      return fallback;
+    }
+  }
   if (!value.startsWith("/") || value.startsWith("//")) return fallback;
   return value;
 }
