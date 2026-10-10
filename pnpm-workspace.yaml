@@ -1,0 +1,10 @@
+# Solo configuración de pnpm (sin `packages:` no se crea un workspace).
+# Sin esta lista pnpm 11 omite los postinstall de estos paquetes y pide
+# aprobación interactiva (`pnpm approve-builds`), que no sirve en scripts.
+allowBuilds:
+  "@prisma/engines": true
+  "@prisma/client": true
+  prisma: true
+  esbuild: true
+  sharp: true
+  unrs-resolver: true

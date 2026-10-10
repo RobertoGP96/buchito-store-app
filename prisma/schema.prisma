@@ -1,0 +1,666 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// =============================================
+// ENUMS
+// =============================================
+
+enum UserRole {
+  admin
+  courier
+  customer
+}
+
+enum ProductStatus {
+  draft
+  active
+  archived
+}
+
+enum StockMovementType {
+  entry
+  exit
+  adjustment
+}
+
+enum OrderStatus {
+  pending
+  confirmed
+  ready
+  out_for_delivery
+  delivered
+  cancelled
+}
+
+enum PaymentStatus {
+  unpaid
+  partial
+  paid
+  refunded
+}
+
+// Tipo operativo del método de pago; el método en sí es catálogo
+// (PaymentMethod) para que el admin pueda crear "Efectivo USD", "Zelle", etc.
+enum PaymentKind {
+  cash_on_delivery
+  transfer
+  card
+  mobile_wallet
+  other
+}
+
+enum FulfillmentType {
+  delivery
+  pickup
+}
+
+enum CouponKind {
+  percent
+  fixed
+}
+
+enum DeliveryStatus {
+  pending
+  assigned
+  in_transit
+  delivered
+  failed
+  cancelled
+}
+
+enum VehicleType {
+  bicycle
+  motorcycle
+  car
+  on_foot
+}
+
+// =============================================
+// CORE
+// =============================================
+
+model User {
+  userId       Int       @id @default(autoincrement()) @map("user_id")
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  fullName     String    @map("full_name")
+  role         UserRole  @default(customer)
+  isActive     Boolean   @default(true) @map("is_active")
+  lastLoginAt  DateTime? @map("last_login_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  customer         Customer?
+  courier          Courier?
+  auditLogs        AuditLog[]
+  stockMovements   StockMovement[]
+  deliveryEvents   DeliveryEvent[]
+  ratesUpdated     ExchangeRate[]        @relation("RateUpdatedBy")
+  rateChanges      ExchangeRateHistory[] @relation("RateChangedBy")
+  paymentsReceived OrderPayment[]        @relation("PaymentReceivedBy")
+
+  @@index([role, isActive])
+  @@map("users")
+}
+
+model AuditLog {
+  logId      Int      @id @default(autoincrement()) @map("log_id")
+  userId     Int?     @map("user_id")
+  action     String
+  entityType String   @map("entity_type")
+  entityId   Int?     @map("entity_id")
+  module     String
+  oldValues  Json?    @map("old_values")
+  newValues  Json?    @map("new_values")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [userId], onDelete: SetNull)
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_log")
+}
+
+// Singleton: solo existe la fila id=1 (upsert en getStoreSettings).
+model StoreSetting {
+  id                    Int      @id @default(1)
+  storeName             String   @default("Buchito") @map("store_name")
+  baseCurrencyId        Int?     @map("base_currency_id")
+  phone                 String?
+  email                 String?
+  address               String?
+  orderPrefix           String   @default("PED-") @map("order_prefix")
+  // Montos en moneda base.
+  defaultShippingFee    Decimal  @default(0) @map("default_shipping_fee") @db.Decimal(20, 8)
+  freeShippingThreshold Decimal? @map("free_shipping_threshold") @db.Decimal(20, 8)
+  lowStockThreshold     Int      @default(5) @map("low_stock_threshold")
+  allowPickup           Boolean  @default(true) @map("allow_pickup")
+  updatedAt             DateTime @default(now()) @updatedAt @map("updated_at")
+
+  baseCurrency Currency? @relation(fields: [baseCurrencyId], references: [currencyId], onDelete: Restrict)
+
+  @@map("store_settings")
+}
+
+model DocumentSequence {
+  id         Int    @id @default(autoincrement())
+  docType    String @unique @map("doc_type")
+  prefix     String
+  lastNumber Int    @default(0) @map("last_number")
+  padLength  Int    @default(5) @map("pad_length")
+
+  @@map("document_sequences")
+}
+
+// =============================================
+// CURRENCY
+// =============================================
+
+model Currency {
+  currencyId    Int      @id @default(autoincrement()) @map("currency_id")
+  code          String   @unique
+  name          String
+  symbol        String
+  decimalPlaces Int      @default(2) @map("decimal_places")
+  isActive      Boolean  @default(true) @map("is_active")
+  sortOrder     Int      @default(0) @map("sort_order")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
+
+  settingsAsBase  StoreSetting[]
+  ratesAsBase     ExchangeRate[]   @relation("RateBase")
+  ratesAsQuote    ExchangeRate[]   @relation("RateQuote")
+  variants        ProductVariant[]
+  paymentMethods  PaymentMethod[]
+  orderPayments   OrderPayment[]
+  orderLinesOrig  OrderLine[]
+  ordersAsBase    Order[]          @relation("OrderBaseCurrency")
+  ordersAsPayment Order[]          @relation("OrderPaymentCurrency")
+
+  @@map("currencies")
+}
+
+// Tasa global única por par. Convención (igual que el ERP): `rate` = unidades
+// de quoteCurrency por 1 unidad de baseCurrency. getRateToBase resuelve la
+// inversa si solo existe el par contrario.
+model ExchangeRate {
+  exchangeRateId  Int      @id @default(autoincrement()) @map("exchange_rate_id")
+  baseCurrencyId  Int      @map("base_currency_id")
+  quoteCurrencyId Int      @map("quote_currency_id")
+  rate            Decimal  @db.Decimal(20, 8)
+  version         Int      @default(0)
+  updatedById     Int?     @map("updated_by_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
+
+  baseCurrency  Currency @relation("RateBase", fields: [baseCurrencyId], references: [currencyId], onDelete: Restrict)
+  quoteCurrency Currency @relation("RateQuote", fields: [quoteCurrencyId], references: [currencyId], onDelete: Restrict)
+  updatedBy     User?    @relation("RateUpdatedBy", fields: [updatedById], references: [userId], onDelete: SetNull)
+  history       ExchangeRateHistory[]
+
+  @@unique([baseCurrencyId, quoteCurrencyId])
+  @@map("exchange_rates")
+}
+
+model ExchangeRateHistory {
+  historyId      Int      @id @default(autoincrement()) @map("history_id")
+  exchangeRateId Int      @map("exchange_rate_id")
+  oldRate        Decimal? @map("old_rate") @db.Decimal(20, 8)
+  newRate        Decimal  @map("new_rate") @db.Decimal(20, 8)
+  changedById    Int?     @map("changed_by_id")
+  note           String?
+  changedAt      DateTime @default(now()) @map("changed_at")
+
+  exchangeRate ExchangeRate @relation(fields: [exchangeRateId], references: [exchangeRateId], onDelete: Restrict)
+  changedBy    User?        @relation("RateChangedBy", fields: [changedById], references: [userId], onDelete: SetNull)
+
+  @@index([exchangeRateId, changedAt])
+  @@map("exchange_rate_history")
+}
+
+// =============================================
+// PAYMENTS
+// =============================================
+
+model PaymentMethod {
+  paymentMethodId   Int         @id @default(autoincrement()) @map("payment_method_id")
+  code              String      @unique
+  name              String
+  kind              PaymentKind
+  // Moneda en la que paga el cliente con este método.
+  currencyId        Int         @map("currency_id")
+  // Texto que ve el cliente en el checkout (número de cuenta, etc.).
+  instructions      String?
+  requiresReference Boolean     @default(false) @map("requires_reference")
+  surchargePercent  Decimal?    @map("surcharge_percent") @db.Decimal(20, 8)
+  isActive          Boolean     @default(true) @map("is_active")
+  sortOrder         Int         @default(0) @map("sort_order")
+  version           Int         @default(0)
+  createdAt         DateTime    @default(now()) @map("created_at")
+  updatedAt         DateTime    @default(now()) @updatedAt @map("updated_at")
+
+  currency Currency       @relation(fields: [currencyId], references: [currencyId], onDelete: Restrict)
+  orders   Order[]
+  payments OrderPayment[]
+
+  @@index([isActive, sortOrder])
+  @@map("payment_methods")
+}
+
+// Cobro registrado contra un pedido. amountTendered va en la moneda pagada;
+// exchangeRate = base por 1 unidad de currencyId (snapshot); amountBase es lo
+// que alimenta Order.paidBase.
+model OrderPayment {
+  paymentId       Int      @id @default(autoincrement()) @map("payment_id")
+  orderId         Int      @map("order_id")
+  paymentMethodId Int      @map("payment_method_id")
+  currencyId      Int      @map("currency_id")
+  amountTendered  Decimal  @map("amount_tendered") @db.Decimal(20, 8)
+  exchangeRate    Decimal  @map("exchange_rate") @db.Decimal(20, 8)
+  amountBase      Decimal  @map("amount_base") @db.Decimal(20, 8)
+  reference       String?
+  notes           String?
+  paidAt          DateTime @map("paid_at")
+  receivedById    Int?     @map("received_by_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  order         Order         @relation(fields: [orderId], references: [orderId], onDelete: Restrict)
+  paymentMethod PaymentMethod @relation(fields: [paymentMethodId], references: [paymentMethodId], onDelete: Restrict)
+  currency      Currency      @relation(fields: [currencyId], references: [currencyId], onDelete: Restrict)
+  receivedBy    User?         @relation("PaymentReceivedBy", fields: [receivedById], references: [userId], onDelete: SetNull)
+
+  @@index([orderId, paidAt])
+  @@map("order_payments")
+}
+
+// =============================================
+// CUSTOMERS
+// =============================================
+
+model Customer {
+  customerId      Int      @id @default(autoincrement()) @map("customer_id")
+  userId          Int?     @unique @map("user_id")
+  name            String
+  phone           String
+  normalizedPhone String   @map("normalized_phone")
+  email           String?
+  notes           String?
+  isActive        Boolean  @default(true) @map("is_active")
+  version         Int      @default(0)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
+
+  user      User?             @relation(fields: [userId], references: [userId], onDelete: SetNull)
+  addresses CustomerAddress[]
+  orders    Order[]
+
+  @@index([normalizedPhone])
+  @@index([name])
+  @@map("customers")
+}
+
+model CustomerAddress {
+  addressId     Int      @id @default(autoincrement()) @map("address_id")
+  customerId    Int      @map("customer_id")
+  label         String?
+  recipientName String?  @map("recipient_name")
+  phone         String?
+  line1         String
+  line2         String?
+  neighborhood  String?
+  city          String
+  reference     String?
+  zoneId        Int?     @map("zone_id")
+  isDefault     Boolean  @default(false) @map("is_default")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
+
+  customer Customer      @relation(fields: [customerId], references: [customerId], onDelete: Cascade)
+  zone     DeliveryZone? @relation(fields: [zoneId], references: [zoneId], onDelete: SetNull)
+
+  @@index([customerId, isDefault])
+  @@map("customer_addresses")
+}
+
+// =============================================
+// CATALOG
+// =============================================
+
+model ProductType {
+  typeId          Int      @id @default(autoincrement()) @map("type_id")
+  name            String   @unique
+  slug            String   @unique
+  description     String?
+  // AttributeDef[]: { key, label, kind: "text"|"number"|"select"|"boolean",
+  // options?: string[], required: boolean, scope: "product"|"variant" }
+  attributeSchema Json     @default("[]") @map("attribute_schema")
+  isActive        Boolean  @default(true) @map("is_active")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
+
+  products Product[]
+
+  @@map("product_types")
+}
+
+model Category {
+  categoryId  Int      @id @default(autoincrement()) @map("category_id")
+  parentId    Int?     @map("parent_id")
+  name        String
+  slug        String   @unique
+  description String?
+  imageUrl    String?  @map("image_url")
+  sortOrder   Int      @default(0) @map("sort_order")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+
+  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [categoryId], onDelete: Restrict)
+  children Category[] @relation("CategoryTree")
+  products Product[]
+
+  @@unique([parentId, name])
+  @@index([parentId, sortOrder])
+  @@map("categories")
+}
+
+model Product {
+  productId   Int           @id @default(autoincrement()) @map("product_id")
+  typeId      Int           @map("type_id")
+  categoryId  Int?          @map("category_id")
+  slug        String        @unique
+  name        String
+  description String?
+  // Valores de scope "product" según attributeSchema del tipo.
+  attributes  Json          @default("{}")
+  status      ProductStatus @default(draft)
+  featured    Boolean       @default(false)
+  sortOrder   Int           @default(0) @map("sort_order")
+  version     Int           @default(0)
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @default(now()) @updatedAt @map("updated_at")
+
+  type     ProductType      @relation(fields: [typeId], references: [typeId], onDelete: Restrict)
+  category Category?        @relation(fields: [categoryId], references: [categoryId], onDelete: SetNull)
+  variants ProductVariant[]
+  images   ProductImage[]
+
+  @@index([status, featured, sortOrder])
+  @@index([categoryId, status])
+  @@index([typeId])
+  @@index([name])
+  @@map("products")
+}
+
+// price y compareAtPrice van en priceCurrencyId; el catálogo los convierte a
+// la moneda base con la tasa vigente al leer.
+model ProductVariant {
+  variantId       Int      @id @default(autoincrement()) @map("variant_id")
+  productId       Int      @map("product_id")
+  sku             String   @unique
+  // "Rojo / M"; null en producto de variante única.
+  name            String?
+  // Valores de scope "variant".
+  attributes      Json     @default("{}")
+  price           Decimal  @db.Decimal(20, 8)
+  compareAtPrice  Decimal? @map("compare_at_price") @db.Decimal(20, 8)
+  priceCurrencyId Int      @map("price_currency_id")
+  stock           Int      @default(0)
+  imageUrl        String?  @map("image_url")
+  isDefault       Boolean  @default(false) @map("is_default")
+  isActive        Boolean  @default(true) @map("is_active")
+  sortOrder       Int      @default(0) @map("sort_order")
+  version         Int      @default(0)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
+
+  product        Product         @relation(fields: [productId], references: [productId], onDelete: Restrict)
+  priceCurrency  Currency        @relation(fields: [priceCurrencyId], references: [currencyId], onDelete: Restrict)
+  stockMovements StockMovement[]
+  orderLines     OrderLine[]
+
+  @@index([productId, sortOrder])
+  @@index([isActive, stock])
+  @@map("product_variants")
+}
+
+model ProductImage {
+  imageId   Int      @id @default(autoincrement()) @map("image_id")
+  productId Int      @map("product_id")
+  url       String
+  alt       String?
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  product Product @relation(fields: [productId], references: [productId], onDelete: Cascade)
+
+  @@index([productId, sortOrder])
+  @@map("product_images")
+}
+
+model StockMovement {
+  movementId    Int               @id @default(autoincrement()) @map("movement_id")
+  variantId     Int               @map("variant_id")
+  type          StockMovementType
+  // Siempre > 0; el signo lo da `type`.
+  quantity      Int
+  stockAfter    Int               @map("stock_after")
+  referenceType String?           @map("reference_type")
+  referenceId   Int?              @map("reference_id")
+  notes         String?
+  createdById   Int?              @map("created_by_id")
+  createdAt     DateTime          @default(now()) @map("created_at")
+
+  variant   ProductVariant @relation(fields: [variantId], references: [variantId], onDelete: Restrict)
+  createdBy User?          @relation(fields: [createdById], references: [userId], onDelete: SetNull)
+
+  @@index([variantId, createdAt])
+  @@index([referenceType, referenceId])
+  @@map("stock_movements")
+}
+
+// =============================================
+// ORDERS
+// =============================================
+
+model Coupon {
+  couponId    Int        @id @default(autoincrement()) @map("coupon_id")
+  code        String     @unique
+  kind        CouponKind
+  // `fixed` va en moneda base.
+  value       Decimal    @db.Decimal(20, 8)
+  minSubtotal Decimal?   @map("min_subtotal") @db.Decimal(20, 8)
+  maxUses     Int?       @map("max_uses")
+  usedCount   Int        @default(0) @map("used_count")
+  startsAt    DateTime?  @map("starts_at")
+  endsAt      DateTime?  @map("ends_at")
+  isActive    Boolean    @default(true) @map("is_active")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @default(now()) @updatedAt @map("updated_at")
+
+  orders Order[]
+
+  @@index([isActive, endsAt])
+  @@map("coupons")
+}
+
+// Todos los montos (subtotal, shippingFee, discount, paymentSurcharge, total,
+// paidBase) van en la moneda base del momento (baseCurrencyId, snapshot).
+model Order {
+  orderId                Int             @id @default(autoincrement()) @map("order_id")
+  orderNo                String          @unique @map("order_no")
+  customerId             Int             @map("customer_id")
+  status                 OrderStatus     @default(pending)
+  fulfillment            FulfillmentType @default(delivery)
+  baseCurrencyId         Int             @map("base_currency_id")
+  subtotal               Decimal         @default(0) @db.Decimal(20, 8)
+  shippingFee            Decimal         @default(0) @map("shipping_fee") @db.Decimal(20, 8)
+  discount               Decimal         @default(0) @db.Decimal(20, 8)
+  paymentSurcharge       Decimal         @default(0) @map("payment_surcharge") @db.Decimal(20, 8)
+  total                  Decimal         @default(0) @db.Decimal(20, 8)
+  // Pago: snapshot del método y de la tasa al crear el pedido.
+  paymentMethodId        Int             @map("payment_method_id")
+  paymentMethodName      String          @map("payment_method_name")
+  paymentCurrencyId      Int             @map("payment_currency_id")
+  // Base por 1 unidad de la moneda de pago.
+  paymentExchangeRate    Decimal         @default(1) @map("payment_exchange_rate") @db.Decimal(20, 8)
+  totalInPaymentCurrency Decimal         @default(0) @map("total_in_payment_currency") @db.Decimal(20, 8)
+  paymentStatus          PaymentStatus   @default(unpaid) @map("payment_status")
+  paidBase               Decimal         @default(0) @map("paid_base") @db.Decimal(20, 8)
+  couponId               Int?            @map("coupon_id")
+  couponCode             String?         @map("coupon_code")
+  zoneId                 Int?            @map("zone_id")
+  // Snapshot: el perfil/dirección del cliente puede cambiar después del pedido.
+  customerName           String          @map("customer_name")
+  customerPhone          String          @map("customer_phone")
+  deliveryAddress        Json?           @map("delivery_address")
+  notes                  String?
+  cancelReason           String?         @map("cancel_reason")
+  confirmedAt            DateTime?       @map("confirmed_at")
+  readyAt                DateTime?       @map("ready_at")
+  deliveredAt            DateTime?       @map("delivered_at")
+  cancelledAt            DateTime?       @map("cancelled_at")
+  version                Int             @default(0)
+  createdAt              DateTime        @default(now()) @map("created_at")
+  updatedAt              DateTime        @default(now()) @updatedAt @map("updated_at")
+
+  customer        Customer       @relation(fields: [customerId], references: [customerId], onDelete: Restrict)
+  baseCurrency    Currency       @relation("OrderBaseCurrency", fields: [baseCurrencyId], references: [currencyId], onDelete: Restrict)
+  paymentMethod   PaymentMethod  @relation(fields: [paymentMethodId], references: [paymentMethodId], onDelete: Restrict)
+  paymentCurrency Currency       @relation("OrderPaymentCurrency", fields: [paymentCurrencyId], references: [currencyId], onDelete: Restrict)
+  coupon          Coupon?        @relation(fields: [couponId], references: [couponId], onDelete: Restrict)
+  zone            DeliveryZone?  @relation(fields: [zoneId], references: [zoneId], onDelete: Restrict)
+  lines           OrderLine[]
+  payments        OrderPayment[]
+  delivery        Delivery?
+
+  @@index([status, createdAt])
+  @@index([customerId, createdAt])
+  @@index([paymentStatus])
+  @@map("orders")
+}
+
+// unitPrice y lineTotal en base. El trío origCurrencyId/origUnitPrice/
+// exchangeRate es la referencia de la moneda original del precio (todo null
+// cuando el precio ya estaba en base).
+model OrderLine {
+  lineId         Int      @id @default(autoincrement()) @map("line_id")
+  orderId        Int      @map("order_id")
+  variantId      Int      @map("variant_id")
+  productName    String   @map("product_name")
+  variantName    String?  @map("variant_name")
+  sku            String
+  attributes     Json?
+  imageUrl       String?  @map("image_url")
+  unitPrice      Decimal  @map("unit_price") @db.Decimal(20, 8)
+  qty            Int
+  lineTotal      Decimal  @map("line_total") @db.Decimal(20, 8)
+  origCurrencyId Int?     @map("orig_currency_id")
+  origUnitPrice  Decimal? @map("orig_unit_price") @db.Decimal(20, 8)
+  exchangeRate   Decimal? @map("exchange_rate") @db.Decimal(20, 8)
+
+  order        Order          @relation(fields: [orderId], references: [orderId], onDelete: Cascade)
+  variant      ProductVariant @relation(fields: [variantId], references: [variantId], onDelete: Restrict)
+  origCurrency Currency?      @relation(fields: [origCurrencyId], references: [currencyId], onDelete: Restrict)
+
+  @@index([orderId])
+  @@index([variantId])
+  @@map("order_lines")
+}
+
+// =============================================
+// DELIVERIES
+// =============================================
+
+model DeliveryZone {
+  zoneId                Int      @id @default(autoincrement()) @map("zone_id")
+  name                  String   @unique
+  description           String?
+  // Montos en moneda base.
+  fee                   Decimal  @db.Decimal(20, 8)
+  freeShippingThreshold Decimal? @map("free_shipping_threshold") @db.Decimal(20, 8)
+  etaLabel              String?  @map("eta_label")
+  sortOrder             Int      @default(0) @map("sort_order")
+  active                Boolean  @default(true)
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @default(now()) @updatedAt @map("updated_at")
+
+  addresses  CustomerAddress[]
+  orders     Order[]
+  deliveries Delivery[]
+
+  @@index([active, sortOrder])
+  @@map("delivery_zones")
+}
+
+// Mensajero = User con rol courier + fila aquí.
+model Courier {
+  courierId Int         @id @default(autoincrement()) @map("courier_id")
+  userId    Int         @unique @map("user_id")
+  phone     String
+  vehicle   VehicleType @default(motorcycle)
+  notes     String?
+  active    Boolean     @default(true)
+  version   Int         @default(0)
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @default(now()) @updatedAt @map("updated_at")
+
+  user       User       @relation(fields: [userId], references: [userId], onDelete: Restrict)
+  deliveries Delivery[]
+
+  @@index([active])
+  @@map("couriers")
+}
+
+model Delivery {
+  deliveryId    Int            @id @default(autoincrement()) @map("delivery_id")
+  orderId       Int            @unique @map("order_id")
+  courierId     Int?           @map("courier_id")
+  zoneId        Int?           @map("zone_id")
+  status        DeliveryStatus @default(pending)
+  // Snapshot de la tarifa de la zona, en moneda base.
+  fee           Decimal        @default(0) @db.Decimal(20, 8)
+  attempts      Int            @default(0)
+  assignedAt    DateTime?      @map("assigned_at")
+  pickedUpAt    DateTime?      @map("picked_up_at")
+  deliveredAt   DateTime?      @map("delivered_at")
+  failedAt      DateTime?      @map("failed_at")
+  failedReason  String?        @map("failed_reason")
+  proofPhotoUrl String?        @map("proof_photo_url")
+  notes         String?
+  version       Int            @default(0)
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @default(now()) @updatedAt @map("updated_at")
+
+  order   Order           @relation(fields: [orderId], references: [orderId], onDelete: Restrict)
+  courier Courier?        @relation(fields: [courierId], references: [courierId], onDelete: Restrict)
+  zone    DeliveryZone?   @relation(fields: [zoneId], references: [zoneId], onDelete: Restrict)
+  events  DeliveryEvent[]
+
+  @@index([status, assignedAt])
+  @@index([courierId, status])
+  @@index([zoneId, status])
+  @@map("deliveries")
+}
+
+model DeliveryEvent {
+  eventId    Int             @id @default(autoincrement()) @map("event_id")
+  deliveryId Int             @map("delivery_id")
+  fromStatus DeliveryStatus? @map("from_status")
+  toStatus   DeliveryStatus  @map("to_status")
+  actorId    Int?            @map("actor_id")
+  note       String?
+  createdAt  DateTime        @default(now()) @map("created_at")
+
+  delivery Delivery @relation(fields: [deliveryId], references: [deliveryId], onDelete: Cascade)
+  actor    User?    @relation(fields: [actorId], references: [userId], onDelete: SetNull)
+
+  @@index([deliveryId, createdAt])
+  @@map("delivery_events")
+}

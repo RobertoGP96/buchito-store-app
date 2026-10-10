@@ -1,0 +1,35 @@
+import { z } from "zod";
+import { isValidPhone } from "@/lib/phone";
+
+export const loginSchema = z.object({
+  email: z.string().trim().toLowerCase().email("Escribe un correo válido"),
+  password: z.string().min(1, "Escribe tu contraseña"),
+  callbackUrl: z.string().optional(),
+});
+
+export type LoginInput = z.infer<typeof loginSchema>;
+
+export const registerSchema = z
+  .object({
+    fullName: z.string().trim().min(2, "Escribe tu nombre"),
+    email: z.string().trim().toLowerCase().email("Escribe un correo válido"),
+    phone: z
+      .string()
+      .trim()
+      .refine(isValidPhone, "Escribe un teléfono válido (7 a 15 dígitos)"),
+    password: z.string().min(8, "Mínimo 8 caracteres"),
+    confirmPassword: z.string(),
+  })
+  .refine((v) => v.password === v.confirmPassword, {
+    message: "Las contraseñas no coinciden",
+    path: ["confirmPassword"],
+  });
+
+export type RegisterInput = z.infer<typeof registerSchema>;
+
+/** Solo rutas internas: un callbackUrl externo sería un open redirect. */
+export function safeCallbackUrl(value: string | undefined, fallback: string): string {
+  if (!value) return fallback;
+  if (!value.startsWith("/") || value.startsWith("//")) return fallback;
+  return value;
+}
