@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 import { db } from "@/lib/db";
 import { assertRole } from "@/lib/auth-guard";
 import { createAuditLog } from "@/lib/audit";
@@ -44,6 +45,9 @@ export async function updateStoreSettings(input: StoreSettingsInput): Promise<Ac
       });
     });
 
+    // La moneda base vive en la configuración: también cambia base y tasas.
+    revalidateTag(CACHE_TAGS.settings);
+    revalidateTag(CACHE_TAGS.currency);
     revalidatePath("/admin/configuracion");
     revalidatePath("/", "layout");
     return { success: true, data: undefined };

@@ -1,5 +1,6 @@
 "use client";
 
+import { lazyDialog } from "@/components/lazy-dialog";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -15,7 +16,8 @@ import { cn } from "@/lib/utils";
 import { PRODUCT_STATUS_META } from "../lib/labels";
 import type { AdminVariantRow } from "../queries/product-queries";
 import type { InventoryRow } from "../queries/inventory-queries";
-import { StockAdjustForm } from "./stock-adjust-form";
+
+const StockAdjustForm = lazyDialog(() => import("./stock-adjust-form").then((m) => m.StockAdjustForm));
 
 interface InventoryListProps {
   rows: InventoryRow[];

@@ -1,6 +1,8 @@
 import "server-only";
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { db } from "@/lib/db";
+import { CACHE_FALLBACK_SECONDS, CACHE_TAGS } from "@/lib/cache-tags";
 import { Prisma } from "@/generated/prisma";
 import { BaseCurrencyNotConfiguredError, getBaseCurrencyCached, getRatesToBaseCached } from "@/lib/currency";
 import { roundToCurrency } from "@/lib/currency-math";
@@ -196,11 +198,14 @@ export async function getProductBySlug(slug: string): Promise<CatalogProduct | n
   return row ? toCatalogProduct(row, ctx) : null;
 }
 
-export async function getCatalogCategories(): Promise<CatalogCategory[]> {
-  const rows = await db.category.findMany({
-    where: { isActive: true },
-    orderBy: [{ parentId: "asc" }, { sortOrder: "asc" }, { name: "asc" }],
-    select: { categoryId: true, name: true, slug: true, parentId: true },
-  });
-  return rows;
-}
+/** En la Data Cache: el árbol cambia solo desde el admin (revalidateTag). */
+export const getCatalogCategories = unstable_cache(
+  (): Promise<CatalogCategory[]> =>
+    db.category.findMany({
+      where: { isActive: true },
+      orderBy: [{ parentId: "asc" }, { sortOrder: "asc" }, { name: "asc" }],
+      select: { categoryId: true, name: true, slug: true, parentId: true },
+    }),
+  ["catalog-categories"],
+  { tags: [CACHE_TAGS.categories], revalidate: CACHE_FALLBACK_SECONDS }
+);

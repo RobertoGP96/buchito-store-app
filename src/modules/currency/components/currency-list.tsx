@@ -1,13 +1,15 @@
 "use client";
 
+import { lazyDialog } from "@/components/lazy-dialog";
 import { useState } from "react";
 import { Button } from "@heroui/react";
 import { Coins, Pencil, Plus } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { ListCard, ResponsiveList, type ListColumn } from "@/components/responsive-list";
 import { StatusChip } from "@/components/status-chip";
-import { CurrencyForm } from "./currency-form";
 import type { CurrencyRow } from "../queries/currency-queries";
+
+const CurrencyForm = lazyDialog(() => import("./currency-form").then((m) => m.CurrencyForm));
 
 function RateCell({ row, baseCode }: { row: CurrencyRow; baseCode: string | null }) {
   if (row.isBase) return <span className="text-slate-400">Base</span>;

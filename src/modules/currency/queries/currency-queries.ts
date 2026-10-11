@@ -1,5 +1,7 @@
 import "server-only";
+import { unstable_cache } from "next/cache";
 import { db } from "@/lib/db";
+import { CACHE_FALLBACK_SECONDS, CACHE_TAGS } from "@/lib/cache-tags";
 import {
   BaseCurrencyNotConfiguredError,
   getBaseCurrencyCached,
@@ -50,13 +52,20 @@ export async function getCurrencies(): Promise<CurrencyRow[]> {
   }));
 }
 
+/** Monedas activas en la Data Cache: cambian solo desde el admin. */
+const loadActiveCurrencies = unstable_cache(
+  (): Promise<CurrencyInfo[]> =>
+    db.currency.findMany({
+      where: { isActive: true },
+      orderBy: [{ sortOrder: "asc" }, { code: "asc" }],
+      select: { currencyId: true, code: true, symbol: true, decimalPlaces: true, name: true },
+    }),
+  ["active-currencies"],
+  { tags: [CACHE_TAGS.currency], revalidate: CACHE_FALLBACK_SECONDS }
+);
+
 export async function getActiveCurrencies(): Promise<CurrencyInfo[]> {
-  const rows = await db.currency.findMany({
-    where: { isActive: true },
-    orderBy: [{ sortOrder: "asc" }, { code: "asc" }],
-    select: { currencyId: true, code: true, symbol: true, decimalPlaces: true, name: true },
-  });
-  return rows;
+  return loadActiveCurrencies();
 }
 
 /** Lo que la tienda pública necesita para pintar montos en cualquier moneda
@@ -65,14 +74,7 @@ export async function getActiveCurrencies(): Promise<CurrencyInfo[]> {
 export async function getCurrencyContext(): Promise<CurrencyContextData> {
   try {
     const base = await getBaseCurrencyCached();
-    const [{ rates }, active] = await Promise.all([
-      getRatesToBaseCached(),
-      db.currency.findMany({
-        where: { isActive: true },
-        orderBy: [{ sortOrder: "asc" }, { code: "asc" }],
-        select: { currencyId: true, code: true, symbol: true, decimalPlaces: true, name: true },
-      }),
-    ]);
+    const [{ rates }, active] = await Promise.all([getRatesToBaseCached(), loadActiveCurrencies()]);
     const currencies = active.filter((c) => rates.has(c.currencyId));
     if (!currencies.some((c) => c.currencyId === base.currencyId)) {
       currencies.unshift({ ...base, name: base.code });

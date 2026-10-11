@@ -1,5 +1,6 @@
 "use client";
 
+import { lazyDialog } from "@/components/lazy-dialog";
 import { useState } from "react";
 import { Button } from "@heroui/react";
 import { Pencil, Plus, TicketPercent } from "lucide-react";
@@ -8,9 +9,10 @@ import { Money } from "@/components/money";
 import { ListCard, ResponsiveList, type ListColumn } from "@/components/responsive-list";
 import { StatusChip } from "@/components/status-chip";
 import { fmtDate } from "@/lib/format";
-import { CouponForm } from "./coupon-form";
 import { COUPON_STATE_META } from "../lib/labels";
 import type { CouponRow } from "../queries/coupon-queries";
+
+const CouponForm = lazyDialog(() => import("./coupon-form").then((m) => m.CouponForm));
 
 function Discount({ row }: { row: CouponRow }) {
   if (row.kind === "percent") return <span className="tabular">{row.value} %</span>;
