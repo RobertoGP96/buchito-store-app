@@ -71,4 +71,14 @@ Flujo completo funcionando y verificado de punta a punta contra Neon:
 - **Gestión**: pedidos (confirmar, listo, entregar en recogida, cancelar con reposición de stock), registro de cobros multi-moneda, entregas (asignar/desasignar mensajero).
 - **Mensajero**: recoger, entregar con cobro contra entrega, o registrar el fallo (el pedido vuelve a la cola).
 
-Pendiente / fuera de alcance por ahora: UI de administración de cupones (el modelo y la validación existen), subida de imágenes (hoy se indica una URL), reembolsos, pasarelas de pago online, notificaciones, favoritos, PWA, mapas, recuperación de contraseña.
+## Fotos de producto y CDN
+
+Las fotos (galería del producto y foto de variante) se suben desde el panel a `/api/uploads/products`, que las guarda en el bucket `products` de Neon Object Storage (declarado en `neon.ts`, `public_read`) con clave `<scope>/<uuid>.<ext>` y `Cache-Control: immutable`. Hace falta tener en `.env` las variables `AWS_*` que escribe `neon env pull`.
+
+En la base **no** se guarda la URL del bucket sino la ruta relativa `/media/<clave>`, así las filas no dependen del host del bucket (cambia por rama de Neon) ni del CDN:
+
+- `GET /media/<clave>` (`src/app/media/[...key]/route.ts`) proxea el objeto con `Cache-Control: public, max-age=31536000, s-maxage=31536000, immutable`. En Vercel eso lo cachea el Edge Network tras la primera petición; si tienes Cloudflare (u otro CDN) delante del dominio de la app, también. Solo sirve claves con la forma de la subida, no es un proxy abierto.
+- `next/image` optimiza a partir de esa ruta; los `/_next/image` resultantes también se cachean en el edge.
+- Si prefieres un CDN propio con origen directo en el bucket (`${AWS_ENDPOINT_URL_S3}/products/`), pon su URL pública en `NEXT_PUBLIC_IMAGE_CDN_URL` (sin barra final): `imageSrc()` (`src/lib/image-url.ts`) reescribe `/media/<clave>` → `<CDN>/<clave>` y `next.config.ts` añade ese host a `images.remotePatterns`. Con Cloudflare: un Worker o una regla de origen que reenvíe `https://img.tu-dominio.com/<clave>` a `${AWS_ENDPOINT_URL_S3}/products/<clave>` con "cache everything"; el objeto ya trae `immutable`, así que no hay que purgar nunca (cada versión es una clave nueva).
+
+Pendiente / fuera de alcance por ahora: UI de administración de cupones (el modelo y la validación existen), reembolsos, pasarelas de pago online, notificaciones, favoritos, PWA, mapas, recuperación de contraseña.

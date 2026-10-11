@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { ImageIcon } from "lucide-react";
+import { imageSrc } from "@/lib/image-url";
 
 /** Nombre de View Transition de la foto "activa": la card pulsada, el hueco
  *  del esqueleto de la ficha y la foto de la ficha lo comparten, así la foto
@@ -32,7 +33,8 @@ export function ProductImage({
   if (src && !failed) {
     return (
       <Image
-        src={src}
+        // `/media/<clave>` tal cual o, si hay CDN propio, su URL (image-url.ts).
+        src={imageSrc(src)}
         alt={alt}
         fill
         sizes={sizes}

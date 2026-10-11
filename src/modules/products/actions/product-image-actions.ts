@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { assertRole } from "@/lib/auth-guard";
 import { createAuditLog } from "@/lib/audit";
 import { failAction, firstIssueMessage } from "@/lib/action-utils";
+import { MEDIA_PREFIX } from "@/lib/image-url";
 import { deleteObjectIfOurs } from "@/lib/storage";
 import type { ActionResult } from "@/types";
 
@@ -13,7 +14,11 @@ const MAX_IMAGES = 10;
 
 const addImageSchema = z.object({
   productId: z.coerce.number().int().positive(),
-  url: z.string().trim().url("URL de imagen no válida"),
+  // `/media/<clave>` (subida propia) o una URL externa.
+  url: z
+    .string()
+    .trim()
+    .refine((v) => v.startsWith(MEDIA_PREFIX) || /^https?:\/\//.test(v), "URL de imagen no válida"),
   alt: z
     .string()
     .trim()

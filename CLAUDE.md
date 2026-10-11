@@ -78,4 +78,4 @@ Navegación: cada ruta hoja sin `searchParams` lleva `loading.tsx` con las silue
 
 ## Entorno
 
-`.env` (gitignored): `DATABASE_URL`, `AUTH_SECRET`, `NEXT_PUBLIC_STORE_NAME`, `SEED_*`. NO definir `AUTH_URL` (ver README: `neon env pull` la escribe por Neon Auth y rompe next-auth; borrarla tras cada pull). Neon: proyecto `bucito-store`, rama `production`, `neon.ts` con `auth: true` + buckets.
+`.env` (gitignored): `DATABASE_URL`, `AUTH_SECRET`, `NEXT_PUBLIC_STORE_NAME`, `SEED_*`. NO definir `AUTH_URL` (ver README: `neon env pull` la escribe por Neon Auth y rompe next-auth; borrarla tras cada pull). Neon: proyecto `bucito-store`, rama `production`, `neon.ts` con `auth: true` + buckets. Fotos: `AWS_*` (bucket `products`); en la base se guarda `/media/<clave>` (route handler cacheable que proxea el bucket); `NEXT_PUBLIC_IMAGE_CDN_URL` opcional reescribe a un CDN propio (`src/lib/image-url.ts`, nunca la URL del bucket en la base).

@@ -1,9 +1,11 @@
 import "server-only";
-import { DeleteObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { MEDIA_KEY_PATTERN, mediaKeyFromUrl, mediaUrl } from "./image-url";
 
-/** Bucket de Neon Object Storage declarado en neon.ts con `public_read`: las
- *  fotos se sirven por URL directa (sin presign). Las credenciales llegan por
- *  las variables AWS_* que escribe `neon env pull`. */
+/** Bucket de Neon Object Storage declarado en neon.ts con `public_read`. Las
+ *  credenciales llegan por las variables AWS_* que escribe `neon env pull`.
+ *  Las fotos se sirven por `/media/<clave>` (ver image-url.ts), nunca por la
+ *  URL del bucket directamente. */
 export const PRODUCT_BUCKET = "products";
 
 export function isStorageConfigured(): boolean {
@@ -34,15 +36,32 @@ function s3(): S3Client {
   return client;
 }
 
+/** URL que se guarda en la base: relativa, independiente del bucket y del CDN. */
 export function publicObjectUrl(key: string): string {
+  return mediaUrl(key);
+}
+
+/** URL del objeto en el bucket (origen del CDN). Solo para diagnóstico. */
+export function originObjectUrl(key: string): string {
   return `${endpoint()}/${PRODUCT_BUCKET}/${key}`;
 }
 
-/** Clave dentro del bucket si la URL es nuestra; null si es una URL externa. */
+/** Clave dentro del bucket si la URL es nuestra; null si es una URL externa.
+ *  Reconoce `/media/<clave>`, la URL del bucket y la del CDN configurado. */
 export function objectKeyFromUrl(url: string): string | null {
-  const prefix = `${endpoint()}/${PRODUCT_BUCKET}/`;
-  if (!endpoint() || !url.startsWith(prefix)) return null;
-  return url.slice(prefix.length);
+  const fromMedia = mediaKeyFromUrl(url);
+  if (fromMedia) return fromMedia;
+  const prefixes = [
+    endpoint() ? `${endpoint()}/${PRODUCT_BUCKET}/` : null,
+    process.env.NEXT_PUBLIC_IMAGE_CDN_URL ? `${process.env.NEXT_PUBLIC_IMAGE_CDN_URL.replace(/\/$/, "")}/` : null,
+  ];
+  for (const prefix of prefixes) {
+    if (prefix && url.startsWith(prefix)) {
+      const key = url.slice(prefix.length);
+      return MEDIA_KEY_PATTERN.test(key) ? key : null;
+    }
+  }
+  return null;
 }
 
 export async function uploadPublicObject(input: {
@@ -61,6 +80,31 @@ export async function uploadPublicObject(input: {
     })
   );
   return publicObjectUrl(input.key);
+}
+
+export interface StoredObject {
+  body: ReadableStream;
+  contentType: string | null;
+  contentLength: number | null;
+  etag: string | null;
+}
+
+/** Lee un objeto del bucket para servirlo por /media. null si no existe. */
+export async function getPublicObject(key: string): Promise<StoredObject | null> {
+  try {
+    const result = await s3().send(new GetObjectCommand({ Bucket: PRODUCT_BUCKET, Key: key }));
+    if (!result.Body) return null;
+    return {
+      body: result.Body.transformToWebStream() as ReadableStream,
+      contentType: result.ContentType ?? null,
+      contentLength: result.ContentLength ?? null,
+      etag: result.ETag ?? null,
+    };
+  } catch (error) {
+    const name = (error as { name?: string })?.name;
+    if (name === "NoSuchKey" || name === "NotFound") return null;
+    throw error;
+  }
 }
 
 /** Borrado best-effort: un objeto huérfano no justifica fallar la operación. */
