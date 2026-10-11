@@ -106,3 +106,40 @@ export async function updateCurrency(
     return failAction("updateCurrency", error, "No se pudo actualizar la moneda");
   }
 }
+
+/** Cambia la moneda base de la tienda. Solo entre monedas activas; el resto
+ *  de pantallas (catálogo, tasas, pedidos nuevos) la leen de StoreSetting. */
+export async function setBaseCurrency(currencyId: number): Promise<ActionResult<void>> {
+  if (!Number.isInteger(currencyId) || currencyId <= 0) {
+    return { success: false, error: "Elige una moneda" };
+  }
+  try {
+    const userId = await assertRole("admin");
+    const currency = await db.currency.findUnique({ where: { currencyId } });
+    if (!currency?.isActive) return { success: false, error: "La moneda base debe ser una moneda activa" };
+
+    await db.$transaction(async (tx) => {
+      const before = await tx.storeSetting.findUnique({ where: { id: 1 }, select: { baseCurrencyId: true } });
+      if (before?.baseCurrencyId === currencyId) return;
+      await tx.storeSetting.upsert({
+        where: { id: 1 },
+        create: { id: 1, baseCurrencyId: currencyId },
+        update: { baseCurrencyId: currencyId },
+      });
+      await createAuditLog(tx, {
+        action: "update",
+        entityType: "StoreSetting",
+        entityId: 1,
+        module: "currency",
+        userId,
+        oldValues: { baseCurrencyId: before?.baseCurrencyId ?? null },
+        newValues: { baseCurrencyId: currencyId, code: currency.code },
+      });
+    });
+
+    revalidateCurrencyPaths();
+    return { success: true, data: undefined };
+  } catch (error) {
+    return failAction("setBaseCurrency", error, "No se pudo cambiar la moneda base");
+  }
+}

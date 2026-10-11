@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/empty-state";
 import { ListCard, ResponsiveList, type ListColumn } from "@/components/responsive-list";
 import { StatusChip } from "@/components/status-chip";
 import { CurrencyForm } from "./currency-form";
+import { SetBaseCurrencyButton } from "./set-base-currency-button";
 import type { CurrencyRow } from "../queries/currency-queries";
 
 function RateCell({ row, baseCode }: { row: CurrencyRow; baseCode: string | null }) {
@@ -54,9 +55,12 @@ export function CurrencyList({ rows }: { rows: CurrencyRow[] }) {
       header: "",
       align: "right",
       cell: (r) => (
-        <Button variant="ghost" size="sm" isIconOnly aria-label={`Editar ${r.code}`} onPress={() => openEdit(r)}>
-          <Pencil className="h-4 w-4" strokeWidth={1.9} />
-        </Button>
+        <div className="flex items-center justify-end gap-1.5">
+          {!r.isBase && r.isActive && <SetBaseCurrencyButton currency={r} currentBaseCode={baseCode} />}
+          <Button variant="ghost" size="sm" isIconOnly aria-label={`Editar ${r.code}`} onPress={() => openEdit(r)}>
+            <Pencil className="h-4 w-4" strokeWidth={1.9} />
+          </Button>
+        </div>
       ),
     },
   ];
@@ -93,10 +97,13 @@ export function CurrencyList({ rows }: { rows: CurrencyRow[] }) {
             }
             rows={[{ label: "Tasa a base", value: <RateCell row={r} baseCode={baseCode} /> }]}
             actions={
-              <Button variant="outline" size="sm" className="rounded-full" onPress={() => openEdit(r)}>
-                <Pencil className="h-3.5 w-3.5" strokeWidth={1.9} />
-                Editar
-              </Button>
+              <>
+                {!r.isBase && r.isActive && <SetBaseCurrencyButton currency={r} currentBaseCode={baseCode} />}
+                <Button variant="outline" size="sm" className="rounded-full" onPress={() => openEdit(r)}>
+                  <Pencil className="h-3.5 w-3.5" strokeWidth={1.9} />
+                  Editar
+                </Button>
+              </>
             }
           />
         )}
