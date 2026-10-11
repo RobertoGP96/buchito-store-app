@@ -1,7 +1,8 @@
 "use client";
 
-import { Button, toast } from "@heroui/react";
+import Link from "next/link";
 import { AlertTriangle, Package, Plus } from "lucide-react";
+import { ButtonLink } from "@/components/button-link";
 import { EmptyState } from "@/components/empty-state";
 import { Money } from "@/components/money";
 import { ListCard, ResponsiveList, type ListColumn } from "@/components/responsive-list";
@@ -42,8 +43,6 @@ function PriceCell({ row }: { row: AdminProductRow }) {
 }
 
 export function ProductList({ rows, lowStockThreshold }: ProductListProps) {
-  const pending = () => toast.info("El alta de productos con variantes llega en la siguiente fase");
-
   const columns: ListColumn<AdminProductRow>[] = [
     {
       id: "name",
@@ -51,7 +50,9 @@ export function ProductList({ rows, lowStockThreshold }: ProductListProps) {
       isRowHeader: true,
       cell: (r) => (
         <div className="min-w-0">
-          <p className="font-semibold text-ink">{r.name}</p>
+          <Link href={`/admin/productos/${r.productId}`} className="font-semibold text-navy-700 hover:underline">
+            {r.name}
+          </Link>
           <p className="text-[12px] text-slate-400">
             {r.typeName}
             {r.categoryName ? ` · ${r.categoryName}` : ""}
@@ -77,10 +78,10 @@ export function ProductList({ rows, lowStockThreshold }: ProductListProps) {
   return (
     <>
       <div className="flex justify-end">
-        <Button variant="primary" className="rounded-full" onPress={pending}>
+        <ButtonLink href="/admin/productos/nuevo" variant="solid">
           <Plus className="h-4 w-4" strokeWidth={2.2} />
           Nuevo producto
-        </Button>
+        </ButtonLink>
       </div>
 
       <ResponsiveList
@@ -93,22 +94,26 @@ export function ProductList({ rows, lowStockThreshold }: ProductListProps) {
             <EmptyState
               icon={Package}
               title="Sin productos"
-              description="Crea primero un tipo de producto y una categoría; después podrás dar de alta productos."
+              description="Crea primero un tipo de producto y una categoría; después da de alta el primer producto."
               size="compact"
+              ctaLabel="Nuevo producto"
+              ctaHref="/admin/productos/nuevo"
             />
           </div>
         }
         renderCard={(r) => (
-          <ListCard
-            title={r.name}
-            subtitle={`${r.typeName}${r.categoryName ? ` · ${r.categoryName}` : ""}`}
-            badge={<StatusChip {...PRODUCT_STATUS_META[r.status]} />}
-            rows={[
-              { label: "Variantes", value: r.variantCount },
-              { label: "Stock", value: <StockCell row={r} threshold={lowStockThreshold} /> },
-              { label: "Precio", value: <PriceCell row={r} /> },
-            ]}
-          />
+          <Link href={`/admin/productos/${r.productId}`} className="block">
+            <ListCard
+              title={r.name}
+              subtitle={`${r.typeName}${r.categoryName ? ` · ${r.categoryName}` : ""}`}
+              badge={<StatusChip {...PRODUCT_STATUS_META[r.status]} />}
+              rows={[
+                { label: "Variantes", value: r.variantCount },
+                { label: "Stock", value: <StockCell row={r} threshold={lowStockThreshold} /> },
+                { label: "Precio", value: <PriceCell row={r} /> },
+              ]}
+            />
+          </Link>
         )}
       />
     </>

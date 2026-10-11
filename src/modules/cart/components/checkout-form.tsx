@@ -1,8 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import { useMemo, useRef, useState } from "react";
+import { Controller, useForm, useWatch, type FieldErrors, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, toast } from "@heroui/react";
 import { ClipboardList } from "lucide-react";
@@ -41,8 +41,28 @@ export function CheckoutForm({
   const { base, rates } = useCurrency();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Las líneas viven en el carrito, no en el formulario, y en recogida la
+  // dirección/zona no aplican: se ajustan antes de validar para que el schema
+  // del servidor sea también el del cliente.
+  const linesRef = useRef(state.lines);
+  linesRef.current = state.lines;
+  const resolver = useMemo<Resolver<CreateOrderInput, unknown, CreateOrderValues>>(() => {
+    const base = zodResolver(createOrderSchema);
+    return (values, context, options) =>
+      base(
+        {
+          ...values,
+          address: values.fulfillment === "pickup" ? null : values.address,
+          zoneId: values.fulfillment === "pickup" ? "" : values.zoneId,
+          lines: linesRef.current.map((l) => ({ variantId: l.variantId, qty: l.qty })),
+        },
+        context,
+        options
+      );
+  }, []);
+
   const { control, handleSubmit, setValue } = useForm<CreateOrderInput, unknown, CreateOrderValues>({
-    resolver: zodResolver(createOrderSchema),
+    resolver,
     defaultValues: {
       customerName: prefill?.name ?? "",
       customerPhone: prefill?.phone ?? "",
@@ -101,11 +121,7 @@ export function CheckoutForm({
   const onSubmit = async (values: CreateOrderValues) => {
     setIsSubmitting(true);
     try {
-      const result = await createOrder({
-        ...values,
-        address: values.fulfillment === "pickup" ? null : values.address,
-        lines: state.lines.map((l) => ({ variantId: l.variantId, qty: l.qty })),
-      });
+      const result = await createOrder(values);
       if (!result.success) {
         toast.danger(result.error);
         return;
@@ -120,13 +136,20 @@ export function CheckoutForm({
     }
   };
 
+  // Algunos errores (líneas, refinamientos de dirección) no tienen un campo
+  // visible donde pintarse: sin este aviso el botón parece no hacer nada.
+  const onInvalid = (errors: FieldErrors<CreateOrderInput>) => {
+    const first = Object.values(errors)[0] as { message?: string; line1?: { message?: string } } | undefined;
+    toast.danger(first?.message ?? first?.line1?.message ?? "Revisa los datos del pedido");
+  };
+
   const fulfillmentOptions = [
     { value: "delivery", label: "Entrega a domicilio" },
     ...(allowPickup ? [{ value: "pickup", label: "Recojo en tienda" }] : []),
   ];
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="grid gap-6 md:grid-cols-[minmax(0,1fr)_340px] md:items-start">
+    <form onSubmit={handleSubmit(onSubmit, onInvalid)} noValidate className="grid gap-6 md:grid-cols-[minmax(0,1fr)_340px] md:items-start">
       <div className="flex flex-col gap-6">
         <section className="rounded-card bg-canvas p-5 shadow-card">
           <p className="eyebrow">Tus datos</p>

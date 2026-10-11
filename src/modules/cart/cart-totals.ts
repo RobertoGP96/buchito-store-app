@@ -38,9 +38,11 @@ export function computeCartTotals(input: CartTotalsInput): CartTotals {
 
   let discount = 0;
   if (input.coupon && (input.coupon.minSubtotal == null || subtotal >= input.coupon.minSubtotal)) {
+    // El descuento nunca supera el subtotal: ni por porcentaje > 100 ni por
+    // importe fijo mayor que la compra.
     discount =
       input.coupon.kind === "percent"
-        ? round((subtotal * input.coupon.value) / 100)
+        ? round((subtotal * Math.min(input.coupon.value, 100)) / 100)
         : round(Math.min(input.coupon.value, subtotal));
   }
 

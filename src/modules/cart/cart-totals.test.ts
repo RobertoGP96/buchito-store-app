@@ -42,6 +42,13 @@ describe("computeCartTotals", () => {
       coupon: { kind: "percent", value: 10, minSubtotal: 5000 },
     });
     expect(belowMin.discount).toBe(0);
+    const over100 = computeCartTotals({
+      ...base,
+      lines: [{ unitPrice: 1000, qty: 1 }],
+      coupon: { kind: "percent", value: 150, minSubtotal: null },
+    });
+    expect(over100.discount).toBe(1000);
+    expect(over100.total).toBe(500);
   });
 
   it("recargo del método de pago y total en la moneda de pago", () => {

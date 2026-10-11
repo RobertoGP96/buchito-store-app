@@ -40,6 +40,8 @@ export const categorySchema = z.object({
 export type CategoryInput = z.input<typeof categorySchema>;
 export type CategoryValues = z.output<typeof categorySchema>;
 
+const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
 export const productSchema = z.object({
   typeId: z.coerce.number().int().positive("Elige el tipo de producto"),
   categoryId: z
@@ -47,10 +49,11 @@ export const productSchema = z.object({
     .transform((v) => (v === "" ? null : v))
     .nullable(),
   name: z.string().trim().min(2, "Escribe el nombre"),
+  // Vacío = la action lo deriva del nombre y garantiza que sea único.
   slug: z
     .string()
     .trim()
-    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug en minúsculas con guiones"),
+    .refine((v) => v === "" || SLUG_PATTERN.test(v), "Slug en minúsculas con guiones"),
   description: optionalText,
   attributes: z.record(z.string(), z.unknown()).default({}),
   status: z.enum(PRODUCT_STATUSES).default("draft"),
@@ -66,7 +69,11 @@ export const variantSchema = z.object({
   sku: z.string().trim().min(1, "Escribe el SKU").max(40),
   name: optionalText,
   attributes: z.record(z.string(), z.unknown()).default({}),
-  price: z.coerce.number().min(0, "No puede ser negativo"),
+  // `z.coerce.number()` convertiría "" en 0 y guardaría la variante gratis.
+  price: z
+    .union([z.literal(""), z.coerce.number().min(0, "No puede ser negativo")])
+    .refine((v) => v !== "", "Escribe el precio")
+    .transform(Number),
   compareAtPrice: z
     .union([z.literal(""), z.null(), z.coerce.number().min(0)])
     .transform((v) => (v === "" ? null : v))
@@ -76,6 +83,12 @@ export const variantSchema = z.object({
   isDefault: z.boolean().default(false),
   isActive: z.boolean().default(true),
   sortOrder: z.coerce.number().int().min(0).default(0),
+  // Solo se usa al crear: genera el StockMovement "Stock inicial". Editar una
+  // variante nunca toca el stock (eso es adjustStock).
+  initialStock: z.coerce.number().int().min(0, "No puede ser negativo").default(0),
+}).refine((v) => v.compareAtPrice == null || v.compareAtPrice > v.price, {
+  message: "El precio anterior debe ser mayor que el precio actual",
+  path: ["compareAtPrice"],
 });
 
 export type VariantInput = z.input<typeof variantSchema>;

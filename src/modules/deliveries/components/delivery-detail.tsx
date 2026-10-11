@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Button, toast } from "@heroui/react";
 import { MapPin, Phone } from "lucide-react";
 import { Money } from "@/components/money";
+import { PromptDialog } from "@/components/prompt-dialog";
 import { StatusChip } from "@/components/status-chip";
 import { fmtDateTime } from "@/lib/format";
 import { PAYMENT_STATUS_META, type PaymentStatus } from "@/modules/payments/lib/labels";
@@ -38,19 +39,23 @@ export function DeliveryDetail({ delivery, actor, isAssignedCourier }: DeliveryD
     (to) => to !== "assigned" && to !== "pending"
   );
   const mustCollect = delivery.paymentStatus !== "paid" && delivery.amountToCollect > 0;
+  // "Entregado" con cobro y "No se pudo" piden un dato antes de enviar.
+  const [asking, setAsking] = useState<"delivered" | "failed" | null>(null);
 
-  const run = async (to: DeliveryStatus) => {
-    let failedReason: string | null = null;
-    let amountCollected: number | null = null;
-    if (to === "failed") {
-      failedReason = window.prompt("¿Por qué no se pudo entregar?");
-      if (!failedReason) return;
+  const press = (to: DeliveryStatus) => {
+    if (to === "failed" || (to === "delivered" && mustCollect)) {
+      setAsking(to);
+      return;
     }
-    if (to === "delivered" && mustCollect) {
-      const raw = window.prompt(`Monto cobrado en ${delivery.paymentCurrency.code}`, String(delivery.amountToCollect));
-      if (raw === null) return;
-      amountCollected = Number(raw.replace(",", "."));
-    }
+    void run(to, {});
+  };
+
+  const run = async (
+    to: DeliveryStatus,
+    extra: { failedReason?: string; amountCollected?: number }
+  ) => {
+    const failedReason = extra.failedReason ?? null;
+    const amountCollected = extra.amountCollected ?? null;
     setPending(to);
     try {
       const result = await transitionDelivery({
@@ -67,6 +72,7 @@ export function DeliveryDetail({ delivery, actor, isAssignedCourier }: DeliveryD
         return;
       }
       toast.success("Entrega actualizada");
+      setAsking(null);
       router.refresh();
     } catch (error) {
       console.error("DeliveryDetail:", error);
@@ -159,7 +165,7 @@ export function DeliveryDetail({ delivery, actor, isAssignedCourier }: DeliveryD
                 className="rounded-full"
                 isPending={pending === to}
                 isDisabled={pending !== null}
-                onPress={() => void run(to)}
+                onPress={() => press(to)}
               >
                 {DELIVERY_TRANSITION_LABELS[to]}
               </Button>
@@ -181,6 +187,42 @@ export function DeliveryDetail({ delivery, actor, isAssignedCourier }: DeliveryD
           </ol>
         )}
       </Section>
+
+      <PromptDialog
+        key={`delivered-${delivery.version}`}
+        open={asking === "delivered"}
+        onOpenChange={(open) => !open && setAsking(null)}
+        title="Confirmar entrega"
+        description={`Escribe lo que cobraste al cliente. Si no cobraste nada, deja 0.`}
+        label="Monto cobrado"
+        kind="number"
+        suffix={delivery.paymentCurrency.code}
+        initialValue={String(delivery.amountToCollect)}
+        confirmLabel="Entregado"
+        isPending={pending === "delivered"}
+        onConfirm={(value) => {
+          const amount = Number(value.replace(",", "."));
+          if (!Number.isFinite(amount) || amount < 0) {
+            toast.danger("Escribe un monto válido");
+            return;
+          }
+          void run("delivered", { amountCollected: amount });
+        }}
+      />
+      <PromptDialog
+        key={`failed-${delivery.version}`}
+        open={asking === "failed"}
+        onOpenChange={(open) => !open && setAsking(null)}
+        title="No se pudo entregar"
+        description="El pedido vuelve a la cola y el administrador podrá reasignarlo."
+        label="Motivo"
+        hint="Ej.: nadie en casa, dirección incorrecta, cliente rechazó el pedido."
+        kind="textarea"
+        confirmLabel="Registrar fallo"
+        tone="danger"
+        isPending={pending === "failed"}
+        onConfirm={(value) => void run("failed", { failedReason: value })}
+      />
     </div>
   );
 }

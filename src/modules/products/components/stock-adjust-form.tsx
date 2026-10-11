@@ -1,0 +1,161 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "@heroui/react";
+import { FormFooter } from "@/components/form/form-footer";
+import { FormSelect, FormTextField, type SelectOption } from "@/components/form/fields";
+import { ResponsiveFormDialog } from "@/components/responsive-form-dialog";
+import { fmtDateTime } from "@/lib/format";
+import { cn } from "@/lib/utils";
+import { adjustStock } from "../actions/stock-actions";
+import { stockAdjustmentSchema, type StockAdjustmentInput } from "../lib/schemas";
+import type { AdminStockMovementType, AdminVariantRow } from "../queries/product-queries";
+
+type StockAdjustmentValues = {
+  variantId: number;
+  type: AdminStockMovementType;
+  quantity: number;
+  notes: string | null;
+};
+
+export const STOCK_MOVEMENT_TYPE_LABELS: Record<AdminStockMovementType, string> = {
+  entry: "Entrada",
+  exit: "Salida",
+  adjustment: "Recuento",
+};
+
+const TYPE_OPTIONS: SelectOption[] = [
+  { value: "entry", label: "Entrada", description: "Suma unidades al stock actual." },
+  { value: "exit", label: "Salida", description: "Resta unidades; no puede quedar en negativo." },
+  { value: "adjustment", label: "Recuento", description: "Escribe el stock real tras contar." },
+];
+
+const QUANTITY_LABEL: Record<AdminStockMovementType, string> = {
+  entry: "Unidades que entran",
+  exit: "Unidades que salen",
+  adjustment: "Stock real (conteo)",
+};
+
+interface StockAdjustFormProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  variant: AdminVariantRow | null;
+}
+
+const FORM_ID = "stock-adjust-form";
+
+/** Signo visual de un movimiento: el recuento no tiene signo, es el stock final. */
+function movementDelta(type: AdminStockMovementType, quantity: number): string {
+  if (type === "entry") return `+${quantity}`;
+  if (type === "exit") return `−${quantity}`;
+  return `= ${quantity}`;
+}
+
+export function StockAdjustForm({ open, onOpenChange, variant }: StockAdjustFormProps) {
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { control, handleSubmit } = useForm<StockAdjustmentInput, unknown, StockAdjustmentValues>({
+    resolver: zodResolver(stockAdjustmentSchema),
+    defaultValues: {
+      variantId: variant?.variantId ?? 0,
+      type: "entry",
+      quantity: "",
+      notes: "",
+    },
+  });
+  const type = (useWatch({ control, name: "type" }) ?? "entry") as AdminStockMovementType;
+
+  const onSubmit = async (values: StockAdjustmentValues) => {
+    setIsSubmitting(true);
+    try {
+      const result = await adjustStock(values);
+      if (!result.success) {
+        toast.danger(result.error);
+        return;
+      }
+      toast.success(`Stock actualizado: ${result.data.stockAfter} ${result.data.stockAfter === 1 ? "unidad" : "unidades"}`);
+      onOpenChange(false);
+      router.refresh();
+    } catch (error) {
+      console.error("StockAdjustForm:", error);
+      toast.danger("No se pudo ajustar el stock");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (!variant) return null;
+
+  return (
+    <ResponsiveFormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={`Stock de ${variant.name ?? variant.sku}`}
+      description={`Stock actual: ${variant.stock} ${variant.stock === 1 ? "unidad" : "unidades"} · SKU ${variant.sku}`}
+      size="sm"
+      footer={
+        <FormFooter
+          formId={FORM_ID}
+          submitLabel="Registrar movimiento"
+          isSubmitting={isSubmitting}
+          onCancel={() => onOpenChange(false)}
+        />
+      }
+    >
+      <form id={FORM_ID} onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
+        <FormSelect control={control} name="type" label="Tipo de movimiento" options={TYPE_OPTIONS} isRequired />
+        <FormTextField
+          control={control}
+          name="quantity"
+          label={QUANTITY_LABEL[type]}
+          type="number"
+          step="1"
+          min={1}
+          isRequired
+          description={
+            type === "adjustment"
+              ? "Se registra la diferencia con el stock actual. Para dejarlo en cero usa una salida."
+              : type === "exit"
+                ? `Máximo ${variant.stock}.`
+                : undefined
+          }
+        />
+        <FormTextField control={control} name="notes" label="Notas (opcional)" placeholder="Compra a proveedor, rotura…" />
+      </form>
+
+      {variant.recentMovements.length > 0 && (
+        <div className="mt-5 border-t border-line pt-4">
+          <p className="eyebrow">Últimos movimientos</p>
+          <ul className="mt-2 divide-y divide-line-soft">
+            {variant.recentMovements.map((m) => (
+              <li key={m.movementId} className="flex items-center justify-between gap-3 py-2 text-[12.5px]">
+                <div className="min-w-0">
+                  <p className="font-medium text-ink">
+                    {STOCK_MOVEMENT_TYPE_LABELS[m.type]}
+                    {m.referenceType === "order" && m.referenceId != null && (
+                      <span className="text-slate-400"> · pedido #{m.referenceId}</span>
+                    )}
+                  </p>
+                  <p className="tabular truncate text-slate-400">
+                    {fmtDateTime(m.createdAt)}
+                    {m.createdBy ? ` · ${m.createdBy}` : ""}
+                    {m.notes ? ` · ${m.notes}` : ""}
+                  </p>
+                </div>
+                <div className="tabular flex-none text-right">
+                  <p className={cn("font-semibold", m.type === "exit" ? "text-danger" : "text-ink")}>
+                    {movementDelta(m.type, m.quantity)}
+                  </p>
+                  <p className="text-[11.5px] text-slate-400">quedan {m.stockAfter}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </ResponsiveFormDialog>
+  );
+}
