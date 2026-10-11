@@ -24,7 +24,10 @@ export default async function AdminHomePage() {
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
         <div className="flex flex-col gap-4">
           <RecentOrders rows={data.recentOrders} />
-          <ActiveDeliveries rows={data.activeDeliveries} />
+          <ActiveDeliveries
+            rows={data.activeDeliveries}
+            total={data.kpis.deliveriesInProgress + data.kpis.deliveriesUnassigned}
+          />
         </div>
         <div className="flex flex-col gap-4">
           <OrdersByStatus rows={data.ordersByStatus} total={data.totalOrders} />
