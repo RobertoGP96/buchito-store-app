@@ -131,3 +131,13 @@ export function variantLabel(schema: AttributeDef[], attributes: AttributeValues
     })
     .join(" / ");
 }
+
+/** Nombre visible de una variante: el explícito, si no el derivado de sus
+ *  atributos y, en último caso, el SKU. */
+export function variantDisplayName(
+  variant: { name: string | null; sku: string; attributes: AttributeValues },
+  schema: AttributeDef[]
+): string {
+  if (variant.name) return variant.name;
+  return variantLabel(schema, variant.attributes) || variant.sku;
+}

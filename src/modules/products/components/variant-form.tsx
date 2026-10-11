@@ -13,15 +13,15 @@ import { useCurrency } from "@/modules/currency/store/currency-provider";
 import { createVariant, updateVariant } from "../actions/variant-actions";
 import type { AttributeDef } from "../lib/attribute-schema";
 import { variantSchema, type VariantInput, type VariantValues } from "../lib/schemas";
-import type { AdminVariantRow } from "../queries/product-queries";
+import type { AdminVariantSummary } from "../queries/product-queries";
 import { AttributeFields, attributeDefaults } from "./attribute-fields";
 
 interface VariantFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   productId: number;
-  /** null = alta. */
-  variant: AdminVariantRow | null;
+  /** null = alta. Basta el resumen: el historial de stock no entra en el formulario. */
+  variant: AdminVariantSummary | null;
   attributeSchema: AttributeDef[];
   currencies: CurrencyInfo[];
 }
