@@ -5,7 +5,6 @@ import { ActiveDeliveries } from "@/modules/dashboard/components/active-deliveri
 import { KpiTiles } from "@/modules/dashboard/components/kpi-tiles";
 import { LowStock } from "@/modules/dashboard/components/low-stock";
 import { OrdersByStatus } from "@/modules/dashboard/components/orders-by-status";
-import { QuickLinks } from "@/modules/dashboard/components/quick-links";
 import { RecentOrders } from "@/modules/dashboard/components/recent-orders";
 import { getDashboardData } from "@/modules/dashboard/queries/dashboard-queries";
 
@@ -34,8 +33,6 @@ export default async function AdminHomePage() {
           <LowStock rows={data.lowStock} total={data.kpis.lowStockVariants} threshold={data.kpis.lowStockThreshold} />
         </div>
       </div>
-
-      <QuickLinks />
     </>
   );
 }
