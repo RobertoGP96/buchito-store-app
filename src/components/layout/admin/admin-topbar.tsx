@@ -7,6 +7,7 @@ import { ChevronRight, Menu, Store } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { AdminNavList } from "@/components/layout/admin/admin-nav-list";
+import { AdminSearch } from "@/components/layout/admin/admin-search";
 import { useAdminNav } from "@/components/layout/admin/admin-nav-context";
 import { AdminUserMenu } from "@/components/layout/admin/admin-user-menu";
 import { findNavEntry, findNavSection } from "@/lib/nav-registry";
@@ -17,7 +18,8 @@ interface AdminTopbarProps {
 }
 
 /** Cabecera del panel: en móvil abre el panel lateral y muestra la marca; en
- *  desktop pinta la miga (sección › página) y el menú de usuario. */
+ *  desktop pinta la miga (sección › página). En todas las anchuras lleva el
+ *  buscador global, el selector de tema y el menú de usuario. */
 export function AdminTopbar({ userName, role }: AdminTopbarProps) {
   const pathname = usePathname();
   const { sheetOpen, setSheetOpen } = useAdminNav();
@@ -57,8 +59,9 @@ export function AdminTopbar({ userName, role }: AdminTopbarProps) {
             )}
           </nav>
 
-          <div className="ml-auto flex items-center gap-1">
-            <ThemeToggle className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-hover md:hidden" />
+          <div className="ml-auto flex items-center gap-1 md:gap-2">
+            <AdminSearch />
+            <ThemeToggle className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-hover hover:text-navy-700" />
             <AdminUserMenu userName={userName} role={role} />
           </div>
         </div>
