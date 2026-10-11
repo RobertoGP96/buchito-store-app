@@ -6,6 +6,7 @@ import { LayoutGrid, ShoppingCart, Store, type LucideIcon } from "lucide-react";
 import { cartCount, useCart } from "@/modules/cart/store";
 import { BrandLogo } from "@/components/brand-logo";
 import { CurrencySwitcher } from "@/components/currency-switcher";
+import { NavIcon } from "@/components/nav-icon";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserMenu, type NavUser } from "@/components/layout/store/user-menu";
 import { cn } from "@/lib/utils";
@@ -70,7 +71,7 @@ export function TopNav({ user }: { user: NavUser | null }) {
                     : "border-transparent font-medium text-slate-500 hover:text-navy-700"
                 )}
               >
-                <Icon className="h-[15px] w-[15px] flex-none" strokeWidth={1.9} />
+                <NavIcon icon={Icon} className="h-[15px] w-[15px] flex-none" strokeWidth={1.9} />
                 {link.label}
               </Link>
             );

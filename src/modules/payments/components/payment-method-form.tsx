@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,7 +27,6 @@ const KIND_OPTIONS: SelectOption[] = PAYMENT_KINDS.map((kind) => ({
 }));
 
 export function PaymentMethodForm({ open, onOpenChange, method, currencies }: PaymentMethodFormProps) {
-  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { control, handleSubmit } = useForm<PaymentMethodInput, unknown, PaymentMethodValues>({
     resolver: zodResolver(paymentMethodSchema),
@@ -57,7 +55,6 @@ export function PaymentMethodForm({ open, onOpenChange, method, currencies }: Pa
       }
       toast.success(method ? "Método actualizado" : "Método creado");
       onOpenChange(false);
-      router.refresh();
     } catch (error) {
       console.error("PaymentMethodForm:", error);
       toast.danger("No se pudo guardar el método de pago");

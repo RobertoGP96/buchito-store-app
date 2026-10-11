@@ -1,4 +1,6 @@
+import { cookies } from "next/headers";
 import { auth } from "@/lib/auth";
+import { DISPLAY_CURRENCY_COOKIE } from "@/lib/preferences";
 import { CartProvider } from "@/modules/cart/store";
 import { CurrencyProvider } from "@/modules/currency/store/currency-provider";
 import { getCurrencyContext } from "@/modules/currency/queries/currency-queries";
@@ -11,10 +13,11 @@ import type { NavUser } from "@/components/layout/store/user-menu";
 export default async function StoreLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const [session, currency, settings] = await Promise.all([
+  const [session, currency, settings, cookieStore] = await Promise.all([
     auth(),
     getCurrencyContext(),
     getStoreSettingsSafe(),
+    cookies(),
   ]);
 
   const user: NavUser | null = session?.user
@@ -26,7 +29,7 @@ export default async function StoreLayout({
     : null;
 
   return (
-    <CurrencyProvider data={currency}>
+    <CurrencyProvider data={currency} initialDisplayCode={cookieStore.get(DISPLAY_CURRENCY_COOKIE)?.value}>
       <CartProvider>
         <div className="flex min-h-dvh flex-col">
           <TopNav user={user} />

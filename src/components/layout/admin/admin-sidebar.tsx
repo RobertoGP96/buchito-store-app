@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronsLeft, ChevronsRight, Store } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
+import { NavIcon } from "@/components/nav-icon";
 import { ADMIN_NAV_SECTIONS, isNavActive, type NavEntry } from "@/lib/nav-registry";
 import { useAdminNav } from "@/components/layout/admin/admin-nav-context";
 import { cn } from "@/lib/utils";
@@ -27,7 +28,7 @@ function SidebarLink({ entry, collapsed }: { entry: NavEntry; collapsed: boolean
             : "text-footer-muted hover:bg-white/5 hover:text-white"
         )}
       >
-        <Icon className="h-4 w-4 flex-none" strokeWidth={active ? 2.1 : 1.9} />
+        <NavIcon icon={Icon} className="h-4 w-4 flex-none" strokeWidth={active ? 2.1 : 1.9} />
         {!collapsed && <span className="truncate">{entry.label}</span>}
       </Link>
     </li>

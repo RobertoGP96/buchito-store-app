@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -34,7 +33,6 @@ function toDayInput(iso: string | null): string {
 }
 
 export function CouponForm({ open, onOpenChange, coupon }: CouponFormProps) {
-  const router = useRouter();
   const { base } = useCurrency();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { control, handleSubmit } = useForm<CouponInput, unknown, CouponValues>({
@@ -63,7 +61,6 @@ export function CouponForm({ open, onOpenChange, coupon }: CouponFormProps) {
       }
       toast.success(coupon ? "Cupón actualizado" : "Cupón creado");
       onOpenChange(false);
-      router.refresh();
     } catch (error) {
       console.error("CouponForm:", error);
       toast.danger("No se pudo guardar el cupón");

@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -75,7 +74,6 @@ function toPayload(values: FormValues): ProductTypeInput {
 }
 
 export function ProductTypeForm({ open, onOpenChange, type }: ProductTypeFormProps) {
-  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [slugTouched, setSlugTouched] = useState(Boolean(type));
   const { control, handleSubmit, setValue, getValues } = useForm<FormInput, unknown, FormValues>({
@@ -112,7 +110,6 @@ export function ProductTypeForm({ open, onOpenChange, type }: ProductTypeFormPro
       }
       toast.success(type ? "Tipo actualizado" : "Tipo creado");
       onOpenChange(false);
-      router.refresh();
     } catch (error) {
       console.error("ProductTypeForm:", error);
       toast.danger("No se pudo guardar el tipo de producto");

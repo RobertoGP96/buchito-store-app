@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button, toast } from "@heroui/react";
 import { Star } from "lucide-react";
@@ -17,7 +16,6 @@ interface SetBaseCurrencyButtonProps {
 /** "Hacer moneda base" con confirmación: cambiarla afecta a cómo se guardan
  *  los montos de los pedidos nuevos, así que no va en un clic suelto. */
 export function SetBaseCurrencyButton({ currency, currentBaseCode, size = "sm" }: SetBaseCurrencyButtonProps) {
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
 
@@ -31,7 +29,6 @@ export function SetBaseCurrencyButton({ currency, currentBaseCode, size = "sm" }
       }
       toast.success(`${currency.code} es ahora la moneda base`);
       setOpen(false);
-      router.refresh();
     } catch (error) {
       console.error("SetBaseCurrencyButton:", error);
       toast.danger("No se pudo cambiar la moneda base");

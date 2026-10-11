@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button, ListBox, Select, toast } from "@heroui/react";
 import { Truck } from "lucide-react";
 import { CHIP_BASE, CHIP_OFF, CHIP_ON } from "@/components/choice-chips";
 import { EmptyState } from "@/components/empty-state";
 import { Money } from "@/components/money";
+import { LinkPending } from "@/components/nav-icon";
 import { ListCard, ResponsiveList, type ListColumn } from "@/components/responsive-list";
 import { StatusChip } from "@/components/status-chip";
 import { fmtDateTime } from "@/lib/format";
@@ -30,7 +30,6 @@ function AssignControl({
   delivery: DeliveryRow;
   couriers: DeliveryListProps["couriers"];
 }) {
-  const router = useRouter();
   const [courierId, setCourierId] = useState<string | null>(delivery.courierId ? String(delivery.courierId) : null);
   const [pending, setPending] = useState(false);
   const canAssign = delivery.status === "pending" || delivery.status === "failed";
@@ -49,7 +48,6 @@ function AssignControl({
         return;
       }
       toast.success(canUnassign ? "Mensajero desasignado" : "Mensajero asignado");
-      router.refresh();
     } catch (error) {
       console.error("AssignControl:", error);
       toast.danger("No se pudo actualizar la entrega");
@@ -128,12 +126,19 @@ export function DeliveryList({ rows, couriers, activeStatus }: DeliveryListProps
   return (
     <>
       <div className="no-scrollbar -mx-1 flex snap-x gap-2 overflow-x-auto px-1 py-1">
-        <Link href="/admin/entregas" className={cn(CHIP_BASE, activeStatus === null ? CHIP_ON : CHIP_OFF)}>
+        <Link href="/admin/entregas" scroll={false} className={cn(CHIP_BASE, activeStatus === null ? CHIP_ON : CHIP_OFF)}>
           Todas
+          <LinkPending />
         </Link>
         {DELIVERY_STATUSES.map((status) => (
-          <Link key={status} href={`/admin/entregas?status=${status}`} className={cn(CHIP_BASE, activeStatus === status ? CHIP_ON : CHIP_OFF)}>
+          <Link
+            key={status}
+            href={`/admin/entregas?status=${status}`}
+            scroll={false}
+            className={cn(CHIP_BASE, activeStatus === status ? CHIP_ON : CHIP_OFF)}
+          >
             {DELIVERY_STATUS_META[status].label}
+            <LinkPending />
           </Link>
         ))}
       </div>

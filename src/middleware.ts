@@ -3,8 +3,8 @@ import { authConfig } from "@/lib/auth.config";
 
 export const { auth: middleware } = NextAuth(authConfig);
 
+// Solo las rutas que dependen de la sesión: la tienda pública no paga el
+// middleware de next-auth en cada navegación ni en cada prefetch.
 export const config = {
-  matcher: [
-    "/((?!api/auth|_next/static|_next/image|favicon\\.ico|icon|apple-icon|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|ttf|woff|woff2|webmanifest|json|txt|xml)$).*)",
-  ],
+  matcher: ["/admin/:path*", "/mensajero/:path*", "/perfil/:path*", "/login", "/registro"],
 };

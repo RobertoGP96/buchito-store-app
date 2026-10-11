@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { unstable_ViewTransition as ViewTransition, useMemo, useState } from "react";
 import { Button, toast } from "@heroui/react";
 import { ChevronLeft, ShoppingCart } from "lucide-react";
 import { Badge } from "@/components/badge";
 import { ChoiceChips } from "@/components/choice-chips";
 import { Money } from "@/components/money";
-import { ProductImage } from "@/components/product-image";
+import { PRODUCT_IMAGE_TRANSITION, ProductImage } from "@/components/product-image";
 import { QtyStepper } from "@/components/qty-stepper";
 import { StockLabel } from "@/components/stock-label";
 import { cartLineFor } from "@/components/product-card";
@@ -62,10 +62,12 @@ export function ProductDetail({ product }: { product: CatalogProduct }) {
 
       <div className="mt-5 grid gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:gap-12">
         <div className="relative aspect-square w-full overflow-hidden rounded-card bg-cream shadow-card">
-          <span className="absolute inset-0 flex items-center justify-center">
-            {/* key: ProductImage guarda `failed`; al cambiar de variante debe reintentar. */}
-            <ProductImage key={imageUrl ?? "none"} src={imageUrl} alt={product.name} sizes="(max-width: 768px) 100vw, 560px" priority />
-          </span>
+          <ViewTransition name={PRODUCT_IMAGE_TRANSITION} enter="none" exit="none" default="none" share="product-image">
+            <span className="absolute inset-0 flex items-center justify-center">
+              {/* key: ProductImage guarda `failed`; al cambiar de variante debe reintentar. */}
+              <ProductImage key={imageUrl ?? "none"} src={imageUrl} alt={product.name} sizes="(max-width: 768px) 100vw, 560px" priority />
+            </span>
+          </ViewTransition>
           {product.featured && !soldOut && (
             <Badge variant="featured" className="absolute top-3 left-3">
               Destacado

@@ -1,5 +1,6 @@
 "use client";
 
+import { lazyDialog } from "@/components/lazy-dialog";
 import { useMemo, useState } from "react";
 import { Button } from "@heroui/react";
 import { CornerDownRight, FolderTree, Pencil, Plus } from "lucide-react";
@@ -7,9 +8,10 @@ import { EmptyState } from "@/components/empty-state";
 import type { SelectOption } from "@/components/form/fields";
 import { ListCard, ResponsiveList, type ListColumn } from "@/components/responsive-list";
 import { StatusChip } from "@/components/status-chip";
-import { CategoryForm } from "./category-form";
 import type { CategoryRow } from "../queries/category-queries";
 import { cn } from "@/lib/utils";
+
+const CategoryForm = lazyDialog(() => import("./category-form").then((m) => m.CategoryForm));
 
 /** Ids de la categoría y de todas sus descendientes (no pueden ser su padre). */
 function subtreeIds(rows: CategoryRow[], rootId: number): Set<number> {
