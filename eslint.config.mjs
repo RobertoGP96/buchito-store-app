@@ -13,6 +13,8 @@ const eslintConfig = [
   ...compat.extends("next/core-web-vitals"),
   {
     ignores: [
+      // Worktrees de otras sesiones de Claude: traen su propio .next y node_modules.
+      ".claude/**",
       ".next/**",
       "generated/**",
       "next-env.d.ts",
