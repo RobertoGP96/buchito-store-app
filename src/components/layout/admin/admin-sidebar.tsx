@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronsLeft, ChevronsRight, Store } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { ADMIN_NAV_SECTIONS, isNavActive, type NavEntry } from "@/lib/nav-registry";
 import { useAdminNav } from "@/components/layout/admin/admin-nav-context";
 import { cn } from "@/lib/utils";
@@ -85,8 +84,7 @@ export function AdminSidebar() {
             Ver la tienda
           </Link>
         )}
-        <div className={cn("flex items-center gap-1", collapsed ? "flex-col" : "justify-between px-3 pt-1")}>
-          <ThemeToggle className="flex h-9 w-9 items-center justify-center rounded-full text-footer-muted hover:bg-white/10 hover:text-white" />
+        <div className={cn("flex items-center", collapsed ? "justify-center" : "justify-end px-3 pt-1")}>
           <button
             type="button"
             onClick={toggleCollapsed}
