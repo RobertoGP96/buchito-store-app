@@ -17,7 +17,7 @@ export const storeSettingsSchema = z.object({
   orderPrefix: z.string().trim().min(1, "Escribe un prefijo").max(10, "Máximo 10 caracteres"),
   defaultShippingFee: money,
   freeShippingThreshold: z
-    .union([z.literal(""), z.coerce.number().min(0, "No puede ser negativo")])
+    .union([z.literal(""), z.null(), z.coerce.number().min(0, "No puede ser negativo")])
     .transform((v) => (v === "" ? null : v)),
   lowStockThreshold: z.coerce.number().int().min(0, "No puede ser negativo"),
   allowPickup: z.boolean(),

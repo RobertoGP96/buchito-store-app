@@ -27,7 +27,7 @@ export const createOrderSchema = z
     customerEmail: optionalText,
     fulfillment: z.enum(["delivery", "pickup"]),
     zoneId: z
-      .union([z.literal(""), z.coerce.number().int().positive()])
+      .union([z.literal(""), z.null(), z.coerce.number().int().positive()])
       .transform((v) => (v === "" ? null : v))
       .nullable(),
     address: deliveryAddressSchema.nullable(),

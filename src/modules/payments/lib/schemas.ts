@@ -19,7 +19,7 @@ export const paymentMethodSchema = z.object({
   instructions: optionalText,
   requiresReference: z.boolean().default(false),
   surchargePercent: z
-    .union([z.literal(""), z.coerce.number().min(0, "No puede ser negativo").max(100, "Máximo 100 %")])
+    .union([z.literal(""), z.null(), z.coerce.number().min(0, "No puede ser negativo").max(100, "Máximo 100 %")])
     .transform((v) => (v === "" ? null : v)),
   sortOrder: z.coerce.number().int().min(0).default(0),
   isActive: z.boolean().default(true),

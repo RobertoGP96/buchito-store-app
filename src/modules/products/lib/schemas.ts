@@ -29,7 +29,7 @@ export const categorySchema = z.object({
     .trim()
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug en minúsculas con guiones (ej. ropa-hombre)"),
   parentId: z
-    .union([z.literal(""), z.coerce.number().int().positive()])
+    .union([z.literal(""), z.null(), z.coerce.number().int().positive()])
     .transform((v) => (v === "" ? null : v))
     .nullable(),
   description: optionalText,
@@ -43,7 +43,7 @@ export type CategoryValues = z.output<typeof categorySchema>;
 export const productSchema = z.object({
   typeId: z.coerce.number().int().positive("Elige el tipo de producto"),
   categoryId: z
-    .union([z.literal(""), z.coerce.number().int().positive()])
+    .union([z.literal(""), z.null(), z.coerce.number().int().positive()])
     .transform((v) => (v === "" ? null : v))
     .nullable(),
   name: z.string().trim().min(2, "Escribe el nombre"),
@@ -68,7 +68,7 @@ export const variantSchema = z.object({
   attributes: z.record(z.string(), z.unknown()).default({}),
   price: z.coerce.number().min(0, "No puede ser negativo"),
   compareAtPrice: z
-    .union([z.literal(""), z.coerce.number().min(0)])
+    .union([z.literal(""), z.null(), z.coerce.number().min(0)])
     .transform((v) => (v === "" ? null : v))
     .nullable(),
   priceCurrencyId: z.coerce.number().int().positive("Elige la moneda del precio"),

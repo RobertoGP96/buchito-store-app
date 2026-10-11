@@ -13,7 +13,7 @@ export const zoneSchema = z.object({
   description: optionalText,
   fee: z.coerce.number().min(0, "No puede ser negativo"),
   freeShippingThreshold: z
-    .union([z.literal(""), z.coerce.number().min(0, "No puede ser negativo")])
+    .union([z.literal(""), z.null(), z.coerce.number().min(0, "No puede ser negativo")])
     .transform((v) => (v === "" ? null : v)),
   etaLabel: optionalText,
   sortOrder: z.coerce.number().int().min(0).default(0),
@@ -53,7 +53,7 @@ export const transitionDeliverySchema = z.object({
   proofPhotoUrl: optionalText,
   /** Cobro contra entrega: monto en la moneda del método de pago del pedido. */
   amountCollected: z
-    .union([z.literal(""), z.coerce.number().min(0)])
+    .union([z.literal(""), z.null(), z.coerce.number().min(0)])
     .transform((v) => (v === "" ? null : v))
     .nullable()
     .optional(),
