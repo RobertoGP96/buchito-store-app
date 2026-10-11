@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -55,7 +54,6 @@ function movementDelta(type: AdminStockMovementType, quantity: number): string {
 }
 
 export function StockAdjustForm({ open, onOpenChange, variant }: StockAdjustFormProps) {
-  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { control, handleSubmit } = useForm<StockAdjustmentInput, unknown, StockAdjustmentValues>({
     resolver: zodResolver(stockAdjustmentSchema),
@@ -78,7 +76,6 @@ export function StockAdjustForm({ open, onOpenChange, variant }: StockAdjustForm
       }
       toast.success(`Stock actualizado: ${result.data.stockAfter} ${result.data.stockAfter === 1 ? "unidad" : "unidades"}`);
       onOpenChange(false);
-      router.refresh();
     } catch (error) {
       console.error("StockAdjustForm:", error);
       toast.danger("No se pudo ajustar el stock");

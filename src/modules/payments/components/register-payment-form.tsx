@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,7 +29,6 @@ export function RegisterPaymentForm({
   currencyCode,
   methods,
 }: RegisterPaymentFormProps) {
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { control, handleSubmit } = useForm<RegisterPaymentInput, unknown, RegisterPaymentValues>({
@@ -54,7 +52,6 @@ export function RegisterPaymentForm({
       }
       toast.success("Cobro registrado");
       setOpen(false);
-      router.refresh();
     } catch (error) {
       console.error("RegisterPaymentForm:", error);
       toast.danger("No se pudo registrar el cobro");

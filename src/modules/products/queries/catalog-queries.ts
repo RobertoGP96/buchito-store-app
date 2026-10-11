@@ -1,7 +1,10 @@
 import "server-only";
+import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { db } from "@/lib/db";
+import { CACHE_FALLBACK_SECONDS, CACHE_TAGS } from "@/lib/cache-tags";
 import { Prisma } from "@/generated/prisma";
-import { BaseCurrencyNotConfiguredError, getBaseCurrency, getRatesToBase } from "@/lib/currency";
+import { BaseCurrencyNotConfiguredError, getBaseCurrencyCached, getRatesToBaseCached } from "@/lib/currency";
 import { roundToCurrency } from "@/lib/currency-math";
 import type { CurrencyInfo } from "@/lib/format";
 import { decimalToNullableNumber, decimalToNumber } from "@/lib/money";
@@ -73,16 +76,17 @@ interface RateContext {
   rates: Map<number, { rate: number }>;
 }
 
-async function getRateContext(): Promise<RateContext | null> {
+// generateMetadata y la página del producto lo piden en el mismo request.
+const getRateContext = cache(async (): Promise<RateContext | null> => {
   try {
-    const base = await getBaseCurrency(db);
-    const { rates } = await getRatesToBase(db, base);
+    const base = await getBaseCurrencyCached();
+    const { rates } = await getRatesToBaseCached();
     return { base, rates };
   } catch (error) {
     if (!(error instanceof BaseCurrencyNotConfiguredError)) console.error("getRateContext:", error);
     return null;
   }
-}
+});
 
 /** Convierte un producto de DB a `CatalogProduct`. Devuelve null si ninguna
  *  variante tiene tasa a base (no se puede mostrar un precio). */
@@ -194,11 +198,14 @@ export async function getProductBySlug(slug: string): Promise<CatalogProduct | n
   return row ? toCatalogProduct(row, ctx) : null;
 }
 
-export async function getCatalogCategories(): Promise<CatalogCategory[]> {
-  const rows = await db.category.findMany({
-    where: { isActive: true },
-    orderBy: [{ parentId: "asc" }, { sortOrder: "asc" }, { name: "asc" }],
-    select: { categoryId: true, name: true, slug: true, parentId: true },
-  });
-  return rows;
-}
+/** En la Data Cache: el árbol cambia solo desde el admin (revalidateTag). */
+export const getCatalogCategories = unstable_cache(
+  (): Promise<CatalogCategory[]> =>
+    db.category.findMany({
+      where: { isActive: true },
+      orderBy: [{ parentId: "asc" }, { sortOrder: "asc" }, { name: "asc" }],
+      select: { categoryId: true, name: true, slug: true, parentId: true },
+    }),
+  ["catalog-categories"],
+  { tags: [CACHE_TAGS.categories], revalidate: CACHE_FALLBACK_SECONDS }
+);

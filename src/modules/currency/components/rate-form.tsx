@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,7 +22,6 @@ interface RateFormProps {
 const FORM_ID = "rate-form";
 
 export function RateForm({ open, onOpenChange, row, base }: RateFormProps) {
-  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { control, handleSubmit } = useForm<RateInput, unknown, RateValues>({
     resolver: zodResolver(rateSchema),
@@ -45,7 +43,6 @@ export function RateForm({ open, onOpenChange, row, base }: RateFormProps) {
       }
       toast.success("Tasa guardada");
       onOpenChange(false);
-      router.refresh();
     } catch (error) {
       console.error("RateForm:", error);
       toast.danger("No se pudo guardar la tasa");

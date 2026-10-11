@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,7 +21,6 @@ interface CurrencyFormProps {
 const FORM_ID = "currency-form";
 
 export function CurrencyForm({ open, onOpenChange, currency }: CurrencyFormProps) {
-  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { control, handleSubmit } = useForm<CurrencyInput, unknown, CurrencyValues>({
     resolver: zodResolver(currencySchema),
@@ -48,7 +46,6 @@ export function CurrencyForm({ open, onOpenChange, currency }: CurrencyFormProps
       }
       toast.success(currency ? "Moneda actualizada" : "Moneda creada");
       onOpenChange(false);
-      router.refresh();
     } catch (error) {
       console.error("CurrencyForm:", error);
       toast.danger("No se pudo guardar la moneda");

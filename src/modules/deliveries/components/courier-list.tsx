@@ -1,14 +1,16 @@
 "use client";
 
+import { lazyDialog } from "@/components/lazy-dialog";
 import { useState } from "react";
 import { Button } from "@heroui/react";
 import { Bike, Pencil, Plus } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { ListCard, ResponsiveList, type ListColumn } from "@/components/responsive-list";
 import { StatusChip } from "@/components/status-chip";
-import { CourierForm } from "./courier-form";
 import { VEHICLE_LABELS } from "../lib/labels";
 import type { CourierRow } from "../queries/courier-queries";
+
+const CourierForm = lazyDialog(() => import("./courier-form").then((m) => m.CourierForm));
 
 export function CourierList({ rows }: { rows: CourierRow[] }) {
   const [editing, setEditing] = useState<CourierRow | null>(null);

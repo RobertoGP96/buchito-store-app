@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,7 +21,6 @@ interface ZoneFormProps {
 const FORM_ID = "zone-form";
 
 export function ZoneForm({ open, onOpenChange, zone }: ZoneFormProps) {
-  const router = useRouter();
   const { base } = useCurrency();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { control, handleSubmit } = useForm<ZoneInput, unknown, ZoneValues>({
@@ -48,7 +46,6 @@ export function ZoneForm({ open, onOpenChange, zone }: ZoneFormProps) {
       }
       toast.success(zone ? "Zona actualizada" : "Zona creada");
       onOpenChange(false);
-      router.refresh();
     } catch (error) {
       console.error("ZoneForm:", error);
       toast.danger("No se pudo guardar la zona");

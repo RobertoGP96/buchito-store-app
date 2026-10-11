@@ -1,6 +1,6 @@
 import "server-only";
 import { db } from "@/lib/db";
-import { BaseCurrencyNotConfiguredError, getBaseCurrency, getRatesToBase } from "@/lib/currency";
+import { BaseCurrencyNotConfiguredError, getBaseCurrencyCached, getRatesToBaseCached } from "@/lib/currency";
 import { roundToCurrency } from "@/lib/currency-math";
 import type { CurrencyInfo } from "@/lib/format";
 import { decimalToNullableNumber, decimalToNumber } from "@/lib/money";
@@ -34,9 +34,9 @@ export async function getAdminProducts(): Promise<AdminProductRow[]> {
   let rates = new Map<number, { rate: number }>();
   let baseDecimals = 0;
   try {
-    const base = await getBaseCurrency(db);
+    const base = await getBaseCurrencyCached();
     baseDecimals = base.decimalPlaces;
-    rates = (await getRatesToBase(db, base)).rates;
+    rates = (await getRatesToBaseCached()).rates;
   } catch (error) {
     if (!(error instanceof BaseCurrencyNotConfiguredError)) throw error;
   }
@@ -170,9 +170,9 @@ export async function getAdminProduct(productId: number): Promise<AdminProductDe
   let rates = new Map<number, { rate: number }>();
   let baseDecimals = 0;
   try {
-    const base = await getBaseCurrency(db);
+    const base = await getBaseCurrencyCached();
     baseDecimals = base.decimalPlaces;
-    rates = (await getRatesToBase(db, base)).rates;
+    rates = (await getRatesToBaseCached()).rates;
   } catch (error) {
     if (!(error instanceof BaseCurrencyNotConfiguredError)) throw error;
   }

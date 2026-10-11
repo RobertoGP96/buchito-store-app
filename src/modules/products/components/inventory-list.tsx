@@ -1,5 +1,6 @@
 "use client";
 
+import { lazyDialog } from "@/components/lazy-dialog";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -8,13 +9,15 @@ import { Boxes, History, Search, X } from "lucide-react";
 import { CHIP_BASE, CHIP_OFF, CHIP_ON } from "@/components/choice-chips";
 import { EmptyState } from "@/components/empty-state";
 import { Money } from "@/components/money";
+import { LinkPending } from "@/components/nav-icon";
 import { ListCard, ResponsiveList, type ListColumn } from "@/components/responsive-list";
 import { StatusChip } from "@/components/status-chip";
 import { cn } from "@/lib/utils";
 import { PRODUCT_STATUS_META } from "../lib/labels";
 import type { AdminVariantRow } from "../queries/product-queries";
 import type { InventoryRow } from "../queries/inventory-queries";
-import { StockAdjustForm } from "./stock-adjust-form";
+
+const StockAdjustForm = lazyDialog(() => import("./stock-adjust-form").then((m) => m.StockAdjustForm));
 
 interface InventoryListProps {
   rows: InventoryRow[];
@@ -131,15 +134,18 @@ export function InventoryList({ rows, query, lowOnly }: InventoryListProps) {
     <>
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="no-scrollbar -mx-1 flex snap-x gap-2 overflow-x-auto px-1 py-1">
-          <Link href={inventoryHref(query, false)} className={cn(CHIP_BASE, !lowOnly ? CHIP_ON : CHIP_OFF)}>
+          <Link href={inventoryHref(query, false)} scroll={false} className={cn(CHIP_BASE, !lowOnly ? CHIP_ON : CHIP_OFF)}>
             Todo
+            <LinkPending />
           </Link>
-          <Link href={inventoryHref(query, true)} className={cn(CHIP_BASE, lowOnly ? CHIP_ON : CHIP_OFF)}>
+          <Link href={inventoryHref(query, true)} scroll={false} className={cn(CHIP_BASE, lowOnly ? CHIP_ON : CHIP_OFF)}>
             Solo stock bajo
+            <LinkPending />
           </Link>
           <Link href="/admin/inventario/movimientos" className={cn(CHIP_BASE, CHIP_OFF)}>
             <History className="mr-1.5 h-3.5 w-3.5" strokeWidth={2} />
             Movimientos
+            <LinkPending />
           </Link>
         </div>
 

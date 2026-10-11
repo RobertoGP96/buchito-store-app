@@ -1,8 +1,7 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-
-const STORAGE_KEY = "buchito-admin-nav";
+import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import { ADMIN_NAV_COOKIE, writePreferenceCookie } from "@/lib/preferences";
 
 interface AdminNavApi {
   /** Sidebar en modo solo iconos (desktop). */
@@ -15,28 +14,22 @@ interface AdminNavApi {
 
 const AdminNavContext = createContext<AdminNavApi | null>(null);
 
-export function AdminNavProvider({ children }: { children: React.ReactNode }) {
-  // El primer render debe coincidir con el servidor (expandido); la
-  // preferencia guardada se aplica al hidratar.
-  const [collapsed, setCollapsed] = useState(false);
+export function AdminNavProvider({
+  initialCollapsed = false,
+  children,
+}: {
+  initialCollapsed?: boolean;
+  children: React.ReactNode;
+}) {
+  // La preferencia llega del layout servidor (cookie): el primer render ya
+  // tiene el ancho definitivo y el sidebar no salta al hidratar.
+  const [collapsed, setCollapsed] = useState(initialCollapsed);
   const [sheetOpen, setSheetOpen] = useState(false);
-
-  useEffect(() => {
-    try {
-      setCollapsed(localStorage.getItem(STORAGE_KEY) === "collapsed");
-    } catch {
-      // Sin storage: se queda expandido.
-    }
-  }, []);
 
   const toggleCollapsed = useCallback(() => {
     setCollapsed((prev) => {
       const next = !prev;
-      try {
-        localStorage.setItem(STORAGE_KEY, next ? "collapsed" : "expanded");
-      } catch {
-        // Modo privado: la preferencia dura la sesión.
-      }
+      writePreferenceCookie(ADMIN_NAV_COOKIE, next ? "collapsed" : "expanded");
       return next;
     });
   }, []);

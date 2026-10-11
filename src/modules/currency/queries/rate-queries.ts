@@ -1,6 +1,6 @@
 import "server-only";
 import { db } from "@/lib/db";
-import { BaseCurrencyNotConfiguredError, getBaseCurrency } from "@/lib/currency";
+import { BaseCurrencyNotConfiguredError, getBaseCurrencyCached } from "@/lib/currency";
 import type { CurrencyInfo } from "@/lib/format";
 import { decimalToNullableNumber, decimalToNumber } from "@/lib/money";
 
@@ -33,7 +33,7 @@ export interface RatesOverview {
 export async function getRatesOverview(): Promise<RatesOverview> {
   let base: CurrencyInfo;
   try {
-    base = await getBaseCurrency(db);
+    base = await getBaseCurrencyCached();
   } catch (error) {
     if (error instanceof BaseCurrencyNotConfiguredError) return { base: null, rows: [] };
     throw error;

@@ -1,9 +1,11 @@
 import "server-only";
+import { unstable_cache } from "next/cache";
 import { db } from "@/lib/db";
+import { CACHE_FALLBACK_SECONDS, CACHE_TAGS } from "@/lib/cache-tags";
 import {
   BaseCurrencyNotConfiguredError,
-  getBaseCurrency,
-  getRatesToBase,
+  getBaseCurrencyCached,
+  getRatesToBaseCached,
 } from "@/lib/currency";
 import type { CurrencyInfo } from "@/lib/format";
 import {
@@ -32,9 +34,8 @@ export async function getCurrencies(): Promise<CurrencyRow[]> {
   const baseId = settings?.baseCurrencyId ?? null;
   let rates = new Map<number, { rate: number }>();
   if (baseId) {
-    const base = rows.find((r) => r.currencyId === baseId);
-    if (base) {
-      rates = (await getRatesToBase(db, base)).rates;
+    if (rows.some((r) => r.currencyId === baseId)) {
+      rates = (await getRatesToBaseCached()).rates;
     }
   }
   return rows.map((row) => ({
@@ -51,13 +52,20 @@ export async function getCurrencies(): Promise<CurrencyRow[]> {
   }));
 }
 
+/** Monedas activas en la Data Cache: cambian solo desde el admin. */
+const loadActiveCurrencies = unstable_cache(
+  (): Promise<CurrencyInfo[]> =>
+    db.currency.findMany({
+      where: { isActive: true },
+      orderBy: [{ sortOrder: "asc" }, { code: "asc" }],
+      select: { currencyId: true, code: true, symbol: true, decimalPlaces: true, name: true },
+    }),
+  ["active-currencies"],
+  { tags: [CACHE_TAGS.currency], revalidate: CACHE_FALLBACK_SECONDS }
+);
+
 export async function getActiveCurrencies(): Promise<CurrencyInfo[]> {
-  const rows = await db.currency.findMany({
-    where: { isActive: true },
-    orderBy: [{ sortOrder: "asc" }, { code: "asc" }],
-    select: { currencyId: true, code: true, symbol: true, decimalPlaces: true, name: true },
-  });
-  return rows;
+  return loadActiveCurrencies();
 }
 
 /** Lo que la tienda pública necesita para pintar montos en cualquier moneda
@@ -65,15 +73,8 @@ export async function getActiveCurrencies(): Promise<CurrencyInfo[]> {
  *  para que la tienda siga renderizando. */
 export async function getCurrencyContext(): Promise<CurrencyContextData> {
   try {
-    const base = await getBaseCurrency(db);
-    const [{ rates }, active] = await Promise.all([
-      getRatesToBase(db, base),
-      db.currency.findMany({
-        where: { isActive: true },
-        orderBy: [{ sortOrder: "asc" }, { code: "asc" }],
-        select: { currencyId: true, code: true, symbol: true, decimalPlaces: true, name: true },
-      }),
-    ]);
+    const base = await getBaseCurrencyCached();
+    const [{ rates }, active] = await Promise.all([getRatesToBaseCached(), loadActiveCurrencies()]);
     const currencies = active.filter((c) => rates.has(c.currencyId));
     if (!currencies.some((c) => c.currencyId === base.currencyId)) {
       currencies.unshift({ ...base, name: base.code });
