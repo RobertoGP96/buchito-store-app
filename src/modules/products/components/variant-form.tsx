@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -36,7 +35,6 @@ export function VariantForm({
   attributeSchema,
   currencies,
 }: VariantFormProps) {
-  const router = useRouter();
   const { base } = useCurrency();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -79,7 +77,6 @@ export function VariantForm({
       }
       toast.success(variant ? "Variante actualizada" : "Variante creada");
       onOpenChange(false);
-      router.refresh();
     } catch (error) {
       console.error("VariantForm:", error);
       toast.danger("No se pudo guardar la variante");

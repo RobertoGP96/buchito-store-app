@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,7 +15,6 @@ interface SettingsFormProps {
 }
 
 export function SettingsForm({ settings, currencies }: SettingsFormProps) {
-  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const baseCode = settings.baseCurrency?.code ?? "";
 
@@ -45,7 +43,6 @@ export function SettingsForm({ settings, currencies }: SettingsFormProps) {
         return;
       }
       toast.success("Configuración guardada");
-      router.refresh();
     } catch (error) {
       console.error("SettingsForm:", error);
       toast.danger("No se pudo guardar la configuración");

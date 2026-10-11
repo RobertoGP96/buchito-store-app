@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button, ListBox, Select, toast } from "@heroui/react";
 import { Truck } from "lucide-react";
@@ -31,7 +30,6 @@ function AssignControl({
   delivery: DeliveryRow;
   couriers: DeliveryListProps["couriers"];
 }) {
-  const router = useRouter();
   const [courierId, setCourierId] = useState<string | null>(delivery.courierId ? String(delivery.courierId) : null);
   const [pending, setPending] = useState(false);
   const canAssign = delivery.status === "pending" || delivery.status === "failed";
@@ -50,7 +48,6 @@ function AssignControl({
         return;
       }
       toast.success(canUnassign ? "Mensajero desasignado" : "Mensajero asignado");
-      router.refresh();
     } catch (error) {
       console.error("AssignControl:", error);
       toast.danger("No se pudo actualizar la entrega");

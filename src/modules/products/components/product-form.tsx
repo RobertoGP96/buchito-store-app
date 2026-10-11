@@ -112,7 +112,6 @@ export function ProductForm({ product, types, categories }: ProductFormProps) {
           return;
         }
         toast.success("Producto actualizado");
-        router.refresh();
         return;
       }
       const result = await createProduct(values);

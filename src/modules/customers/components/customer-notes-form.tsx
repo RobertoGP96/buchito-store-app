@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,7 +14,6 @@ interface CustomerNotesFormProps {
 }
 
 export function CustomerNotesForm({ customerId, notes }: CustomerNotesFormProps) {
-  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { control, handleSubmit, formState } = useForm<CustomerNotesInput, unknown, CustomerNotesValues>({
     resolver: zodResolver(customerNotesSchema),
@@ -31,7 +29,6 @@ export function CustomerNotesForm({ customerId, notes }: CustomerNotesFormProps)
         return;
       }
       toast.success("Notas guardadas");
-      router.refresh();
     } catch (error) {
       console.error("CustomerNotesForm:", error);
       toast.danger("No se pudieron guardar las notas");

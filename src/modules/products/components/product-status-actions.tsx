@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button, toast } from "@heroui/react";
 import { setProductStatus } from "../actions/product-actions";
@@ -36,7 +35,6 @@ const TRANSITIONS: Record<ProductStatus, Transition[]> = {
 
 /** Botones de cambio de estado del producto (borrador / publicado / archivado). */
 export function ProductStatusActions({ productId, status, hasActiveVariants }: ProductStatusActionsProps) {
-  const router = useRouter();
   const [pending, setPending] = useState<ProductStatus | null>(null);
 
   const run = async (transition: Transition) => {
@@ -55,7 +53,6 @@ export function ProductStatusActions({ productId, status, hasActiveVariants }: P
         return;
       }
       toast.success("Estado actualizado");
-      router.refresh();
     } catch (error) {
       console.error("ProductStatusActions:", error);
       toast.danger("No se pudo cambiar el estado del producto");
