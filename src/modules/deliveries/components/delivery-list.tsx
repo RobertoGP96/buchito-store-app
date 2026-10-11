@@ -8,6 +8,7 @@ import { Truck } from "lucide-react";
 import { CHIP_BASE, CHIP_OFF, CHIP_ON } from "@/components/choice-chips";
 import { EmptyState } from "@/components/empty-state";
 import { Money } from "@/components/money";
+import { LinkPending } from "@/components/nav-icon";
 import { ListCard, ResponsiveList, type ListColumn } from "@/components/responsive-list";
 import { StatusChip } from "@/components/status-chip";
 import { fmtDateTime } from "@/lib/format";
@@ -128,12 +129,19 @@ export function DeliveryList({ rows, couriers, activeStatus }: DeliveryListProps
   return (
     <>
       <div className="no-scrollbar -mx-1 flex snap-x gap-2 overflow-x-auto px-1 py-1">
-        <Link href="/admin/entregas" className={cn(CHIP_BASE, activeStatus === null ? CHIP_ON : CHIP_OFF)}>
+        <Link href="/admin/entregas" scroll={false} className={cn(CHIP_BASE, activeStatus === null ? CHIP_ON : CHIP_OFF)}>
           Todas
+          <LinkPending />
         </Link>
         {DELIVERY_STATUSES.map((status) => (
-          <Link key={status} href={`/admin/entregas?status=${status}`} className={cn(CHIP_BASE, activeStatus === status ? CHIP_ON : CHIP_OFF)}>
+          <Link
+            key={status}
+            href={`/admin/entregas?status=${status}`}
+            scroll={false}
+            className={cn(CHIP_BASE, activeStatus === status ? CHIP_ON : CHIP_OFF)}
+          >
             {DELIVERY_STATUS_META[status].label}
+            <LinkPending />
           </Link>
         ))}
       </div>

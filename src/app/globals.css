@@ -376,6 +376,36 @@ html {
   }
 }
 
+/* Spinner de enlace pendiente (NavIcon / LinkPending): aparece con retardo
+   para no parpadear cuando la navegación es instantánea. */
+@keyframes pendingIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes navSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.nav-spinner {
+  opacity: 0;
+  animation:
+    pendingIn 120ms ease 150ms forwards,
+    navSpin 0.8s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-spinner {
+    animation: pendingIn 120ms ease 150ms forwards;
+  }
+}
+
 .no-scrollbar {
   scrollbar-width: none;
 }

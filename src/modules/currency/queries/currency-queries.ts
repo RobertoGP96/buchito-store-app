@@ -2,8 +2,8 @@ import "server-only";
 import { db } from "@/lib/db";
 import {
   BaseCurrencyNotConfiguredError,
-  getBaseCurrency,
-  getRatesToBase,
+  getBaseCurrencyCached,
+  getRatesToBaseCached,
 } from "@/lib/currency";
 import type { CurrencyInfo } from "@/lib/format";
 import {
@@ -32,9 +32,8 @@ export async function getCurrencies(): Promise<CurrencyRow[]> {
   const baseId = settings?.baseCurrencyId ?? null;
   let rates = new Map<number, { rate: number }>();
   if (baseId) {
-    const base = rows.find((r) => r.currencyId === baseId);
-    if (base) {
-      rates = (await getRatesToBase(db, base)).rates;
+    if (rows.some((r) => r.currencyId === baseId)) {
+      rates = (await getRatesToBaseCached()).rates;
     }
   }
   return rows.map((row) => ({
@@ -65,9 +64,9 @@ export async function getActiveCurrencies(): Promise<CurrencyInfo[]> {
  *  para que la tienda siga renderizando. */
 export async function getCurrencyContext(): Promise<CurrencyContextData> {
   try {
-    const base = await getBaseCurrency(db);
+    const base = await getBaseCurrencyCached();
     const [{ rates }, active] = await Promise.all([
-      getRatesToBase(db, base),
+      getRatesToBaseCached(),
       db.currency.findMany({
         where: { isActive: true },
         orderBy: [{ sortOrder: "asc" }, { code: "asc" }],

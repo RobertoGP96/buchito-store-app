@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { db } from "@/lib/db";
 import { Prisma } from "@/generated/prisma";
 import type { CurrencyInfo } from "@/lib/format";
@@ -124,6 +125,14 @@ export async function getRatesToBase(
   }
   return { base: baseCurrency, rates };
 }
+
+/** Deduplicadas por request: layout y página piden la misma base y las
+ *  mismas tasas. Solo sobre `db`; dentro de una transacción usar las
+ *  versiones con `tx`, que deben leer el snapshot de esa tx. */
+export const getBaseCurrencyCached = cache(() => getBaseCurrency(db));
+export const getRatesToBaseCached = cache(async () =>
+  getRatesToBase(db, await getBaseCurrencyCached())
+);
 
 export async function convertToBase(
   client: DbOrTx,

@@ -1,7 +1,8 @@
 import "server-only";
+import { cache } from "react";
 import { db } from "@/lib/db";
 import { Prisma } from "@/generated/prisma";
-import { BaseCurrencyNotConfiguredError, getBaseCurrency, getRatesToBase } from "@/lib/currency";
+import { BaseCurrencyNotConfiguredError, getBaseCurrencyCached, getRatesToBaseCached } from "@/lib/currency";
 import { roundToCurrency } from "@/lib/currency-math";
 import type { CurrencyInfo } from "@/lib/format";
 import { decimalToNullableNumber, decimalToNumber } from "@/lib/money";
@@ -73,16 +74,17 @@ interface RateContext {
   rates: Map<number, { rate: number }>;
 }
 
-async function getRateContext(): Promise<RateContext | null> {
+// generateMetadata y la página del producto lo piden en el mismo request.
+const getRateContext = cache(async (): Promise<RateContext | null> => {
   try {
-    const base = await getBaseCurrency(db);
-    const { rates } = await getRatesToBase(db, base);
+    const base = await getBaseCurrencyCached();
+    const { rates } = await getRatesToBaseCached();
     return { base, rates };
   } catch (error) {
     if (!(error instanceof BaseCurrencyNotConfiguredError)) console.error("getRateContext:", error);
     return null;
   }
-}
+});
 
 /** Convierte un producto de DB a `CatalogProduct`. Devuelve null si ninguna
  *  variante tiene tasa a base (no se puede mostrar un precio). */
