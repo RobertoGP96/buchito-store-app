@@ -62,10 +62,13 @@ Módulos: `auth`, `settings`, `currency`, `payments`, `products`, `cart`, `order
 - **Pedidos y entregas**: máquinas de estado puras en `src/modules/orders/lib/state-machine.ts` y `src/modules/deliveries/lib/state-machine.ts` (con tests). Una entrega fallida se re-asigna, no se duplica.
 - **Server actions**: siempre devuelven `ActionResult<T>`, validan con Zod, escriben audit log dentro de la transacción y usan `version` para optimistic locking (Neon no soporta `SELECT FOR UPDATE` fiable).
 
-## Estado actual (bases)
+## Estado actual
 
-Implementado: design system + shells, auth por roles, configuración, monedas/tasas, métodos de pago, tipos de producto, categorías, catálogo público con carrito y checkout (UI), listas de pedidos/entregas, zonas y mensajeros, app del mensajero.
+Flujo completo funcionando y verificado de punta a punta contra Neon:
 
-Con firma estable pero **pendientes de implementar** (devuelven `success: false` con mensaje): alta/edición de productos y variantes, ajustes de stock, `createOrder`, `transitionOrder`, `registerOrderPayment`, `assignCourier`, `transitionDelivery`. El comentario sobre cada una describe qué debe hacer.
+- **Catálogo**: tipos de producto con atributos dinámicos, categorías en árbol, productos con variantes (SKU, precio en cualquier moneda, stock, variante por defecto), publicación y ajustes de stock con kardex.
+- **Compra**: carrito, checkout con entrega a domicilio por zona o recogida, método de pago en su moneda, cupones; el servidor recalcula precios con la tasa vigente y descuenta stock de forma atómica.
+- **Gestión**: pedidos (confirmar, listo, entregar en recogida, cancelar con reposición de stock), registro de cobros multi-moneda, entregas (asignar/desasignar mensajero).
+- **Mensajero**: recoger, entregar con cobro contra entrega, o registrar el fallo (el pedido vuelve a la cola).
 
-Fuera de alcance por ahora: pasarelas de pago online, reembolsos, cupones (UI), favoritos, imágenes (subida), PWA, mapas, recuperación de contraseña.
+Pendiente / fuera de alcance por ahora: UI de administración de cupones (el modelo y la validación existen), subida de imágenes (hoy se indica una URL), reembolsos, pasarelas de pago online, notificaciones, favoritos, PWA, mapas, recuperación de contraseña.
