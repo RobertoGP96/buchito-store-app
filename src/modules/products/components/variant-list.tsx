@@ -1,5 +1,6 @@
 "use client";
 
+import { lazyDialog } from "@/components/lazy-dialog";
 import { useState } from "react";
 import { Button } from "@heroui/react";
 import { AlertTriangle, Boxes, Layers, Pencil, Plus } from "lucide-react";
@@ -12,8 +13,9 @@ import { cn } from "@/lib/utils";
 import { useCurrency } from "@/modules/currency/store/currency-provider";
 import { variantDisplayName, type AttributeDef } from "../lib/attribute-schema";
 import type { AdminVariantRow, AdminVariantSummary } from "../queries/product-queries";
-import { StockAdjustForm } from "./stock-adjust-form";
-import { VariantForm } from "./variant-form";
+
+const StockAdjustForm = lazyDialog(() => import("./stock-adjust-form").then((m) => m.StockAdjustForm));
+const VariantForm = lazyDialog(() => import("./variant-form").then((m) => m.VariantForm));
 
 interface VariantListProps {
   productId: number;

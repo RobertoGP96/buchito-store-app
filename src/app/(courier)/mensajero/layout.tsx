@@ -6,8 +6,7 @@ import { getCurrencyContext } from "@/modules/currency/queries/currency-queries"
 export default async function CourierLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const session = await requireRole("courier");
-  const currency = await getCurrencyContext();
+  const [session, currency] = await Promise.all([requireRole("courier"), getCurrencyContext()]);
   return (
     <CurrencyProvider data={currency} lockToBase>
       <CourierShell userName={session.user.fullName}>{children}</CourierShell>

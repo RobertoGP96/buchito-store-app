@@ -6,6 +6,7 @@ import { Button } from "@heroui/react";
 import { AlertTriangle, ChevronRight, CornerDownRight, Package, Pencil, Plus } from "lucide-react";
 import { ButtonLink } from "@/components/button-link";
 import { EmptyState } from "@/components/empty-state";
+import { lazyDialog } from "@/components/lazy-dialog";
 import { Money } from "@/components/money";
 import { ListCard, ResponsiveList, type ListColumn } from "@/components/responsive-list";
 import { StatusChip } from "@/components/status-chip";
@@ -14,8 +15,9 @@ import { cn } from "@/lib/utils";
 import { variantDisplayName } from "../lib/attribute-schema";
 import { PRODUCT_STATUS_META } from "../lib/labels";
 import type { AdminProductRow, AdminVariantSummary } from "../queries/product-queries";
-import { VariantForm } from "./variant-form";
 import { VariantChips, VariantPriceCell, VariantStockCell } from "./variant-list";
+
+const VariantForm = lazyDialog(() => import("./variant-form").then((m) => m.VariantForm));
 
 interface ProductListProps {
   rows: AdminProductRow[];

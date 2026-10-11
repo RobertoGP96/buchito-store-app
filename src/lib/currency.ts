@@ -1,4 +1,7 @@
 import "server-only";
+import { cache } from "react";
+import { unstable_cache } from "next/cache";
+import { CACHE_FALLBACK_SECONDS, CACHE_TAGS } from "@/lib/cache-tags";
 import { db } from "@/lib/db";
 import { Prisma } from "@/generated/prisma";
 import type { CurrencyInfo } from "@/lib/format";
@@ -124,6 +127,28 @@ export async function getRatesToBase(
   }
   return { base: baseCurrency, rates };
 }
+
+/** Base y tasas en la Data Cache entre requests, invalidadas por tag desde
+ *  las actions de monedas, tasas y configuración. El Map viaja como lista de
+ *  pares porque la caché serializa a JSON. */
+const loadRatesToBase = unstable_cache(
+  async () => {
+    const base = await getBaseCurrency(db);
+    const { rates } = await getRatesToBase(db, base);
+    return { base, rates: Array.from(rates.entries()) };
+  },
+  ["rates-to-base"],
+  { tags: [CACHE_TAGS.currency, CACHE_TAGS.settings], revalidate: CACHE_FALLBACK_SECONDS }
+);
+
+/** Deduplicadas además por request con `cache()`: layout y página las piden
+ *  a la vez. Solo sobre `db`; dentro de una transacción usar las versiones
+ *  con `tx`, que deben leer el snapshot de esa tx. */
+export const getRatesToBaseCached = cache(async () => {
+  const { base, rates } = await loadRatesToBase();
+  return { base, rates: new Map(rates) };
+});
+export const getBaseCurrencyCached = cache(async () => (await loadRatesToBase()).base);
 
 export async function convertToBase(
   client: DbOrTx,

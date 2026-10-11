@@ -4,7 +4,7 @@ Tienda web + panel de gestión + app de mensajero en UNA app Next.js. Hereda el 
 
 ## Stack
 
-- **Next.js 15** App Router · **React 19** · **TypeScript estricto** · **Tailwind 4** · **HeroUI v3** (`@heroui/react`, sin provider; compound components: `Modal.Backdrop > Modal.Container > Modal.Dialog`, `Table.ScrollContainer > Table.Content`, `Select.Trigger/Popover + ListBox`) · lucide-react
+- **Next.js 15** App Router · **React 19** · **TypeScript estricto** · **Tailwind 4** · **HeroUI v3** (`@heroui/react`, sin provider; compound components: `Modal.Backdrop > Modal.Container > Modal.Dialog`, `Table.ScrollContainer > Table.Content`, `Select.Trigger/Popover + ListBox`; **solo en archivos `"use client"`**: su barrel rompe `next build` desde un componente servidor) · lucide-react
 - **Prisma 7** + **Neon** (`@prisma/adapter-neon`), cliente generado en `generated/prisma` (import `@/generated/prisma`), `db push` (sin migraciones manuales), SQL crudo en `prisma/sql/*.sql` (`pnpm db:sql <archivo>`)
 - **next-auth 5** Credentials, JWT, roles `admin | courier | customer` (`src/lib/roles.ts`)
 - **Zod 4** + react-hook-form (`@hookform/resolvers`) · **Vitest** (`src/**/*.test.ts`)
@@ -67,11 +67,14 @@ export async function createX(input: XInput): Promise<ActionResult<{ id: number 
 - Archivos `"use server"` solo exportan funciones async: schemas, labels y helpers van en `lib/`. Helpers que participan en una tx reciben `tx: Prisma.TransactionClient` y NO llevan `"use server"`.
 - **Doble parseo**: el resolver de RHF ya transforma en el cliente (`""` → `null`); el servidor vuelve a parsear, así que los schemas aceptan también el valor transformado (`z.union([z.literal(""), z.null(), z.coerce.number()])`). No romper esto.
 - `Prisma.Decimal` nunca llega al cliente: convertir con `decimalToNumber` en queries. Enums de Prisma nunca en `"use client"`: usar las uniones de `lib/labels.ts`.
-- Mensajes al usuario en español sin tecnicismos; `console.error` del error real. Handlers cliente: `try/catch/finally` con `setIsSubmitting(false)` en `finally`; feedback con `toast` de HeroUI; `router.refresh()` tras guardar.
+- **Data Cache por tags**: base/tasas, monedas activas, configuración y categorías se leen con `unstable_cache` (`CACHE_TAGS` en `src/lib/cache-tags.ts`); la action que escribe esas tablas llama a `revalidateTag` además de `revalidatePath`. Dentro de una tx usar siempre las versiones con `tx` (sin caché).
+- Mensajes al usuario en español sin tecnicismos; `console.error` del error real. Handlers cliente: `try/catch/finally` con `setIsSubmitting(false)` en `finally`; feedback con `toast` de HeroUI. **Sin `router.refresh()`** tras una action que ya llama a `revalidatePath`/`revalidateTag`: la respuesta de la action trae la ruta actual re-renderizada y el refresh duplicaba el render completo. Solo login/registro lo usan, porque no revalidan.
 
 ## UI
 
 Mobile-first (probar 375px). Listas: `ResponsiveList` (cards <md, tabla ≥md). Formularios: `ResponsiveFormDialog` + `FormFooter` + campos de `components/form/fields.tsx`. Montos siempre con `<Money value={base} />` (`tabular-nums`). Enlaces con aspecto de botón: `ButtonLink`; HeroUI `Button` solo con `onPress`. Sin emojis. Comentarios solo para el "por qué".
+
+Navegación: cada ruta hoja sin `searchParams` lleva `loading.tsx` con las siluetas de `components/skeletons.tsx`; las que filtran por URL no lo llevan (conservan la lista y el chip pulsado muestra `LinkPending`, con `scroll={false}`). Iconos de enlaces de navegación con `NavIcon`. Transición de ruta: `RouteTransition` en el `template.tsx` de cada grupo (View Transitions). Formularios en diálogo se importan en las listas con `lazyDialog(() => import("./x-form").then((m) => m.XForm))`, nunca con import estático.
 
 ## Entorno
 

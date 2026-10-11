@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,7 +23,6 @@ interface CategoryFormProps {
 const FORM_ID = "category-form";
 
 export function CategoryForm({ open, onOpenChange, category, parentOptions }: CategoryFormProps) {
-  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [slugTouched, setSlugTouched] = useState(Boolean(category));
   const { control, handleSubmit, setValue, getValues } = useForm<CategoryInput, unknown, CategoryValues>({
@@ -51,7 +49,6 @@ export function CategoryForm({ open, onOpenChange, category, parentOptions }: Ca
       }
       toast.success(category ? "Categoría actualizada" : "Categoría creada");
       onOpenChange(false);
-      router.refresh();
     } catch (error) {
       console.error("CategoryForm:", error);
       toast.danger("No se pudo guardar la categoría");

@@ -1,5 +1,6 @@
 "use client";
 
+import { lazyDialog } from "@/components/lazy-dialog";
 import { useState } from "react";
 import { Button } from "@heroui/react";
 import { Pencil, Plus, Wallet } from "lucide-react";
@@ -7,9 +8,10 @@ import { EmptyState } from "@/components/empty-state";
 import type { SelectOption } from "@/components/form/fields";
 import { ListCard, ResponsiveList, type ListColumn } from "@/components/responsive-list";
 import { StatusChip } from "@/components/status-chip";
-import { PaymentMethodForm } from "./payment-method-form";
 import { PAYMENT_KIND_LABELS } from "../lib/labels";
 import type { PaymentMethodRow } from "../queries/payment-queries";
+
+const PaymentMethodForm = lazyDialog(() => import("./payment-method-form").then((m) => m.PaymentMethodForm));
 
 interface PaymentMethodListProps {
   rows: PaymentMethodRow[];

@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,7 +24,6 @@ const ROLE_OPTIONS: SelectOption[] = ASSIGNABLE_ROLES.map((r) => ({ value: r, la
 const COURIER_ROLE_OPTION: SelectOption[] = [{ value: "courier", label: USER_ROLE_LABELS.courier }];
 
 export function UserForm({ open, onOpenChange, user }: UserFormProps) {
-  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isCourier = Boolean(user && (user.role === "courier" || user.hasCourierProfile));
   const { control, handleSubmit } = useForm<UserInput, unknown, UserValues>({
@@ -49,7 +47,6 @@ export function UserForm({ open, onOpenChange, user }: UserFormProps) {
       }
       toast.success(user ? "Usuario actualizado" : "Usuario creado");
       onOpenChange(false);
-      router.refresh();
     } catch (error) {
       console.error("UserForm:", error);
       toast.danger("No se pudo guardar el usuario");

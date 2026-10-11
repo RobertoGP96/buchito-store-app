@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button, toast } from "@heroui/react";
 import { MapPin, Phone } from "lucide-react";
@@ -32,7 +31,6 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 /** Ficha de entrega para el mensajero (y el admin): dirección, teléfono,
  *  artículos, cobro y botones de transición derivados de la máquina. */
 export function DeliveryDetail({ delivery, actor, isAssignedCourier }: DeliveryDetailProps) {
-  const router = useRouter();
   const [pending, setPending] = useState<DeliveryStatus | null>(null);
   const targets = nextDeliveryStates(delivery.status, actor, { isAssignedCourier }).filter(
     // Asignar/desasignar se hacen desde la lista del admin, no desde la ficha.
@@ -73,7 +71,6 @@ export function DeliveryDetail({ delivery, actor, isAssignedCourier }: DeliveryD
       }
       toast.success("Entrega actualizada");
       setAsking(null);
-      router.refresh();
     } catch (error) {
       console.error("DeliveryDetail:", error);
       toast.danger("No se pudo actualizar la entrega");

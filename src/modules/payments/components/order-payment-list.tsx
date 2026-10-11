@@ -5,6 +5,7 @@ import { Receipt } from "lucide-react";
 import { CHIP_BASE, CHIP_OFF, CHIP_ON } from "@/components/choice-chips";
 import { EmptyState } from "@/components/empty-state";
 import { Money } from "@/components/money";
+import { LinkPending } from "@/components/nav-icon";
 import { ListCard, ResponsiveList, type ListColumn } from "@/components/responsive-list";
 import { fmtDateTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -102,9 +103,11 @@ export function OrderPaymentList({ result, activeRange }: OrderPaymentListProps)
           <Link
             key={range}
             href={`/admin/cobros?range=${range}`}
+            scroll={false}
             className={cn(CHIP_BASE, activeRange === range ? CHIP_ON : CHIP_OFF)}
           >
             {RANGE_LABELS[range]}
+            <LinkPending />
           </Link>
         ))}
       </div>

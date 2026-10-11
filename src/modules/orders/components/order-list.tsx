@@ -5,6 +5,7 @@ import { Inbox } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { CHIP_BASE, CHIP_OFF, CHIP_ON } from "@/components/choice-chips";
 import { Money } from "@/components/money";
+import { LinkPending } from "@/components/nav-icon";
 import { ListCard, ResponsiveList, type ListColumn } from "@/components/responsive-list";
 import { StatusChip } from "@/components/status-chip";
 import { fmtDateTime } from "@/lib/format";
@@ -73,17 +74,20 @@ export function OrderList({ rows, activeStatus, counts }: OrderListProps) {
   return (
     <>
       <div className="no-scrollbar -mx-1 flex snap-x gap-2 overflow-x-auto px-1 py-1">
-        <Link href="/admin/pedidos" className={cn(CHIP_BASE, activeStatus === null ? CHIP_ON : CHIP_OFF)}>
+        <Link href="/admin/pedidos" scroll={false} className={cn(CHIP_BASE, activeStatus === null ? CHIP_ON : CHIP_OFF)}>
           Todos
+          <LinkPending />
         </Link>
         {ORDER_STATUSES.map((status) => (
           <Link
             key={status}
             href={`/admin/pedidos?status=${status}`}
+            scroll={false}
             className={cn(CHIP_BASE, activeStatus === status ? CHIP_ON : CHIP_OFF)}
           >
             {ORDER_STATUS_META[status].label}
             {counts[status] > 0 && <span className="ml-1.5 text-[11px] opacity-70">{counts[status]}</span>}
+            <LinkPending />
           </Link>
         ))}
       </div>

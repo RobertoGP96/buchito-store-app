@@ -4,10 +4,10 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
 } from "react";
+import { DISPLAY_CURRENCY_COOKIE, writePreferenceCookie } from "@/lib/preferences";
 import { fromBaseAmount } from "@/lib/currency-math";
 import { DEFAULT_CURRENCY, fmt, type CurrencyInfo } from "@/lib/format";
 
@@ -26,8 +26,6 @@ export const EMPTY_CURRENCY_CONTEXT: CurrencyContextData = {
   rates: { [DEFAULT_CURRENCY.currencyId]: 1 },
 };
 
-export const DISPLAY_CURRENCY_STORAGE_KEY = "buchito-currency";
-
 interface CurrencyApi extends CurrencyContextData {
   display: CurrencyInfo;
   setDisplay: (code: string) => void;
@@ -44,28 +42,22 @@ const CurrencyContext = createContext<CurrencyApi | null>(null);
 export function CurrencyProvider({
   data,
   lockToBase = false,
+  initialDisplayCode,
   children,
 }: {
   data: CurrencyContextData;
   /** Admin y mensajero trabajan siempre en base: ignoran la preferencia de la tienda. */
   lockToBase?: boolean;
+  /** Código guardado en cookie, leído por el layout servidor: así los precios
+   *  salen ya en la moneda elegida y no parpadean en base tras hidratar. */
+  initialDisplayCode?: string;
   children: React.ReactNode;
 }) {
-  const [displayCode, setDisplayCode] = useState(data.base.code);
-
-  // La preferencia vive en localStorage: el primer render debe coincidir con
-  // el servidor (base), y solo después se aplica la elegida.
-  useEffect(() => {
-    if (lockToBase) return;
-    try {
-      const saved = localStorage.getItem(DISPLAY_CURRENCY_STORAGE_KEY);
-      if (saved && data.currencies.some((c) => c.code === saved)) {
-        setDisplayCode(saved);
-      }
-    } catch {
-      // Sin storage: se queda en base.
-    }
-  }, [data.currencies, lockToBase]);
+  const [displayCode, setDisplayCode] = useState(() =>
+    !lockToBase && initialDisplayCode && data.currencies.some((c) => c.code === initialDisplayCode)
+      ? initialDisplayCode
+      : data.base.code
+  );
 
   const display = useMemo(
     () => data.currencies.find((c) => c.code === displayCode) ?? data.base,
@@ -76,11 +68,7 @@ export function CurrencyProvider({
     (code: string) => {
       if (!data.currencies.some((c) => c.code === code)) return;
       setDisplayCode(code);
-      try {
-        localStorage.setItem(DISPLAY_CURRENCY_STORAGE_KEY, code);
-      } catch {
-        // Modo privado: la elección dura la sesión.
-      }
+      writePreferenceCookie(DISPLAY_CURRENCY_COOKIE, code);
     },
     [data.currencies]
   );

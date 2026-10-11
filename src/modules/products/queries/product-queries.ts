@@ -1,7 +1,7 @@
 import "server-only";
 import type { Prisma } from "@/generated/prisma";
 import { db } from "@/lib/db";
-import { BaseCurrencyNotConfiguredError, getBaseCurrency, getRatesToBase } from "@/lib/currency";
+import { BaseCurrencyNotConfiguredError, getRatesToBaseCached } from "@/lib/currency";
 import { roundToCurrency } from "@/lib/currency-math";
 import type { CurrencyInfo } from "@/lib/format";
 import { decimalToNullableNumber, decimalToNumber } from "@/lib/money";
@@ -59,8 +59,8 @@ type RatesToBase = Map<number, { rate: number }>;
 /** Tasas a base; sin moneda base configurada devuelve un mapa vacío (nada se vende). */
 async function loadRatesToBase(): Promise<{ rates: RatesToBase; baseDecimals: number }> {
   try {
-    const base = await getBaseCurrency(db);
-    return { rates: (await getRatesToBase(db, base)).rates, baseDecimals: base.decimalPlaces };
+    const { base, rates } = await getRatesToBaseCached();
+    return { rates, baseDecimals: base.decimalPlaces };
   } catch (error) {
     if (error instanceof BaseCurrencyNotConfiguredError) return { rates: new Map(), baseDecimals: 0 };
     throw error;

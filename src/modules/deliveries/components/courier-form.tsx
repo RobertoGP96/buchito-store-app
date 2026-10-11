@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,7 +22,6 @@ const FORM_ID = "courier-form";
 const VEHICLE_OPTIONS: SelectOption[] = VEHICLE_TYPES.map((v) => ({ value: v, label: VEHICLE_LABELS[v] }));
 
 export function CourierForm({ open, onOpenChange, courier }: CourierFormProps) {
-  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { control, handleSubmit } = useForm<CourierInput, unknown, CourierValues>({
     resolver: zodResolver(courierSchema),
@@ -50,7 +48,6 @@ export function CourierForm({ open, onOpenChange, courier }: CourierFormProps) {
       }
       toast.success(courier ? "Mensajero actualizado" : "Mensajero creado");
       onOpenChange(false);
-      router.refresh();
     } catch (error) {
       console.error("CourierForm:", error);
       toast.danger("No se pudo guardar el mensajero");

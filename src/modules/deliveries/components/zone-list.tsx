@@ -1,5 +1,6 @@
 "use client";
 
+import { lazyDialog } from "@/components/lazy-dialog";
 import { useState } from "react";
 import { Button } from "@heroui/react";
 import { MapPin, Pencil, Plus } from "lucide-react";
@@ -7,8 +8,9 @@ import { EmptyState } from "@/components/empty-state";
 import { Money } from "@/components/money";
 import { ListCard, ResponsiveList, type ListColumn } from "@/components/responsive-list";
 import { StatusChip } from "@/components/status-chip";
-import { ZoneForm } from "./zone-form";
 import type { ZoneRow } from "../queries/zone-queries";
+
+const ZoneForm = lazyDialog(() => import("./zone-form").then((m) => m.ZoneForm));
 
 export function ZoneList({ rows }: { rows: ZoneRow[] }) {
   const [editing, setEditing] = useState<ZoneRow | null>(null);

@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/page-header";
 import { StatusChip } from "@/components/status-chip";
 import { getActiveCurrencies } from "@/modules/currency/queries/currency-queries";
 import { ProductForm } from "@/modules/products/components/product-form";
+import { ProductImages } from "@/modules/products/components/product-images";
 import { ProductStatusActions } from "@/modules/products/components/product-status-actions";
 import { VariantList } from "@/modules/products/components/variant-list";
 import { PRODUCT_STATUS_META } from "@/modules/products/lib/labels";
@@ -90,23 +91,26 @@ export default async function AdminProductPage({ params }: AdminProductPageProps
       )}
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-start">
-        {/* key: tras guardar o cambiar de estado, el formulario se remonta con los datos frescos. */}
-        <ProductForm
-          key={`${product.productId}-${product.version}-${product.status}`}
-          product={product}
-          types={types.map((t) => ({
-            typeId: t.typeId,
-            name: t.name,
-            attributeSchema: t.attributeSchema,
-            isActive: t.isActive,
-          }))}
-          categories={categories.map((c) => ({
-            categoryId: c.categoryId,
-            name: c.name,
-            depth: c.depth,
-            isActive: c.isActive,
-          }))}
-        />
+        <div className="flex flex-col gap-5">
+          <ProductImages productId={product.productId} images={product.images} />
+          {/* key: tras guardar o cambiar de estado, el formulario se remonta con los datos frescos. */}
+          <ProductForm
+            key={`${product.productId}-${product.version}-${product.status}`}
+            product={product}
+            types={types.map((t) => ({
+              typeId: t.typeId,
+              name: t.name,
+              attributeSchema: t.attributeSchema,
+              isActive: t.isActive,
+            }))}
+            categories={categories.map((c) => ({
+              categoryId: c.categoryId,
+              name: c.name,
+              depth: c.depth,
+              isActive: c.isActive,
+            }))}
+          />
+        </div>
         <VariantList
           productId={product.productId}
           variants={product.variants}

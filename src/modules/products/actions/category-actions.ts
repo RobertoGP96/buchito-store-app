@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 import { db } from "@/lib/db";
 import { assertRole } from "@/lib/auth-guard";
 import { createAuditLog } from "@/lib/audit";
@@ -9,6 +10,7 @@ import type { ActionResult } from "@/types";
 import { categorySchema, type CategoryInput } from "../lib/schemas";
 
 function revalidateCategoryPaths() {
+  revalidateTag(CACHE_TAGS.categories);
   revalidatePath("/admin/categorias");
   revalidatePath("/admin/productos");
   revalidatePath("/catalogo");

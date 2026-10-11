@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button, toast } from "@heroui/react";
 import { PromptDialog } from "@/components/prompt-dialog";
@@ -18,7 +17,6 @@ interface OrderActionsBarProps {
 
 /** Botones de transición del admin, derivados de la máquina de estados. */
 export function OrderActionsBar({ orderId, version, status, fulfillment, deliveryStatus }: OrderActionsBarProps) {
-  const router = useRouter();
   const [pending, setPending] = useState<OrderStatus | null>(null);
   const [askingCancel, setAskingCancel] = useState(false);
   const targets = nextOrderStates(status, "admin", { fulfillment, isOwner: false, deliveryStatus });
@@ -35,7 +33,6 @@ export function OrderActionsBar({ orderId, version, status, fulfillment, deliver
       }
       toast.success("Pedido actualizado");
       setAskingCancel(false);
-      router.refresh();
     } catch (error) {
       console.error("OrderActionsBar:", error);
       toast.danger("No se pudo actualizar el pedido");

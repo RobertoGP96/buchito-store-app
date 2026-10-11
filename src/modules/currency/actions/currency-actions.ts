@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 import { db } from "@/lib/db";
 import { assertRole } from "@/lib/auth-guard";
 import { createAuditLog } from "@/lib/audit";
@@ -11,6 +12,9 @@ import { currencySchema, type CurrencyInput } from "../lib/schemas";
 const PATHS = ["/admin/monedas", "/admin/monedas/tasas", "/admin/configuracion", "/admin/metodos-pago"];
 
 function revalidateCurrencyPaths() {
+  revalidateTag(CACHE_TAGS.currency);
+  // setBaseCurrency escribe en StoreSetting: la configuración cacheada también cambia.
+  revalidateTag(CACHE_TAGS.settings);
   for (const path of PATHS) revalidatePath(path);
   revalidatePath("/", "layout");
 }

@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 import { Prisma } from "@/generated/prisma";
 import { db } from "@/lib/db";
 import { assertRole } from "@/lib/auth-guard";
@@ -11,6 +12,7 @@ import type { ActionResult } from "@/types";
 import { rateSchema, type RateInput } from "../lib/schemas";
 
 function revalidateRatePaths() {
+  revalidateTag(CACHE_TAGS.currency);
   revalidatePath("/admin/monedas/tasas");
   revalidatePath("/admin/monedas");
   revalidatePath("/", "layout");

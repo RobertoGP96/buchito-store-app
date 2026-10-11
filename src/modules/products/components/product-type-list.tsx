@@ -1,13 +1,15 @@
 "use client";
 
+import { lazyDialog } from "@/components/lazy-dialog";
 import { useState } from "react";
 import { Button } from "@heroui/react";
 import { Pencil, Plus, Tags } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { ListCard, ResponsiveList, type ListColumn } from "@/components/responsive-list";
 import { StatusChip } from "@/components/status-chip";
-import { ProductTypeForm } from "./product-type-form";
 import type { ProductTypeRow } from "../queries/product-type-queries";
+
+const ProductTypeForm = lazyDialog(() => import("./product-type-form").then((m) => m.ProductTypeForm));
 
 function attributeSummary(row: ProductTypeRow): string {
   if (row.attributeSchema.length === 0) return "Sin atributos";

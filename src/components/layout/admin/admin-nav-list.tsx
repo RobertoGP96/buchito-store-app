@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { NavIcon } from "@/components/nav-icon";
 import { ADMIN_NAV_SECTIONS, findNavEntry, type NavSection } from "@/lib/nav-registry";
 import { cn } from "@/lib/utils";
 
@@ -49,7 +50,7 @@ export function AdminNavList({ exclude = [], layout = "list", onNavigate }: Admi
                           : "text-slate-500 hover:bg-hover hover:text-navy-700"
                     )}
                   >
-                    <Icon className="h-4 w-4 flex-none" strokeWidth={1.9} />
+                    <NavIcon icon={Icon} className="h-4 w-4 flex-none" strokeWidth={1.9} />
                     <span className="truncate">{entry.label}</span>
                   </Link>
                 </li>

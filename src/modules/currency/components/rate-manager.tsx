@@ -1,13 +1,15 @@
 "use client";
 
+import { lazyDialog } from "@/components/lazy-dialog";
 import { useState } from "react";
 import { Button } from "@heroui/react";
 import { Pencil, TrendingUp } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { fmtDateTime } from "@/lib/format";
-import { RateForm } from "./rate-form";
 import { RateHistoryList } from "./rate-history-list";
 import type { RatesOverview, RateOverviewRow } from "../queries/rate-queries";
+
+const RateForm = lazyDialog(() => import("./rate-form").then((m) => m.RateForm));
 
 /** Una card por moneda (no base): tasa vigente, última actualización e
  *  historial. Pocas monedas y mucho contexto por fila: cards en todas las

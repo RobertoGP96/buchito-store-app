@@ -1,5 +1,6 @@
 "use client";
 
+import { lazyDialog } from "@/components/lazy-dialog";
 import { useState } from "react";
 import { Button } from "@heroui/react";
 import { Pencil, Plus, UserCog } from "lucide-react";
@@ -9,7 +10,8 @@ import { StatusChip } from "@/components/status-chip";
 import { fmtDateTime } from "@/lib/format";
 import { USER_ROLE_LABELS, USER_ROLE_TONE } from "../lib/labels";
 import type { UserRow } from "../queries/user-queries";
-import { UserForm } from "./user-form";
+
+const UserForm = lazyDialog(() => import("./user-form").then((m) => m.UserForm));
 
 export function UserList({ rows }: { rows: UserRow[] }) {
   const [editing, setEditing] = useState<UserRow | null>(null);
