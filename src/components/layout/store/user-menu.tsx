@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import {
   ChevronDown,
   IdCard,
+  Inbox,
   LayoutDashboard,
   LogOut,
   Package,
+  PackageSearch,
   Truck,
   UserRound,
   type LucideIcon,
@@ -35,17 +37,27 @@ const GUEST_LINKS: MenuLink[] = [
 ];
 
 function linksFor(user: NavUser): MenuLink[] {
-  const links: MenuLink[] = [
+  return [
     { id: "profile", href: "/perfil", label: "Mi perfil", icon: UserRound },
     { id: "orders", href: "/perfil/pedidos", label: "Mis pedidos", icon: Package },
   ];
+}
+
+/** Atajos de gestión según el rol: el admin salta a su panel desde la tienda
+ *  sin pasar por el inicio; el mensajero va directo a sus entregas. */
+function manageLinksFor(user: NavUser): MenuLink[] {
   if (user.role === "admin") {
-    links.push({ id: "admin", href: "/admin", label: "Panel de gestión", icon: LayoutDashboard });
+    return [
+      { id: "admin", href: "/admin", label: "Panel de gestión", icon: LayoutDashboard },
+      { id: "admin-orders", href: "/admin/pedidos", label: "Pedidos", icon: Inbox },
+      { id: "admin-products", href: "/admin/productos", label: "Productos", icon: PackageSearch },
+      { id: "admin-deliveries", href: "/admin/entregas", label: "Entregas", icon: Truck },
+    ];
   }
-  if (user.role === "courier" || user.role === "admin") {
-    links.push({ id: "courier", href: "/mensajero", label: "Mis entregas", icon: Truck });
+  if (user.role === "courier") {
+    return [{ id: "courier", href: "/mensajero", label: "Mis entregas", icon: Truck }];
   }
-  return links;
+  return [];
 }
 
 const ITEM = "flex items-center gap-3 text-[13px] font-medium";
@@ -53,6 +65,7 @@ const ITEM = "flex items-center gap-3 text-[13px] font-medium";
 export function UserMenu({ user }: { user: NavUser | null }) {
   const router = useRouter();
   const links = user ? linksFor(user) : GUEST_LINKS;
+  const manageLinks = user ? manageLinksFor(user) : [];
   const firstName = user?.fullName.trim().split(/\s+/)[0] ?? "";
 
   const handleAction = (key: React.Key) => {
@@ -60,7 +73,7 @@ export function UserMenu({ user }: { user: NavUser | null }) {
       void logoutUser();
       return;
     }
-    const link = links.find((l) => l.id === key);
+    const link = [...links, ...manageLinks].find((l) => l.id === key);
     if (link) router.push(link.href);
   };
 
@@ -102,6 +115,21 @@ export function UserMenu({ user }: { user: NavUser | null }) {
               );
             })}
           </Dropdown.Section>
+          {manageLinks.length > 0 && (
+            <Dropdown.Section>
+              {manageLinks.map((link) => {
+                const Icon = link.icon;
+                return (
+                  <Dropdown.Item key={link.id} id={link.id} textValue={link.label}>
+                    <span className={ITEM}>
+                      <Icon className="h-4 w-4 flex-none" strokeWidth={1.9} />
+                      {link.label}
+                    </span>
+                  </Dropdown.Item>
+                );
+              })}
+            </Dropdown.Section>
+          )}
           {user && (
             <Dropdown.Section>
               <Dropdown.Item id="logout" textValue="Cerrar sesión">

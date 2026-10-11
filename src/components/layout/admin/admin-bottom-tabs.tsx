@@ -5,12 +5,8 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Drawer } from "@heroui/react";
 import { LogOut, MoreHorizontal, Store } from "lucide-react";
-import {
-  ADMIN_BOTTOM_TABS,
-  ADMIN_NAV,
-  flattenNav,
-  isNavActive,
-} from "@/lib/nav-registry";
+import { AdminNavList } from "@/components/layout/admin/admin-nav-list";
+import { ADMIN_BOTTOM_TABS, ADMIN_NAV, findNavEntry, isNavActive } from "@/lib/nav-registry";
 import { logoutUser } from "@/modules/auth/actions/auth-actions";
 import { cn } from "@/lib/utils";
 
@@ -18,19 +14,17 @@ const TAB =
   "flex flex-col items-center justify-center gap-1 rounded-chip py-1.5 text-[10.5px] font-semibold transition-colors duration-150";
 
 /** Barra inferior del admin en móvil: cuatro secciones principales y un
- *  quinto slot "Más" que abre el resto en una hoja inferior. */
+ *  quinto slot "Más" que abre el resto, agrupado por sección, en una hoja. */
 export function AdminBottomTabs({ userName }: { userName: string }) {
   const pathname = usePathname();
   const [moreOpen, setMoreOpen] = useState(false);
 
   useEffect(() => setMoreOpen(false), [pathname]);
 
-  const tabs = ADMIN_BOTTOM_TABS.map(
-    (id) => ADMIN_NAV.find((entry) => entry.id === id)!
-  );
+  const tabs = ADMIN_BOTTOM_TABS.map((id) => ADMIN_NAV.find((entry) => entry.id === id)!);
   const tabIds = new Set<string>(ADMIN_BOTTOM_TABS);
-  const rest = flattenNav(ADMIN_NAV).filter((entry) => !tabIds.has(entry.id));
-  const restActive = rest.some((entry) => pathname === entry.href);
+  const current = findNavEntry(pathname);
+  const restActive = current != null && !tabIds.has(current.id);
 
   return (
     <>
@@ -83,37 +77,16 @@ export function AdminBottomTabs({ userName }: { userName: string }) {
       <Drawer isOpen={moreOpen} onOpenChange={setMoreOpen}>
         <Drawer.Backdrop>
           <Drawer.Content placement="bottom">
-            <Drawer.Dialog className="bg-canvas">
+            <Drawer.Dialog className="max-h-[88dvh] bg-canvas">
               <Drawer.Handle />
               <Drawer.Header>
                 <Drawer.Heading className="font-display text-[18px] text-navy-900">
-                  Más secciones
+                  Todas las secciones
                 </Drawer.Heading>
               </Drawer.Header>
               <Drawer.Body className="pb-[max(16px,env(safe-area-inset-bottom))]">
-                <ul className="grid grid-cols-2 gap-2">
-                  {rest.map((entry) => {
-                    const Icon = entry.icon;
-                    const active = pathname === entry.href;
-                    return (
-                      <li key={entry.id}>
-                        <Link
-                          href={entry.href}
-                          className={cn(
-                            "flex items-center gap-3 rounded-field border-[1.5px] px-3.5 py-3 text-[13px] font-semibold transition-colors duration-150",
-                            active
-                              ? "border-navy-700 bg-tint text-navy-700"
-                              : "border-line text-slate-500 hover:border-navy-700 hover:text-navy-700"
-                          )}
-                        >
-                          <Icon className="h-4 w-4 flex-none" strokeWidth={1.9} />
-                          <span className="truncate">{entry.label}</span>
-                        </Link>
-                      </li>
-                    );
-                  })}
-                </ul>
-                <div className="mt-4 flex items-center justify-between gap-3 border-t border-line pt-4">
+                <AdminNavList exclude={ADMIN_BOTTOM_TABS} layout="grid" onNavigate={() => setMoreOpen(false)} />
+                <div className="mt-5 flex items-center justify-between gap-3 border-t border-line pt-4">
                   <div className="min-w-0">
                     <p className="truncate text-[13px] font-semibold text-ink">{userName}</p>
                     <Link

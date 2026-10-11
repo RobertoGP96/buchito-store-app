@@ -2,86 +2,104 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LogOut, Store } from "lucide-react";
+import { ChevronsLeft, ChevronsRight, Store } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { ADMIN_NAV, isNavActive, type NavEntry } from "@/lib/nav-registry";
-import { logoutUser } from "@/modules/auth/actions/auth-actions";
+import { ADMIN_NAV_SECTIONS, isNavActive, type NavEntry } from "@/lib/nav-registry";
+import { useAdminNav } from "@/components/layout/admin/admin-nav-context";
 import { cn } from "@/lib/utils";
 
-interface AdminSidebarProps {
-  userName: string;
-}
-
-function SidebarLink({ entry, depth = 0 }: { entry: NavEntry; depth?: number }) {
+function SidebarLink({ entry, collapsed }: { entry: NavEntry; collapsed: boolean }) {
   const pathname = usePathname();
-  const active = depth === 0 ? isNavActive(entry, pathname) : pathname === entry.href;
+  const active = isNavActive(entry, pathname);
   const Icon = entry.icon;
   return (
     <li>
       <Link
         href={entry.href}
         aria-current={active ? "page" : undefined}
+        title={collapsed ? entry.label : undefined}
+        aria-label={collapsed ? entry.label : undefined}
         className={cn(
-          "flex items-center gap-3 rounded-chip px-3 py-2.5 text-[13px] font-medium transition-colors duration-150",
-          depth > 0 && "ml-6 py-2 text-[12.5px]",
+          "flex items-center gap-3 rounded-chip text-[13px] font-medium transition-colors duration-150",
+          collapsed ? "h-10 w-10 justify-center" : "px-3 py-2",
           active
             ? "bg-white/10 font-semibold text-white"
             : "text-footer-muted hover:bg-white/5 hover:text-white"
         )}
       >
-        <Icon className={cn("flex-none", depth > 0 ? "h-3.5 w-3.5" : "h-4 w-4")} strokeWidth={1.9} />
-        <span className="truncate">{entry.label}</span>
+        <Icon className="h-4 w-4 flex-none" strokeWidth={active ? 2.1 : 1.9} />
+        {!collapsed && <span className="truncate">{entry.label}</span>}
       </Link>
-      {entry.children && (
-        <ul className="mt-0.5 flex flex-col gap-0.5">
-          {entry.children.map((child) => (
-            <SidebarLink key={child.id} entry={child} depth={depth + 1} />
-          ))}
-        </ul>
-      )}
     </li>
   );
 }
 
-/** Sidebar fijo de desktop en navy pleno: la identidad de la marca manda
- *  igual que en el footer de la tienda. */
-export function AdminSidebar({ userName }: AdminSidebarProps) {
+/** Sidebar de desktop en navy pleno, colapsable a solo iconos. El estado se
+ *  recuerda entre sesiones (AdminNavProvider). */
+export function AdminSidebar() {
+  const { collapsed, toggleCollapsed } = useAdminNav();
+
   return (
-    <aside className="sticky top-0 hidden h-dvh w-[240px] flex-none flex-col bg-footer text-footer-fg md:flex">
-      <div className="flex items-center justify-between px-5 pt-6 pb-5">
-        <BrandLogo tone="inverse" href="/admin" />
+    <aside
+      className={cn(
+        "sticky top-0 hidden h-dvh flex-none flex-col bg-footer text-footer-fg transition-[width] duration-200 md:flex",
+        collapsed ? "w-[68px]" : "w-[240px]"
+      )}
+    >
+      <div className={cn("flex items-center pt-5 pb-4", collapsed ? "justify-center px-0" : "justify-between px-5")}>
+        {collapsed ? (
+          <Link href="/admin" aria-label="Ir al panel" className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-brand-tile text-brand-tile-fg shadow-card">
+            <Store className="h-[18px] w-[18px]" strokeWidth={2} />
+          </Link>
+        ) : (
+          <BrandLogo tone="inverse" href="/admin" />
+        )}
       </div>
 
-      <nav aria-label="Secciones del panel" className="min-h-0 flex-1 overflow-y-auto px-3">
-        <ul className="flex flex-col gap-1">
-          {ADMIN_NAV.map((entry) => (
-            <SidebarLink key={entry.id} entry={entry} />
-          ))}
-        </ul>
+      <nav
+        aria-label="Secciones del panel"
+        className={cn("no-scrollbar min-h-0 flex-1 overflow-y-auto pb-3", collapsed ? "px-3.5" : "px-3")}
+      >
+        {ADMIN_NAV_SECTIONS.map((section) => (
+          <div key={section.id} className={cn(section.label && (collapsed ? "mt-3 border-t border-footer-line pt-3" : "mt-4"))}>
+            {section.label && !collapsed && (
+              <p className="eyebrow mb-1.5 px-3 text-gold-500">{section.label}</p>
+            )}
+            <ul className={cn("flex flex-col gap-0.5", collapsed && "items-center")}>
+              {section.items.map((entry) => (
+                <SidebarLink key={entry.id} entry={entry} collapsed={collapsed} />
+              ))}
+            </ul>
+          </div>
+        ))}
       </nav>
 
-      <div className="border-t border-footer-line px-3 py-4">
-        <Link
-          href="/"
-          className="flex items-center gap-3 rounded-chip px-3 py-2 text-[13px] font-medium text-footer-muted transition-colors duration-150 hover:bg-white/5 hover:text-white"
-        >
-          <Store className="h-4 w-4 flex-none" strokeWidth={1.9} />
-          Ver la tienda
-        </Link>
-        <div className="mt-2 flex items-center justify-between gap-3 px-3">
-          <p className="truncate text-[12.5px] font-semibold text-white">{userName}</p>
-          <div className="flex items-center gap-1">
-            <ThemeToggle className="h-8 w-8 justify-center rounded-full text-footer-muted hover:bg-white/10 hover:text-white" />
-            <button
-              type="button"
-              onClick={() => void logoutUser()}
-              aria-label="Cerrar sesión"
-              className="flex h-8 w-8 items-center justify-center rounded-full text-footer-muted transition-colors duration-150 hover:bg-white/10 hover:text-white"
-            >
-              <LogOut className="h-4 w-4" strokeWidth={1.9} />
-            </button>
-          </div>
+      <div className={cn("border-t border-footer-line py-3", collapsed ? "flex flex-col items-center gap-1 px-0" : "px-3")}>
+        {!collapsed && (
+          <Link
+            href="/"
+            className="flex items-center gap-3 rounded-chip px-3 py-2 text-[13px] font-medium text-footer-muted transition-colors duration-150 hover:bg-white/5 hover:text-white"
+          >
+            <Store className="h-4 w-4 flex-none" strokeWidth={1.9} />
+            Ver la tienda
+          </Link>
+        )}
+        <div className={cn("flex items-center gap-1", collapsed ? "flex-col" : "justify-between px-3 pt-1")}>
+          <ThemeToggle className="flex h-9 w-9 items-center justify-center rounded-full text-footer-muted hover:bg-white/10 hover:text-white" />
+          <button
+            type="button"
+            onClick={toggleCollapsed}
+            aria-label={collapsed ? "Expandir menú" : "Contraer menú"}
+            title={collapsed ? "Expandir menú" : "Contraer menú"}
+            className="flex h-9 w-9 items-center justify-center rounded-full text-footer-muted transition-colors duration-150 hover:bg-white/10 hover:text-white"
+          >
+            {collapsed ? (
+              <ChevronsRight className="h-4 w-4" strokeWidth={2} />
+            ) : (
+              <ChevronsLeft className="h-4 w-4" strokeWidth={2} />
+            )}
+          </button>
         </div>
       </div>
     </aside>

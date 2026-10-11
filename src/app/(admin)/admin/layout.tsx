@@ -13,7 +13,9 @@ export default async function AdminLayout({
   return (
     <AuthSessionProvider>
       <CurrencyProvider data={currency} lockToBase>
-        <AdminShell userName={session.user.fullName}>{children}</AdminShell>
+        <AdminShell userName={session.user.fullName} role={session.user.role}>
+          {children}
+        </AdminShell>
       </CurrencyProvider>
     </AuthSessionProvider>
   );

@@ -33,7 +33,7 @@ interface BaseProps<T extends FieldValues> {
 }
 
 interface TextProps<T extends FieldValues> extends BaseProps<T> {
-  type?: "text" | "email" | "tel" | "password" | "number" | "url";
+  type?: "text" | "email" | "tel" | "password" | "number" | "url" | "date";
   placeholder?: string;
   autoComplete?: string;
   /** Para `type="number"`: paso del input (0.01 para montos con decimales). */
