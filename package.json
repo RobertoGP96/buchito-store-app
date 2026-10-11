@@ -24,6 +24,8 @@
     "@heroui/react": "^3.2.6",
     "@heroui/styles": "^3.2.6",
     "@hookform/resolvers": "^5.2.2",
+    "@neon/config": "^1.8.6",
+    "@neon/env": "^1.5.3",
     "@neondatabase/serverless": "^1.0.2",
     "@prisma/adapter-neon": "^7.7.0",
     "@prisma/client": "^7.7.0",

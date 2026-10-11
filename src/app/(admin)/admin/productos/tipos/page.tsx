@@ -1,22 +1,22 @@
 import type { Metadata } from "next";
 import { Tags } from "lucide-react";
-import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { ProductTypeList } from "@/modules/products/components/product-type-list";
+import { getProductTypes } from "@/modules/products/queries/product-type-queries";
 
 export const metadata: Metadata = { title: "Tipos de producto" };
 export const dynamic = "force-dynamic";
 
-export default function AdminProductTypesPage() {
+export default async function AdminProductTypesPage() {
+  const rows = await getProductTypes();
   return (
     <>
       <PageHeader
         icon={Tags}
         title="Tipos de producto"
-        description="Cada tipo define qué atributos lleva un producto y sus variantes."
+        description="Cada tipo define qué atributos lleva un producto y cuáles distinguen a sus variantes."
       />
-      <div className="rounded-card bg-canvas shadow-card">
-        <EmptyState icon={Tags} title="Sin tipos" description="Crea el primer tipo de producto." size="compact" />
-      </div>
+      <ProductTypeList rows={rows} />
     </>
   );
 }

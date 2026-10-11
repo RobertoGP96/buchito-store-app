@@ -1,11 +1,16 @@
 import { PackageOpen } from "lucide-react";
 import { ButtonLink } from "@/components/button-link";
 import { EmptyState } from "@/components/empty-state";
+import { ProductCard } from "@/components/product-card";
+import { ProductGrid, ProductGridCell } from "@/components/product-grid";
 import { STORE_NAME } from "@/lib/config";
+import { getFeaturedProducts } from "@/modules/products/queries/catalog-queries";
 
 export const dynamic = "force-dynamic";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const featured = await getFeaturedProducts(8);
+
   return (
     <>
       <section className="border-b border-line bg-canvas px-5 pt-14 pb-12 text-center md:px-10 md:pt-[72px] md:pb-16">
@@ -29,18 +34,35 @@ export default function HomePage() {
 
       <div className="mx-auto flex w-full max-w-[1120px] flex-1 flex-col px-5 py-10 md:px-6 md:py-11">
         <section>
-          <p className="eyebrow">Destacados</p>
-          <h2 className="font-display mt-2 text-[20px] leading-tight text-navy-900 md:text-[24px]">
-            Lo más pedido
-          </h2>
-          <EmptyState
-            icon={PackageOpen}
-            title="Pronto habrá productos"
-            description="Cuando el catálogo tenga productos destacados aparecerán aquí."
-            ctaLabel="Explorar catálogo"
-            ctaHref="/catalogo"
-            size="compact"
-          />
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <p className="eyebrow">Destacados</p>
+              <h2 className="font-display mt-2 text-[20px] leading-tight text-navy-900 md:text-[24px]">
+                Lo más pedido
+              </h2>
+            </div>
+            <ButtonLink href="/catalogo" variant="ghost" size="sm">
+              Ver todo
+            </ButtonLink>
+          </div>
+          {featured.length === 0 ? (
+            <EmptyState
+              icon={PackageOpen}
+              title="Pronto habrá productos"
+              description="Cuando el catálogo tenga productos destacados aparecerán aquí."
+              ctaLabel="Explorar catálogo"
+              ctaHref="/catalogo"
+              size="compact"
+            />
+          ) : (
+            <ProductGrid className="mt-5">
+              {featured.map((product, i) => (
+                <ProductGridCell key={product.productId}>
+                  <ProductCard product={product} priority={i < 4} />
+                </ProductGridCell>
+              ))}
+            </ProductGrid>
+          )}
         </section>
       </div>
     </>

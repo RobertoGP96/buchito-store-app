@@ -36,3 +36,4 @@ generated/prisma
 
 # Claude Code (permisos locales por máquina)
 .claude/settings.local.json
+.neon

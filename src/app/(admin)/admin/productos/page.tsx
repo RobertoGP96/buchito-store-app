@@ -1,27 +1,23 @@
 import type { Metadata } from "next";
 import { Package } from "lucide-react";
-import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { ProductList } from "@/modules/products/components/product-list";
+import { getAdminProducts } from "@/modules/products/queries/product-queries";
+import { getStoreSettings } from "@/modules/settings/queries/settings-queries";
 
 export const metadata: Metadata = { title: "Productos" };
 export const dynamic = "force-dynamic";
 
-export default function AdminProductsPage() {
+export default async function AdminProductsPage() {
+  const [rows, settings] = await Promise.all([getAdminProducts(), getStoreSettings()]);
   return (
     <>
       <PageHeader
         icon={Package}
         title="Productos"
-        description="Catálogo con variantes, precios y stock."
+        description="Catálogo con variantes, precios (convertidos a la moneda base) y stock."
       />
-      <div className="rounded-card bg-canvas shadow-card">
-        <EmptyState
-          icon={Package}
-          title="Sin productos"
-          description="Crea primero un tipo de producto y una categoría; después podrás dar de alta productos."
-          size="compact"
-        />
-      </div>
+      <ProductList rows={rows} lowStockThreshold={settings.lowStockThreshold} />
     </>
   );
 }

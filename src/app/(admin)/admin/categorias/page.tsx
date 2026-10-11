@@ -1,18 +1,18 @@
 import type { Metadata } from "next";
 import { FolderTree } from "lucide-react";
-import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { CategoryList } from "@/modules/products/components/category-list";
+import { getCategoryTree } from "@/modules/products/queries/category-queries";
 
 export const metadata: Metadata = { title: "Categorías" };
 export const dynamic = "force-dynamic";
 
-export default function AdminCategoriesPage() {
+export default async function AdminCategoriesPage() {
+  const rows = await getCategoryTree();
   return (
     <>
-      <PageHeader icon={FolderTree} title="Categorías" description="Árbol de categorías del catálogo." />
-      <div className="rounded-card bg-canvas shadow-card">
-        <EmptyState icon={FolderTree} title="Sin categorías" description="Crea la primera categoría." size="compact" />
-      </div>
+      <PageHeader icon={FolderTree} title="Categorías" description="Árbol de categorías del catálogo. Una categoría padre agrupa los productos de sus hijas." />
+      <CategoryList rows={rows} />
     </>
   );
 }
