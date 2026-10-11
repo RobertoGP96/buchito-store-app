@@ -150,10 +150,14 @@
   --accent-foreground: var(--c-on-brand);
   --accent-hover: var(--c-navy-600);
 
-  --field-background: var(--c-canvas);
+  /* Los formularios viven en cards blancas (canvas): el campo toma el crema
+     de página para separarse del fondo y recupera el blanco al enfocarse. */
+  --field-background: var(--c-page);
+  --field-hover: var(--c-cream-50);
+  --field-focus: var(--c-canvas);
   --field-foreground: var(--c-ink);
   --field-placeholder: var(--c-slate-400);
-  --field-border: var(--c-line);
+  --field-border: var(--c-rule);
   --field-border-hover: var(--c-navy-700);
   --field-border-focus: var(--c-navy-700);
   --field-shadow: 0 0 0 0 transparent;

@@ -14,7 +14,7 @@ export default async function AdminCurrenciesPage() {
       <PageHeader
         icon={Coins}
         title="Monedas"
-        description="Monedas en las que se fijan precios y se cobra. La base se elige en Configuración."
+        description="Monedas en las que se fijan precios y se cobra. La base se cambia con «Hacer base» o desde Configuración."
       />
       <CurrencyList rows={rows} />
     </>
