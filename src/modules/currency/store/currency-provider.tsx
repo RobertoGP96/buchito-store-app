@@ -43,9 +43,12 @@ const CurrencyContext = createContext<CurrencyApi | null>(null);
 
 export function CurrencyProvider({
   data,
+  lockToBase = false,
   children,
 }: {
   data: CurrencyContextData;
+  /** Admin y mensajero trabajan siempre en base: ignoran la preferencia de la tienda. */
+  lockToBase?: boolean;
   children: React.ReactNode;
 }) {
   const [displayCode, setDisplayCode] = useState(data.base.code);
@@ -53,6 +56,7 @@ export function CurrencyProvider({
   // La preferencia vive en localStorage: el primer render debe coincidir con
   // el servidor (base), y solo después se aplica la elegida.
   useEffect(() => {
+    if (lockToBase) return;
     try {
       const saved = localStorage.getItem(DISPLAY_CURRENCY_STORAGE_KEY);
       if (saved && data.currencies.some((c) => c.code === saved)) {
@@ -61,7 +65,7 @@ export function CurrencyProvider({
     } catch {
       // Sin storage: se queda en base.
     }
-  }, [data.currencies]);
+  }, [data.currencies, lockToBase]);
 
   const display = useMemo(
     () => data.currencies.find((c) => c.code === displayCode) ?? data.base,

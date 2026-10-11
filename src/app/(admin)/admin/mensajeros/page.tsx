@@ -1,18 +1,18 @@
 import type { Metadata } from "next";
 import { Bike } from "lucide-react";
-import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { CourierList } from "@/modules/deliveries/components/courier-list";
+import { getCouriers } from "@/modules/deliveries/queries/courier-queries";
 
 export const metadata: Metadata = { title: "Mensajeros" };
 export const dynamic = "force-dynamic";
 
-export default function AdminCouriersPage() {
+export default async function AdminCouriersPage() {
+  const rows = await getCouriers();
   return (
     <>
       <PageHeader icon={Bike} title="Mensajeros" description="Usuarios con rol mensajero que reparten pedidos." />
-      <div className="rounded-card bg-canvas shadow-card">
-        <EmptyState icon={Bike} title="Sin mensajeros" description="Da de alta el primer mensajero." size="compact" />
-      </div>
+      <CourierList rows={rows} />
     </>
   );
 }

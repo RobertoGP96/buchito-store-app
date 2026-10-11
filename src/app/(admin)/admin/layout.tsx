@@ -12,7 +12,7 @@ export default async function AdminLayout({
   const currency = await getCurrencyContext();
   return (
     <AuthSessionProvider>
-      <CurrencyProvider data={currency}>
+      <CurrencyProvider data={currency} lockToBase>
         <AdminShell userName={session.user.fullName}>{children}</AdminShell>
       </CurrencyProvider>
     </AuthSessionProvider>

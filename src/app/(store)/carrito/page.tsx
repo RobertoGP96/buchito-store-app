@@ -1,21 +1,20 @@
 import type { Metadata } from "next";
-import { ShoppingBag } from "lucide-react";
-import { EmptyState } from "@/components/empty-state";
 import { ScreenHeader } from "@/components/screen-header";
+import { CartView } from "@/modules/cart/components/cart-view";
+import { getStoreSettingsSafe } from "@/modules/settings/queries/settings-queries";
 
 export const metadata: Metadata = { title: "Bolsa" };
+export const dynamic = "force-dynamic";
 
-export default function CartPage() {
+export default async function CartPage() {
+  const settings = await getStoreSettingsSafe();
   return (
     <>
       <ScreenHeader eyebrow="Tu compra" title="Bolsa" />
       <div className="mx-auto flex w-full max-w-[1120px] flex-1 flex-col px-5 pb-10 md:px-6">
-        <EmptyState
-          icon={ShoppingBag}
-          title="Tu bolsa está vacía"
-          description="Añade productos desde el catálogo para verlos aquí."
-          ctaLabel="Ir al catálogo"
-          ctaHref="/catalogo"
+        <CartView
+          defaultShippingFee={settings?.defaultShippingFee ?? 0}
+          freeShippingThreshold={settings?.freeShippingThreshold ?? null}
         />
       </div>
     </>
