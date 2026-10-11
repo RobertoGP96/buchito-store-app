@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@heroui/react";
 import { FormFooter } from "@/components/form/form-footer";
 import { FormSelect, FormSwitch, FormTextField, type SelectOption } from "@/components/form/fields";
+import { FormImageField } from "@/components/form/image-field";
 import { ResponsiveFormDialog } from "@/components/responsive-form-dialog";
 import type { CurrencyInfo } from "@/lib/format";
 import { useCurrency } from "@/modules/currency/store/currency-provider";
@@ -143,12 +144,12 @@ export function VariantForm({
               description="Después se ajusta desde el botón Stock."
             />
           )}
-          <FormTextField
+          <FormImageField
             control={control}
             name="imageUrl"
-            label="Imagen (URL)"
-            type="url"
-            placeholder="https://…"
+            label="Foto de la variante"
+            scope="variants"
+            description="Opcional: si no tiene, se usa la portada del producto."
             className="sm:col-span-2"
           />
           <FormTextField control={control} name="sortOrder" label="Orden" type="number" step="1" min={0} />

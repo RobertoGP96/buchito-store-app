@@ -4,7 +4,8 @@ import { defineConfig } from "@neon/config/v1";
 export default defineConfig({
   auth: true,
   buckets: {
-    products: { access: "private" },
+    // Las fotos de producto se sirven por URL directa en la tienda.
+    products: { access: "public_read" },
     users: { access: "private" },
     objects: { access: "private" },
   },

@@ -6,10 +6,9 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["@neondatabase/serverless"],
   images: {
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "**.public.blob.vercel-storage.com",
-      },
+      // Neon Object Storage (bucket `products` en neon.ts).
+      { protocol: "https", hostname: "**.neon.tech" },
+      { protocol: "https", hostname: "**.public.blob.vercel-storage.com" },
     ],
   },
 };
