@@ -1,10 +1,11 @@
 "use client";
 
 import { Dropdown } from "@heroui/react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
 import {
   ChevronDown,
-  IdCard,
   Inbox,
   LayoutDashboard,
   LogOut,
@@ -15,6 +16,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { logoutUser } from "@/modules/auth/actions/auth-actions";
+import { buttonLinkClasses } from "@/components/button-link";
 import { cn } from "@/lib/utils";
 
 /** Lo mínimo de la sesión que necesita la barra; lo pasa el layout servidor. */
@@ -31,10 +33,8 @@ interface MenuLink {
   icon: LucideIcon;
 }
 
-const GUEST_LINKS: MenuLink[] = [
-  { id: "login", href: "/login", label: "Iniciar sesión", icon: UserRound },
-  { id: "register", href: "/registro", label: "Crear cuenta", icon: IdCard },
-];
+/** Rutas desde las que no tiene sentido "volver" tras iniciar sesión. */
+const AUTH_PATHS = ["/login", "/registro"];
 
 function linksFor(user: NavUser): MenuLink[] {
   return [
@@ -64,9 +64,16 @@ const ITEM = "flex items-center gap-3 text-[13px] font-medium";
 
 export function UserMenu({ user }: { user: NavUser | null }) {
   const router = useRouter();
-  const links = user ? linksFor(user) : GUEST_LINKS;
+  const pathname = usePathname();
+  // Controlado para poder cerrar el menú al pulsar los enlaces de invitado:
+  // el Dropdown vive en el layout y no se desmonta al cambiar de ruta.
+  const [isOpen, setIsOpen] = useState(false);
+  const links = user ? linksFor(user) : [];
   const manageLinks = user ? manageLinksFor(user) : [];
   const firstName = user?.fullName.trim().split(/\s+/)[0] ?? "";
+  const loginHref = AUTH_PATHS.includes(pathname)
+    ? "/login"
+    : `/login?callbackUrl=${encodeURIComponent(pathname)}`;
 
   const handleAction = (key: React.Key) => {
     if (key === "logout") {
@@ -78,7 +85,7 @@ export function UserMenu({ user }: { user: NavUser | null }) {
   };
 
   return (
-    <Dropdown>
+    <Dropdown isOpen={isOpen} onOpenChange={setIsOpen}>
       <Dropdown.Trigger
         aria-label={user ? `Cuenta de ${user.fullName}` : "Tu cuenta"}
         className={cn(
@@ -93,31 +100,40 @@ export function UserMenu({ user }: { user: NavUser | null }) {
         <ChevronDown className="hidden h-3.5 w-3.5 flex-none md:block" strokeWidth={2} />
       </Dropdown.Trigger>
       <Dropdown.Popover placement="bottom end" className="w-[256px]">
-        <Dropdown.Menu aria-label="Cuenta" onAction={handleAction}>
-          <Dropdown.Section>
-            <div className="mb-1 rounded-field bg-page px-3.5 py-3">
-              <p className="truncate text-[14px] font-semibold text-ink">
-                {user ? user.fullName : "Cliente invitado"}
-              </p>
-              <p className="mt-0.5 truncate text-[12px] text-slate-400">
-                {user ? user.email : "Inicia sesión o crea tu cuenta"}
-              </p>
-            </div>
-            {links.map((link) => {
-              const Icon = link.icon;
-              return (
-                <Dropdown.Item key={link.id} id={link.id} textValue={link.label}>
-                  <span className={ITEM}>
-                    <Icon className="h-4 w-4 flex-none" strokeWidth={1.9} />
-                    {link.label}
-                  </span>
-                </Dropdown.Item>
-              );
-            })}
-          </Dropdown.Section>
-          {manageLinks.length > 0 && (
+        {/* La cabecera va fuera del Menu: React Aria solo admite ítems dentro
+            de una sección y descartaba el bloque junto con los enlaces. */}
+        <div className="p-1 pb-0">
+          <div className="rounded-field bg-page px-3.5 py-3">
+            <p className="truncate text-[14px] font-semibold text-ink">
+              {user ? user.fullName : "Cliente invitado"}
+            </p>
+            <p className="mt-0.5 truncate text-[12px] text-slate-400">
+              {user ? user.email : "Inicia sesión o crea tu cuenta"}
+            </p>
+            {!user && (
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <Link
+                  href={loginHref}
+                  onClick={() => setIsOpen(false)}
+                  className={buttonLinkClasses("solid", "sm", "px-3")}
+                >
+                  Iniciar sesión
+                </Link>
+                <Link
+                  href="/registro"
+                  onClick={() => setIsOpen(false)}
+                  className={buttonLinkClasses("soft", "sm", "px-3")}
+                >
+                  Crear cuenta
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+        {user && (
+          <Dropdown.Menu aria-label="Cuenta" onAction={handleAction}>
             <Dropdown.Section>
-              {manageLinks.map((link) => {
+              {links.map((link) => {
                 const Icon = link.icon;
                 return (
                   <Dropdown.Item key={link.id} id={link.id} textValue={link.label}>
@@ -129,8 +145,21 @@ export function UserMenu({ user }: { user: NavUser | null }) {
                 );
               })}
             </Dropdown.Section>
-          )}
-          {user && (
+            {manageLinks.length > 0 && (
+              <Dropdown.Section>
+                {manageLinks.map((link) => {
+                  const Icon = link.icon;
+                  return (
+                    <Dropdown.Item key={link.id} id={link.id} textValue={link.label}>
+                      <span className={ITEM}>
+                        <Icon className="h-4 w-4 flex-none" strokeWidth={1.9} />
+                        {link.label}
+                      </span>
+                    </Dropdown.Item>
+                  );
+                })}
+              </Dropdown.Section>
+            )}
             <Dropdown.Section>
               <Dropdown.Item id="logout" textValue="Cerrar sesión">
                 <span className={cn(ITEM, "text-danger")}>
@@ -139,8 +168,8 @@ export function UserMenu({ user }: { user: NavUser | null }) {
                 </span>
               </Dropdown.Item>
             </Dropdown.Section>
-          )}
-        </Dropdown.Menu>
+          </Dropdown.Menu>
+        )}
       </Dropdown.Popover>
     </Dropdown>
   );

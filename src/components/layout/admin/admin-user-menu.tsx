@@ -82,12 +82,16 @@ export function AdminUserMenu({ userName, role, className }: AdminUserMenuProps)
         <ChevronDown className="h-3.5 w-3.5 flex-none" strokeWidth={2} />
       </Dropdown.Trigger>
       <Dropdown.Popover placement="bottom end" className="w-[248px]">
+        {/* Fuera del Menu: React Aria solo admite ítems dentro de una sección
+            y descartaba la cabecera junto con los atajos. */}
+        <div className="p-1 pb-0">
+          <div className="rounded-field bg-page px-3.5 py-3">
+            <p className="truncate text-[14px] font-semibold text-ink">{userName}</p>
+            <p className="mt-0.5 text-[12px] text-slate-400">{roleLabel}</p>
+          </div>
+        </div>
         <Dropdown.Menu aria-label="Cuenta" onAction={handleAction}>
           <Dropdown.Section>
-            <div className="mb-1 rounded-field bg-page px-3.5 py-3">
-              <p className="truncate text-[14px] font-semibold text-ink">{userName}</p>
-              <p className="mt-0.5 text-[12px] text-slate-400">{roleLabel}</p>
-            </div>
             {QUICK_LINKS.map((link) => {
               const Icon = link.icon;
               return (
