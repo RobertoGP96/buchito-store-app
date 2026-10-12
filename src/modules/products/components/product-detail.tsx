@@ -49,7 +49,7 @@ export function ProductDetail({ product }: { product: CatalogProduct }) {
       return;
     }
     addToCart(cartLineFor(product, variant), qty);
-    toast.success(`${fmtQty(qty, variant.unit)} de ${product.name}${variant.name ? ` · ${variant.name}` : ""} en la bolsa`);
+    toast.success(`${fmtQty(qty, variant.unit)} de ${product.name}${variant.name ? ` · ${variant.name}` : ""} en el carrito`);
     setQty(variant.qtyStep);
   };
 
@@ -154,7 +154,7 @@ export function ProductDetail({ product }: { product: CatalogProduct }) {
               onPress={handleAdd}
             >
               <ShoppingCart className="h-4 w-4" strokeWidth={2} />
-              {soldOut ? "Agotado" : "Añadir a la bolsa"}
+              {soldOut ? "Agotado" : "Añadir al carrito"}
             </Button>
           </div>
 

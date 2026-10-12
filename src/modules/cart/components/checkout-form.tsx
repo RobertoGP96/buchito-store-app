@@ -113,7 +113,7 @@ export function CheckoutForm({
       <EmptyState
         icon={ClipboardList}
         title="Nada que pagar todavía"
-        description="Añade productos a la bolsa antes de finalizar la compra."
+        description="Añade productos al carrito antes de finalizar la compra."
         ctaLabel="Ir al catálogo"
         ctaHref="/catalogo"
       />

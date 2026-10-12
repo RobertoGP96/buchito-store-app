@@ -53,7 +53,7 @@ export const createOrderSchema = z
       )
       .default([]),
   })
-  .refine((v) => v.lines.length + v.combos.length > 0, { message: "La bolsa está vacía", path: ["lines"] })
+  .refine((v) => v.lines.length + v.combos.length > 0, { message: "El carrito está vacío", path: ["lines"] })
   .refine((v) => v.fulfillment === "pickup" || v.address != null, {
     message: "Escribe la dirección de entrega",
     path: ["address"],

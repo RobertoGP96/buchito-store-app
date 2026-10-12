@@ -85,7 +85,7 @@ export function TopNav({ user }: { user: NavUser | null }) {
 
           <Link
             href="/carrito"
-            aria-label={`Bolsa${count > 0 ? ` (${count} artículos)` : " vacía"}`}
+            aria-label={`Carrito de compra${count > 0 ? ` (${count} artículos)` : " vacío"}`}
             className={cn(ICON_ACTION, "text-navy-700 hover:bg-tint")}
           >
             <ShoppingCart className="h-[18px] w-[18px]" strokeWidth={1.9} />

@@ -27,7 +27,7 @@ export function ComboDetail({ combo }: { combo: CatalogCombo }) {
       return;
     }
     addCombo(cartComboFor(combo), qty);
-    toast.success(`${combo.name} añadido a la bolsa`);
+    toast.success(`${combo.name} añadido al carrito`);
     setQty(1);
   };
 
@@ -121,7 +121,7 @@ export function ComboDetail({ combo }: { combo: CatalogCombo }) {
             />
             <Button variant="primary" size="lg" className="rounded-full" isDisabled={soldOut} onPress={handleAdd}>
               <ShoppingCart className="h-4 w-4" strokeWidth={2} />
-              {soldOut ? "Agotado" : "Añadir a la bolsa"}
+              {soldOut ? "Agotado" : "Añadir al carrito"}
             </Button>
           </div>
 

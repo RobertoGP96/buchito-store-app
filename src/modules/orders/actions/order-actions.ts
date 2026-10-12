@@ -77,7 +77,7 @@ export async function createOrder(
       const comboIds = [...qtyByCombo.keys()].sort((a, b) => a - b);
       const combos = await getOrderCombos(tx, comboIds, new Date());
       for (const comboId of comboIds) {
-        if (!combos.has(comboId)) throw new CheckoutError("Un combo de tu bolsa ya no está disponible");
+        if (!combos.has(comboId)) throw new CheckoutError("Un combo de tu carrito ya no está disponible");
       }
 
       // Orden ascendente: las filas de stock se bloquean siempre en el mismo
@@ -118,7 +118,7 @@ export async function createOrder(
       const lines: OrderLineDraft[] = [...qtyByVariant.keys()]
         .sort((a, b) => a - b)
         .map((variantId) => {
-          const priced = requireVariant(variantId, "Un producto de tu bolsa ya no está disponible");
+          const priced = requireVariant(variantId, "Un producto de tu carrito ya no está disponible");
           const qty = roundQty(qtyByVariant.get(variantId)!);
           // La UI ya ajusta al paso, pero el cliente controla el payload.
           if (!isValidQty(qty, priced.variant.qtyStep)) {

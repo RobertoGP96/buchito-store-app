@@ -57,7 +57,7 @@ export function ComboCard({ combo, priority = false }: ComboCardProps) {
     }
     setAdding(true);
     addCombo(cartComboFor(combo), 1);
-    toast.success(`${combo.name} añadido a la bolsa`);
+    toast.success(`${combo.name} añadido al carrito`);
     window.setTimeout(() => setAdding(false), 300);
   };
 
@@ -117,7 +117,7 @@ export function ComboCard({ combo, priority = false }: ComboCardProps) {
         >
           <Plus className="h-4 w-4 sm:hidden" strokeWidth={2.4} aria-hidden />
           <span className="hidden sm:inline">{soldOut ? "Agotado" : "Añadir"}</span>
-          <span className="sr-only sm:hidden">{soldOut ? "Agotado" : "Añadir a la bolsa"}</span>
+          <span className="sr-only sm:hidden">{soldOut ? "Agotado" : "Añadir al carrito"}</span>
         </button>
       </div>
     </article>

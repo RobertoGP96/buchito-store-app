@@ -20,7 +20,7 @@ const COLUMNS: FooterColumn[] = [
       { href: "/combos", label: "Combos" },
       { href: "/ofertas", label: "Ofertas" },
       { href: "/pagos", label: "Formas de pago" },
-      { href: "/carrito", label: "Bolsa" },
+      { href: "/carrito", label: "Carrito de compra" },
     ],
   },
   {

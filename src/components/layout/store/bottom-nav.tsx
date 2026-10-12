@@ -50,7 +50,7 @@ const ITEMS: NavItem[] = [
   {
     href: "/carrito",
     icon: ShoppingCart,
-    label: "Bolsa",
+    label: "Carrito",
     isActive: (p) => p === "/carrito",
   },
   {

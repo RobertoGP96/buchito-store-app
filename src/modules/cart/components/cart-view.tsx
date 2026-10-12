@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ShoppingBag, Trash2 } from "lucide-react";
+import { ShoppingCart, Trash2 } from "lucide-react";
 import { ButtonLink } from "@/components/button-link";
 import { EmptyState } from "@/components/empty-state";
 import { Money } from "@/components/money";
@@ -136,8 +136,8 @@ export function CartView({ defaultShippingFee, freeShippingThreshold }: CartView
   if (cartIsEmpty(state)) {
     return (
       <EmptyState
-        icon={ShoppingBag}
-        title="Tu bolsa está vacía"
+        icon={ShoppingCart}
+        title="Tu carrito está vacío"
         description="Añade productos o combos desde el catálogo para verlos aquí."
         ctaLabel="Ir al catálogo"
         ctaHref="/catalogo"

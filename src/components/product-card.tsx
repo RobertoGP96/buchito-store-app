@@ -59,7 +59,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
     }
     setAdding(true);
     addToCart(cartLineFor(product, variant), variant.qtyStep);
-    toast.success(`${product.name} añadido a la bolsa`);
+    toast.success(`${product.name} añadido al carrito`);
     window.setTimeout(() => setAdding(false), 300);
   };
 
@@ -156,7 +156,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           >
             <Plus className="h-4 w-4 sm:hidden" strokeWidth={2.4} aria-hidden />
             <span className="hidden sm:inline">{soldOut ? "Agotado" : "Añadir"}</span>
-            <span className="sr-only sm:hidden">{soldOut ? "Agotado" : "Añadir a la bolsa"}</span>
+            <span className="sr-only sm:hidden">{soldOut ? "Agotado" : "Añadir al carrito"}</span>
           </button>
         )}
       </div>
