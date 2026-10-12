@@ -7,6 +7,7 @@ import { toast } from "@heroui/react";
 import { FormFooter } from "@/components/form/form-footer";
 import { FormSelect, FormSwitch, FormTextField, type SelectOption } from "@/components/form/fields";
 import { ResponsiveFormDialog } from "@/components/responsive-form-dialog";
+import { useCurrency } from "@/modules/currency/store/currency-provider";
 import { createCourier, updateCourier } from "../actions/courier-actions";
 import { VEHICLE_LABELS, VEHICLE_TYPES } from "../lib/labels";
 import { courierSchema, type CourierInput, type CourierValues } from "../lib/schemas";
@@ -22,6 +23,7 @@ const FORM_ID = "courier-form";
 const VEHICLE_OPTIONS: SelectOption[] = VEHICLE_TYPES.map((v) => ({ value: v, label: VEHICLE_LABELS[v] }));
 
 export function CourierForm({ open, onOpenChange, courier }: CourierFormProps) {
+  const { base } = useCurrency();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { control, handleSubmit } = useForm<CourierInput, unknown, CourierValues>({
     resolver: zodResolver(courierSchema),
@@ -32,6 +34,7 @@ export function CourierForm({ open, onOpenChange, courier }: CourierFormProps) {
       phone: courier?.phone ?? "",
       vehicle: courier?.vehicle ?? "motorcycle",
       notes: courier?.notes ?? "",
+      deliveryFee: courier?.deliveryFee ?? 0,
       active: courier?.active ?? true,
     },
   });
@@ -78,7 +81,17 @@ export function CourierForm({ open, onOpenChange, courier }: CourierFormProps) {
           isRequired={!courier}
         />
         <FormSelect control={control} name="vehicle" label="Vehículo" options={VEHICLE_OPTIONS} />
-        <FormTextField control={control} name="notes" label="Notas" />
+        <FormTextField
+          control={control}
+          name="deliveryFee"
+          label="Pago por entrega"
+          type="number"
+          step="0.01"
+          min={0}
+          suffix={base.code}
+          description="Lo que cobra por cada entrega completada. Se liquida en Pagos a mensajeros."
+        />
+        <FormTextField control={control} name="notes" label="Notas" className="sm:col-span-2" />
         <FormSwitch control={control} name="active" label="Activo" description="Un mensajero inactivo no puede entrar ni recibir entregas." className="sm:col-span-2" />
       </form>
     </ResponsiveFormDialog>

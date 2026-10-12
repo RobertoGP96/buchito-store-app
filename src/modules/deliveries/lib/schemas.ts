@@ -31,11 +31,25 @@ export const courierSchema = z.object({
   phone: z.string().trim().refine(isValidPhone, "Escribe un teléfono válido"),
   vehicle: z.enum(VEHICLE_TYPES),
   notes: optionalText,
+  /** Pago por entrega completada, en moneda base. */
+  deliveryFee: z
+    .union([z.literal(""), z.null(), z.coerce.number().min(0, "No puede ser negativo")])
+    .transform((v) => (v === "" || v == null ? 0 : v)),
   active: z.boolean().default(true),
 });
 
 export type CourierInput = z.input<typeof courierSchema>;
 export type CourierValues = z.output<typeof courierSchema>;
+
+/** Liquidación al mensajero: salda todas sus entregas completadas pendientes. */
+export const courierPaymentSchema = z.object({
+  courierId: z.coerce.number().int().positive("Elige el mensajero"),
+  amountBase: z.coerce.number({ message: "Escribe el monto" }).positive("El monto debe ser mayor que cero"),
+  notes: optionalText,
+});
+
+export type CourierPaymentInput = z.input<typeof courierPaymentSchema>;
+export type CourierPaymentValues = z.output<typeof courierPaymentSchema>;
 
 export const assignCourierSchema = z.object({
   deliveryId: z.coerce.number().int().positive(),

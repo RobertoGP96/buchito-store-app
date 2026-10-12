@@ -14,7 +14,7 @@ import { cartCount, useCart } from "@/modules/cart/store";
 import { NavIcon } from "@/components/nav-icon";
 import { cn } from "@/lib/utils";
 
-const VISIBLE_PATHS = ["/", "/catalogo", "/carrito", "/perfil", "/perfil/pedidos"];
+const VISIBLE_PATHS = ["/", "/catalogo", "/combos", "/ofertas", "/pagos", "/carrito", "/perfil", "/perfil/pedidos"];
 
 interface NavItem {
   href: string;

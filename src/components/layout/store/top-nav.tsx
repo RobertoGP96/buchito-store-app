@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, ShoppingCart, Store, type LucideIcon } from "lucide-react";
+import { BadgePercent, Gift, LayoutGrid, ShoppingCart, Store, type LucideIcon } from "lucide-react";
 import { cartCount, useCart } from "@/modules/cart/store";
 import { BrandLogo } from "@/components/brand-logo";
 import { CurrencySwitcher } from "@/components/currency-switcher";
@@ -28,6 +28,8 @@ const LINKS: NavLink[] = [
     icon: LayoutGrid,
     isActive: (p) => p.startsWith("/catalogo"),
   },
+  { href: "/combos", label: "Combos", icon: Gift, isActive: (p) => p.startsWith("/combos") },
+  { href: "/ofertas", label: "Ofertas", icon: BadgePercent, isActive: (p) => p === "/ofertas" },
 ];
 
 /** Acción de icono del header: círculo de 36px que se tiñe al hover. */

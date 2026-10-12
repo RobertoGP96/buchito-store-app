@@ -1,15 +1,33 @@
-import { PackageOpen } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, BadgePercent, Gift, PackageOpen, Wallet, type LucideIcon } from "lucide-react";
 import { ButtonLink } from "@/components/button-link";
 import { EmptyState } from "@/components/empty-state";
 import { ProductCard } from "@/components/product-card";
 import { ProductGrid, ProductGridCell } from "@/components/product-grid";
 import { STORE_NAME } from "@/lib/config";
+import { ComboCard } from "@/modules/combos/components/combo-card";
+import { getCatalogCombos } from "@/modules/combos/queries/combo-catalog-queries";
 import { getFeaturedProducts } from "@/modules/products/queries/catalog-queries";
 
 export const dynamic = "force-dynamic";
 
+interface InfoLink {
+  href: string;
+  icon: LucideIcon;
+  title: string;
+  description: string;
+}
+
+// Las tres vistas informativas de la tienda, enlazadas desde la portada
+// porque en móvil no caben en la barra inferior.
+const INFO_LINKS: InfoLink[] = [
+  { href: "/combos", icon: Gift, title: "Combos", description: "Paquetes de productos a precio cerrado." },
+  { href: "/ofertas", icon: BadgePercent, title: "Ofertas", description: "Rebajas y combos que ahorran." },
+  { href: "/pagos", icon: Wallet, title: "Formas de pago", description: "Métodos, monedas y tasa del día." },
+];
+
 export default async function HomePage() {
-  const featured = await getFeaturedProducts(8);
+  const [featured, combos] = await Promise.all([getFeaturedProducts(8), getCatalogCombos({ limit: 4 })]);
 
   return (
     <>
@@ -32,7 +50,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <div className="mx-auto flex w-full max-w-[1120px] flex-1 flex-col px-5 py-10 md:px-6 md:py-11">
+      <div className="mx-auto flex w-full max-w-[1120px] flex-1 flex-col gap-11 px-5 py-10 md:px-6 md:py-11">
         <section>
           <div className="flex items-end justify-between gap-4">
             <div>
@@ -63,6 +81,54 @@ export default async function HomePage() {
               ))}
             </ProductGrid>
           )}
+        </section>
+
+        {combos.length > 0 && (
+          <section>
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <p className="eyebrow">Combos</p>
+                <h2 className="font-display mt-2 text-[20px] leading-tight text-navy-900 md:text-[24px]">
+                  Más por menos
+                </h2>
+              </div>
+              <ButtonLink href="/combos" variant="ghost" size="sm">
+                Ver todos
+              </ButtonLink>
+            </div>
+            <ProductGrid className="mt-5">
+              {combos.map((combo) => (
+                <ProductGridCell key={combo.comboId}>
+                  <ComboCard combo={combo} />
+                </ProductGridCell>
+              ))}
+            </ProductGrid>
+          </section>
+        )}
+
+        <section className="grid gap-3 sm:grid-cols-3">
+          {INFO_LINKS.map((link) => {
+            const Icon = link.icon;
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="group flex items-center gap-3.5 rounded-card bg-canvas p-4 shadow-card transition-[box-shadow,transform] duration-200 hover:shadow-float motion-safe:hover:-translate-y-0.5"
+              >
+                <span className="flex h-11 w-11 flex-none items-center justify-center rounded-field bg-tint text-navy-700">
+                  <Icon className="h-5 w-5" strokeWidth={1.9} />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[14.5px] font-semibold text-ink">{link.title}</span>
+                  <span className="block text-[12.5px] leading-[1.5] text-slate-500">{link.description}</span>
+                </span>
+                <ArrowRight
+                  className="h-4 w-4 flex-none text-slate-300 transition-transform motion-safe:group-hover:translate-x-0.5"
+                  strokeWidth={2}
+                />
+              </Link>
+            );
+          })}
         </section>
       </div>
     </>

@@ -46,6 +46,10 @@ export function VariantForm({
   const defaultCurrencyId =
     variant?.priceCurrency.currencyId ??
     (currencies.some((c) => c.currencyId === base.currencyId) ? base.currencyId : (currencies[0]?.currencyId ?? ""));
+  const costCurrencyOptions = useMemo<SelectOption[]>(
+    () => [{ value: "", label: "La misma del precio" }, ...currencyOptions],
+    [currencyOptions]
+  );
 
   const { control, handleSubmit } = useForm<VariantInput, unknown, VariantValues>({
     resolver: zodResolver(variantSchema),
@@ -57,6 +61,8 @@ export function VariantForm({
       price: variant?.price ?? "",
       compareAtPrice: variant?.compareAtPrice ?? "",
       priceCurrencyId: defaultCurrencyId,
+      cost: variant?.cost ?? "",
+      costCurrencyId: variant?.costCurrency?.currencyId ?? "",
       imageUrl: variant?.imageUrl ?? "",
       isDefault: variant?.isDefault ?? false,
       isActive: variant?.isActive ?? true,
@@ -129,6 +135,22 @@ export function VariantForm({
             step="0.01"
             min={0}
             description="Opcional; se muestra tachado para marcar la rebaja."
+          />
+          <FormTextField
+            control={control}
+            name="cost"
+            label="Costo de compra"
+            type="number"
+            step="0.01"
+            min={0}
+            description="Por unidad. Sirve para calcular la ganancia; se actualiza con cada entrada de stock."
+          />
+          <FormSelect
+            control={control}
+            name="costCurrencyId"
+            label="Moneda del costo"
+            options={costCurrencyOptions}
+            placeholder="La misma del precio"
           />
           {!variant && (
             <FormTextField

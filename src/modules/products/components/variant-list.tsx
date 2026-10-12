@@ -50,7 +50,25 @@ export function VariantPriceCell({ variant }: { variant: AdminVariantSummary }) 
             Sin tasa
           </span>
         ))}
+      <VariantCostLine variant={variant} />
     </div>
+  );
+}
+
+/** Costo de compra y margen bajo el precio; "Sin costo" invita a registrarlo. */
+export function VariantCostLine({ variant }: { variant: AdminVariantSummary }) {
+  if (variant.cost == null || !variant.costCurrency) {
+    return <span className="text-[11px] text-slate-400">Sin costo</span>;
+  }
+  return (
+    <span className="text-[11px] text-slate-400">
+      Costo <Money value={variant.cost} currency={variant.costCurrency} />
+      {variant.marginPct != null && (
+        <span className={cn("ml-1 font-semibold", variant.marginPct < 0 ? "text-danger" : "text-ok")}>
+          · margen {variant.marginPct} %
+        </span>
+      )}
+    </span>
   );
 }
 

@@ -79,6 +79,15 @@ export const variantSchema = z.object({
     .transform((v) => (v === "" ? null : v))
     .nullable(),
   priceCurrencyId: z.coerce.number().int().positive("Elige la moneda del precio"),
+  // Costo de compra por unidad (opcional). Sin moneda propia se asume la del precio.
+  cost: z
+    .union([z.literal(""), z.null(), z.coerce.number().min(0, "El costo no puede ser negativo")])
+    .transform((v) => (v === "" ? null : v))
+    .nullable(),
+  costCurrencyId: z
+    .union([z.literal(""), z.null(), z.coerce.number().int().positive()])
+    .transform((v) => (v === "" ? null : v))
+    .nullable(),
   imageUrl: optionalText,
   isDefault: z.boolean().default(false),
   isActive: z.boolean().default(true),
@@ -98,6 +107,18 @@ export const stockAdjustmentSchema = z.object({
   variantId: z.coerce.number().int().positive(),
   type: z.enum(["entry", "exit", "adjustment"]),
   quantity: z.coerce.number().int().positive("La cantidad debe ser mayor que cero"),
+  // Solo en entradas: precio de compra por unidad de esta compra; actualiza
+  // el costo de la variante.
+  unitCost: z
+    .union([z.literal(""), z.null(), z.coerce.number().min(0, "El costo no puede ser negativo")])
+    .transform((v) => (v === "" ? null : v))
+    .nullable()
+    .optional(),
+  costCurrencyId: z
+    .union([z.literal(""), z.null(), z.coerce.number().int().positive()])
+    .transform((v) => (v === "" ? null : v))
+    .nullable()
+    .optional(),
   notes: optionalText,
 });
 
