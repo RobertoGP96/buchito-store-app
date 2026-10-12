@@ -8,7 +8,7 @@ import {
   useMemo,
   useReducer,
 } from "react";
-import { MAX_LINE_QTY, maxSellable, snapQty, type SaleUnit } from "@/modules/products/lib/units";
+import { MAX_LINE_QTY, maxSellable, SALE_UNITS, snapQty, type SaleUnit } from "@/modules/products/lib/units";
 
 /** Línea del carrito. `unitPrice` va en moneda BASE: lo que la tienda muestra
  *  en otra moneda es solo conversión de display. El servidor recalcula todo
@@ -68,11 +68,14 @@ const LEGACY_STORAGE_KEY = "buchito-cart-v1";
 
 export { MAX_LINE_QTY };
 
-/** Cantidad válida para la línea: múltiplo del paso y dentro del stock. */
+/** Cantidad válida para la línea: múltiplo del paso y dentro del stock.
+ *  Una cantidad no numérica deja la línea en un paso: nunca propaga NaN a
+ *  los totales. */
 function clampLineQty(qty: number, line: Pick<CartLine, "stock" | "qtyStep">): number {
   const cap = maxSellable(line.stock, line.qtyStep);
   if (cap <= 0) return 0;
-  return Math.min(cap, snapQty(qty, line.qtyStep));
+  const wanted = Number.isFinite(qty) ? qty : line.qtyStep;
+  return Math.min(cap, snapQty(wanted, line.qtyStep));
 }
 
 export function cartCount(state: Pick<CartState, "lines" | "combos">): number {
@@ -119,6 +122,8 @@ export function cartReducer(state: CartState, action: CartAction): CartState {
       return { ...state, lines: [...state.lines, { ...action.line, qty }] };
     }
     case "setQty": {
+      // Una cantidad no numérica no cambia nada: viene de un cálculo roto.
+      if (!Number.isFinite(action.qty)) return state;
       // Bajar por debajo de un paso quita la línea (el "menos" en el mínimo).
       if (action.qty < 1e-9) {
         return {
@@ -156,6 +161,7 @@ export function cartReducer(state: CartState, action: CartAction): CartState {
       };
     }
     case "setComboQty": {
+      if (!Number.isFinite(action.qty)) return state;
       if (action.qty <= 0) {
         return { ...state, combos: state.combos.filter((c) => c.comboId !== action.comboId) };
       }
@@ -197,6 +203,36 @@ function isLine(value: unknown): value is CartLine {
   );
 }
 
+function isSaleUnit(value: unknown): value is SaleUnit {
+  return typeof value === "string" && (SALE_UNITS as readonly string[]).includes(value);
+}
+
+/** Las líneas guardadas antes de la venta por unidad de medida no traen
+ *  `unit` ni `qtyStep`; sin ellas cada suma del stepper da NaN. Se completan
+ *  con la unidad y el paso por defecto y se descartan las que ya no tienen
+ *  números válidos. Exportado solo para tests. */
+export function normalizeStoredLine(raw: CartLine): CartLine | null {
+  if (!Number.isFinite(raw.unitPrice)) return null;
+  const line: CartLine = {
+    ...raw,
+    unit: isSaleUnit(raw.unit) ? raw.unit : "unit",
+    qtyStep: Number.isFinite(raw.qtyStep) && raw.qtyStep > 0 ? raw.qtyStep : 1,
+    stock: Number.isFinite(raw.stock) ? raw.stock : 0,
+    compareAtPrice: Number.isFinite(raw.compareAtPrice) ? raw.compareAtPrice : null,
+  };
+  const qty = clampLineQty(raw.qty, line);
+  if (qty <= 0) return null;
+  return { ...line, qty };
+}
+
+function readStoredLines(value: unknown): CartLine[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter(isLine).flatMap((l) => {
+    const line = normalizeStoredLine(l);
+    return line ? [line] : [];
+  });
+}
+
 function isCombo(value: unknown): value is CartCombo {
   return (
     typeof value === "object" &&
@@ -213,11 +249,11 @@ function readStorage(): { lines: CartLine[]; combos: CartCombo[] } {
     if (!raw) return { lines: [], combos: [] };
     const parsed: unknown = JSON.parse(raw);
     // v1 guardaba solo el array de líneas.
-    if (Array.isArray(parsed)) return { lines: parsed.filter(isLine), combos: [] };
+    if (Array.isArray(parsed)) return { lines: readStoredLines(parsed), combos: [] };
     if (typeof parsed !== "object" || parsed === null) return { lines: [], combos: [] };
     const data = parsed as { lines?: unknown; combos?: unknown };
     return {
-      lines: Array.isArray(data.lines) ? data.lines.filter(isLine) : [],
+      lines: readStoredLines(data.lines),
       combos: Array.isArray(data.combos) ? data.combos.filter(isCombo) : [],
     };
   } catch {

@@ -4,6 +4,7 @@ import {
   cartIsEmpty,
   cartPriceLines,
   cartReducer,
+  normalizeStoredLine,
   type CartCombo,
   type CartLine,
   type CartState,
@@ -94,11 +95,49 @@ describe("cartReducer", () => {
     expect(state.combos).toHaveLength(0);
   });
 
+  it("ignora una cantidad NaN en lugar de romper los totales", () => {
+    let state = cartReducer(empty, { type: "add", line: line(), qty: 2 });
+    state = cartReducer(state, { type: "setQty", variantId: 1, qty: Number.NaN });
+    expect(state.lines[0].qty).toBe(2);
+    state = cartReducer(state, { type: "add", line: line({ variantId: 2 }), qty: 1 });
+    state = cartReducer(state, { type: "addCombo", combo: combo(), qty: 1 });
+    state = cartReducer(state, { type: "setComboQty", comboId: 7, qty: Number.NaN });
+    expect(state.combos[0].qty).toBe(1);
+    expect(cartPriceLines(state).every((l) => Number.isFinite(l.unitPrice * l.qty))).toBe(true);
+  });
+
   it("clear vacía el carrito y conserva hydrated", () => {
     let state = cartReducer(empty, { type: "add", line: line(), qty: 1 });
     state = cartReducer(state, { type: "addCombo", combo: combo(), qty: 1 });
     state = cartReducer(state, { type: "clear" });
     expect(state).toEqual(empty);
     expect(cartIsEmpty(state)).toBe(true);
+  });
+});
+
+describe("normalizeStoredLine", () => {
+  // Carritos guardados antes de la venta por unidad de medida: sin unit ni qtyStep.
+  const legacy = (over: Record<string, unknown> = {}): CartLine => {
+    const { unit: _unit, qtyStep: _qtyStep, ...rest } = line();
+    return { ...rest, qty: 2, ...over } as CartLine;
+  };
+
+  it("completa unidad y paso por defecto y el stepper ya no produce NaN", () => {
+    const normalized = normalizeStoredLine(legacy());
+    expect(normalized).toMatchObject({ unit: "unit", qtyStep: 1, qty: 2 });
+    let state = cartReducer(empty, { type: "hydrate", lines: [normalized!], combos: [] });
+    state = cartReducer(state, { type: "setQty", variantId: 1, qty: state.lines[0].qty + state.lines[0].qtyStep });
+    expect(state.lines[0].qty).toBe(3);
+  });
+
+  it("ajusta la cantidad guardada al stock actual y descarta líneas sin precio", () => {
+    expect(normalizeStoredLine(legacy({ qty: 50 }))?.qty).toBe(5);
+    expect(normalizeStoredLine(legacy({ stock: 0 }))).toBeNull();
+    expect(normalizeStoredLine(legacy({ unitPrice: undefined }))).toBeNull();
+    expect(normalizeStoredLine(legacy({ unit: "kg", qtyStep: 0.25, qty: 0.5, stock: 2 }))).toMatchObject({
+      unit: "kg",
+      qtyStep: 0.25,
+      qty: 0.5,
+    });
   });
 });
