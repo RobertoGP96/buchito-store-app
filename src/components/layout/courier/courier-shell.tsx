@@ -15,7 +15,7 @@ interface CourierShellProps {
 export function CourierShell({ userName, children }: CourierShellProps) {
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className="sticky top-0 z-40 border-b border-line bg-canvas/90 backdrop-blur-md">
+      <header className="sticky top-0 z-40 border-b border-line bg-canvas/95 md:bg-canvas/90 md:backdrop-blur-md">
         <div className="mx-auto flex h-14 w-full max-w-[720px] items-center gap-3 px-4">
           <BrandLogo size="sm" href="/mensajero" />
           <span className="eyebrow text-navy-700">Mensajero</span>

@@ -1,8 +1,6 @@
 "use client";
 
-import { unstable_ViewTransition as ViewTransition } from "react";
 import { Skeleton } from "@heroui/react";
-import { PRODUCT_IMAGE_TRANSITION } from "@/components/product-image";
 import { cn } from "@/lib/utils";
 
 /* Esqueletos de carga de las rutas (`loading.tsx`) y de los Suspense internos.
@@ -12,12 +10,14 @@ import { cn } from "@/lib/utils";
 export function ProductCardSkeleton() {
   return (
     <div className="flex flex-col gap-3.5 rounded-card bg-canvas p-3 pb-4 shadow-card sm:p-4 sm:pb-5">
+      {/* Solo la foto lleva shimmer: cada barra animada es una capa más del
+          compositor y una retícula de 8 cards sumaba 40. */}
       <Skeleton className="aspect-square w-full rounded-field" />
-      <Skeleton className="h-2.5 w-16 rounded-full" />
-      <Skeleton className="h-3.5 w-3/4 rounded-full" />
+      <Skeleton animationType="none" className="h-2.5 w-16 rounded-full" />
+      <Skeleton animationType="none" className="h-3.5 w-3/4 rounded-full" />
       <div className="mt-1 flex items-center justify-between border-t border-line pt-3">
-        <Skeleton className="h-4 w-20 rounded-full" />
-        <Skeleton className="h-9 w-9 rounded-full sm:w-16" />
+        <Skeleton animationType="none" className="h-4 w-20 rounded-full" />
+        <Skeleton animationType="none" className="h-9 w-9 rounded-full sm:w-16" />
       </div>
     </div>
   );
@@ -106,13 +106,9 @@ export function ProductDetailSkeleton() {
   return (
     <StoreScreenSkeleton back>
       <div className="grid gap-6 md:grid-cols-2 md:gap-10">
-        {/* Mismo nombre que la foto de la card pulsada y que la de la ficha:
-            la foto aterriza aquí y luego la real se funde encima. */}
-        <ViewTransition name={PRODUCT_IMAGE_TRANSITION} enter="none" exit="none" default="none" share="product-image">
-          <div className="aspect-square w-full">
-            <Skeleton className="h-full w-full rounded-card" />
-          </div>
-        </ViewTransition>
+        <div className="aspect-square w-full">
+          <Skeleton className="h-full w-full rounded-card" />
+        </div>
         <div className="flex flex-col gap-4">
           <Skeleton className="h-2.5 w-20 rounded-full" />
           <Skeleton className="h-7 w-3/4 rounded-full" />

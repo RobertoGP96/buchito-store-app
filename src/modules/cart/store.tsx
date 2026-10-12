@@ -181,8 +181,7 @@ export function cartReducer(state: CartState, action: CartAction): CartState {
   }
 }
 
-interface CartApi {
-  state: CartState;
+interface CartActions {
   addToCart: (line: Omit<CartLine, "qty">, qty?: number) => void;
   setQty: (variantId: number, qty: number) => void;
   removeLine: (variantId: number) => void;
@@ -192,7 +191,15 @@ interface CartApi {
   clearCart: () => void;
 }
 
-const CartContext = createContext<CartApi | null>(null);
+interface CartApi extends CartActions {
+  state: CartState;
+}
+
+// Dos contextos: las acciones son estables y así las cards que solo añaden al
+// carrito no se re-renderizan con cada cambio del estado (la hidratación y
+// cada "+" en una retícula de 30-60 productos).
+const CartStateContext = createContext<CartState | null>(null);
+const CartActionsContext = createContext<CartActions | null>(null);
 
 function isLine(value: unknown): value is CartLine {
   return (
@@ -307,16 +314,28 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const removeCombo = useCallback((comboId: number) => dispatch({ type: "removeCombo", comboId }), []);
   const clearCart = useCallback(() => dispatch({ type: "clear" }), []);
 
-  const value = useMemo(
-    () => ({ state, addToCart, setQty, removeLine, addCombo, setComboQty, removeCombo, clearCart }),
-    [state, addToCart, setQty, removeLine, addCombo, setComboQty, removeCombo, clearCart]
+  const actions = useMemo<CartActions>(
+    () => ({ addToCart, setQty, removeLine, addCombo, setComboQty, removeCombo, clearCart }),
+    [addToCart, setQty, removeLine, addCombo, setComboQty, removeCombo, clearCart]
   );
 
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+  return (
+    <CartActionsContext.Provider value={actions}>
+      <CartStateContext.Provider value={state}>{children}</CartStateContext.Provider>
+    </CartActionsContext.Provider>
+  );
+}
+
+/** Solo acciones: el consumidor no se re-renderiza al cambiar el carrito. */
+export function useCartActions(): CartActions {
+  const actions = useContext(CartActionsContext);
+  if (!actions) throw new Error("useCartActions debe usarse dentro de CartProvider");
+  return actions;
 }
 
 export function useCart(): CartApi {
-  const context = useContext(CartContext);
-  if (!context) throw new Error("useCart debe usarse dentro de CartProvider");
-  return context;
+  const state = useContext(CartStateContext);
+  const actions = useCartActions();
+  if (!state) throw new Error("useCart debe usarse dentro de CartProvider");
+  return useMemo(() => ({ state, ...actions }), [state, actions]);
 }

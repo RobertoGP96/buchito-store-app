@@ -10,6 +10,8 @@ interface BrandLogoProps {
   /** Sin enlace en lugares donde ya se está en la home o dentro de otro <a>. */
   asLink?: boolean;
   href?: string;
+  /** Para cerrar el panel o menú desde el que se navega. */
+  onClick?: () => void;
   className?: string;
 }
 
@@ -21,6 +23,7 @@ export function BrandLogo({
   size = "md",
   asLink = true,
   href = "/",
+  onClick,
   className,
 }: BrandLogoProps) {
   const content = (
@@ -59,6 +62,7 @@ export function BrandLogo({
   return (
     <Link
       href={href}
+      onClick={onClick}
       aria-label={`${STORE_NAME}, ir al inicio`}
       className={cn(rootClass, "transition-opacity duration-150 hover:opacity-85")}
     >

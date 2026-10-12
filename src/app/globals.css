@@ -250,17 +250,6 @@
   --radius-sheet: 28px;
 }
 
-/* El tema cambia por clase en <html>; solo colores, solo en la raíz. */
-html {
-  transition: background-color 200ms ease, color 200ms ease;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html {
-    transition: none;
-  }
-}
-
 /* El foco se ve siempre, nunca se suprime. */
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
   outline: 2px solid var(--c-navy-700);
@@ -327,59 +316,32 @@ html {
   }
 }
 
-@keyframes navIn {
-  from {
-    opacity: 0;
-    transform: translateY(24px) scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
 .anim-fade-up {
   animation: fadeUp 0.4s ease both;
 }
 
-/* Transición de ruta (RouteTransition en cada template.tsx): pseudoelementos
-   de la View Transitions API; React les pone la clase `route`. El contenido
-   saliente se desvanece y el entrante sube levemente. */
-@keyframes vtFadeOut {
-  to {
-    opacity: 0;
-  }
-}
-
-@keyframes vtSlideIn {
+/* Entrada de ruta (RouteTransition en cada template.tsx): el contenido nuevo
+   se funde en su sitio. Solo opacity: un transform convertiría al wrapper en
+   bloque contenedor de cualquier descendiente fixed. Sin View Transitions API:
+   nada se captura ni se pinta por encima de las barras fijas. */
+@keyframes routeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
   }
 }
 
-::view-transition-old(.route) {
-  animation: vtFadeOut 120ms ease both;
-}
-
-::view-transition-new(.route) {
-  animation: vtSlideIn 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-/* Imagen compartida: la foto de la card viaja hasta su sitio en la ficha. */
-::view-transition-group(.product-image) {
-  animation-duration: 320ms;
-  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+.route-enter {
+  animation: routeIn 180ms ease-out both;
 }
 
 .pop-in {
   animation: popIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
-/* Barra inferior flotante: entra desde abajo al montar y se esconde al hacer
-   scroll hacia abajo (clase `is-hidden`, la pone el componente). */
+/* Barra inferior flotante: siempre montada. En las rutas sin barra el
+   componente pone `is-hidden` y se retira deslizándose; `visibility` espera
+   al final de la salida y vuelve al instante al mostrarse. */
 .nav-float {
-  animation: navIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) backwards;
   transition:
     transform 0.38s cubic-bezier(0.16, 1, 0.3, 1),
     opacity 0.28s ease;
@@ -388,22 +350,22 @@ html {
 .nav-float.is-hidden {
   transform: translateY(calc(100% + 28px));
   opacity: 0;
+  visibility: hidden;
+  transition:
+    transform 0.38s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.28s ease,
+    visibility 0s 0.38s;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .anim-fade-up,
   .pop-in,
-  .nav-float {
+  .route-enter {
     animation: none;
   }
 
-  ::view-transition-group(*),
-  ::view-transition-old(*),
-  ::view-transition-new(*) {
-    animation: none !important;
-  }
-
-  .nav-float {
+  .nav-float,
+  .nav-float.is-hidden {
     transition: none;
   }
 }

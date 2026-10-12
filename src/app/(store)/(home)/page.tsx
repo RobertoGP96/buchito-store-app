@@ -78,9 +78,10 @@ export default async function HomePage() {
               </ButtonLink>
             </div>
             <ProductGrid className="mt-5">
+              {/* Solo la primera fila: a 375px la segunda queda bajo el pliegue. */}
               {recentlyAdded.map((product, i) => (
                 <ProductGridCell key={product.productId}>
-                  <ProductCard product={product} priority={i < 4} />
+                  <ProductCard product={product} priority={i < 2} />
                 </ProductGridCell>
               ))}
             </ProductGrid>

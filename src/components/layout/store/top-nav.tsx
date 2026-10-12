@@ -8,6 +8,7 @@ import { BrandLogo } from "@/components/brand-logo";
 import { CurrencySwitcher } from "@/components/currency-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserMenu, type NavUser } from "@/components/layout/store/user-menu";
+import { isCatalogPath } from "@/lib/store-nav";
 import { cn } from "@/lib/utils";
 
 interface NavLink {
@@ -25,7 +26,7 @@ const LINKS: NavLink[] = [
     href: "/catalogo",
     label: "Catálogo",
     icon: LayoutGrid,
-    isActive: (p) => p.startsWith("/catalogo"),
+    isActive: isCatalogPath,
   },
   { href: "/combos", label: "Combos", icon: Gift, isActive: (p) => p.startsWith("/combos") },
   { href: "/ofertas", label: "Ofertas", icon: BadgePercent, isActive: (p) => p === "/ofertas" },
@@ -40,7 +41,7 @@ export const ICON_ACTION =
 export function CountBadge({ count }: { count: number }) {
   if (count <= 0) return null;
   return (
-    <span className="tabular absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-navy-700 px-1 text-[9.5px] leading-none font-bold text-on-brand ring-2 ring-canvas">
+    <span className="pop-in tabular absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-navy-700 px-1 text-[9.5px] leading-none font-bold text-on-brand ring-2 ring-canvas">
       {count > 99 ? "99+" : count}
     </span>
   );
@@ -52,7 +53,7 @@ export function TopNav({ user }: { user: NavUser | null }) {
   const count = state.hydrated ? cartCount(state) : 0;
 
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-canvas/90 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-line bg-canvas/95 md:bg-canvas/90 md:backdrop-blur-md">
       <div className="mx-auto flex h-16 w-full max-w-[1200px] items-center gap-5 px-5 md:h-[68px] md:gap-7 md:px-6">
         <BrandLogo />
 

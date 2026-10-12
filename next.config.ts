@@ -17,11 +17,6 @@ const nextConfig: NextConfig = {
   // El driver de Neon abre WebSockets desde Node; empaquetarlo rompe el
   // adapter en server actions.
   serverExternalPackages: ["@neondatabase/serverless"],
-  experimental: {
-    // <ViewTransition> de React para las transiciones de ruta y la imagen
-    // compartida card → ficha (RouteTransition, ProductCard, ProductDetail).
-    viewTransition: true,
-  },
   images: {
     // Las fotos propias van por `/media/<clave>` (ruta local, no necesita
     // patrón). Estos son los orígenes externos que el optimizador acepta.

@@ -11,7 +11,7 @@ import { comboItemsSummary } from "@/modules/combos/lib/labels";
 import { useCurrency } from "@/modules/currency/store/currency-provider";
 import { maxSellable, perUnitSuffix, roundQty } from "@/modules/products/lib/units";
 import { computeCartTotals } from "../cart-totals";
-import { cartIsEmpty, cartPriceLines, useCart, type CartCombo, type CartLine } from "../store";
+import { cartIsEmpty, cartPriceLines, useCart, useCartActions, type CartCombo, type CartLine } from "../store";
 import { CartSummary } from "./cart-summary";
 
 interface CartViewProps {
@@ -23,7 +23,7 @@ const REMOVE_BUTTON =
   "-mt-1 -mr-1 flex h-8 w-8 flex-none items-center justify-center rounded-full text-slate-400 transition-colors duration-150 hover:bg-danger-soft hover:text-danger";
 
 function LineItem({ line }: { line: CartLine }) {
-  const { setQty, removeLine } = useCart();
+  const { setQty, removeLine } = useCartActions();
   const href = `/producto/${encodeURIComponent(line.slug)}`;
   return (
     <li className="flex gap-4 rounded-card bg-canvas p-3.5 shadow-card sm:p-4">
@@ -70,7 +70,7 @@ function LineItem({ line }: { line: CartLine }) {
 }
 
 function ComboItem({ combo }: { combo: CartCombo }) {
-  const { setComboQty, removeCombo } = useCart();
+  const { setComboQty, removeCombo } = useCartActions();
   const href = `/combos/${encodeURIComponent(combo.slug)}`;
   const savings = combo.regularPrice - combo.unitPrice;
   return (

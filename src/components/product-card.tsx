@@ -1,15 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { unstable_ViewTransition as ViewTransition, useMemo, useState, type MouseEvent } from "react";
+import { useMemo, useState, type MouseEvent } from "react";
 import { toast } from "@heroui/react";
 import { Plus } from "lucide-react";
 import { Badge } from "@/components/badge";
 import { Money } from "@/components/money";
-import { PRODUCT_IMAGE_TRANSITION, ProductImage } from "@/components/product-image";
+import { ProductImage } from "@/components/product-image";
 import { StockLabel } from "@/components/stock-label";
 import { discountPct } from "@/lib/format";
-import { useCart } from "@/modules/cart/store";
+import { useCartActions } from "@/modules/cart/store";
 import { perUnitSuffix } from "@/modules/products/lib/units";
 import type { CatalogProduct, CatalogVariant } from "@/modules/products/queries/catalog-queries";
 import { cn } from "@/lib/utils";
@@ -38,15 +38,12 @@ export function cartLineFor(product: CatalogProduct, variant: CatalogVariant) {
 }
 
 export function ProductCard({ product, priority = false }: ProductCardProps) {
-  const { addToCart } = useCart();
+  const { addToCart } = useCartActions();
   const variant = product.defaultVariant;
   const soldOut = product.totalStock <= 0;
   const hasVariants = product.variants.length > 1;
   const pct = useMemo(() => discountPct(variant.price, variant.compareAtPrice), [variant]);
   const [adding, setAdding] = useState(false);
-  // Solo la card pulsada toma el nombre compartido: la foto viaja a la ficha.
-  const [leaving, setLeaving] = useState(false);
-  const markLeaving = () => setLeaving(true);
   const href = `/producto/${encodeURIComponent(product.slug)}`;
 
   // Con varias variantes el cliente elige en el detalle; la card no debe meter
@@ -71,25 +68,17 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
     >
       {/* El enlace cubre la celda entera para que toda la card navegue; va por
           encima de foto y texto (z-[1]) y debajo de los controles (z-10). */}
-      <Link href={href} onClick={markLeaving} className="absolute inset-0 z-[1] rounded-card" aria-label={product.name} />
+      <Link href={href} className="absolute inset-0 z-[1] rounded-card" aria-label={product.name} />
 
       <div className="relative aspect-square w-full overflow-hidden rounded-field bg-cream">
-        <ViewTransition
-          name={leaving ? PRODUCT_IMAGE_TRANSITION : undefined}
-          enter="none"
-          exit="none"
-          default="none"
-          share="product-image"
-        >
-          <span className="absolute inset-0 flex items-center justify-center">
-            <ProductImage
-              src={product.imageUrl}
-              alt=""
-              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 280px"
-              priority={priority}
-            />
-          </span>
-        </ViewTransition>
+        <span className="absolute inset-0 flex items-center justify-center">
+          <ProductImage
+            src={product.imageUrl}
+            alt=""
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 280px"
+            priority={priority}
+          />
+        </span>
         {product.featured && !soldOut && (
           <Badge variant="featured" className="absolute top-2 left-2">
             Destacado
@@ -136,7 +125,6 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
         {hasVariants ? (
           <Link
             href={href}
-            onClick={markLeaving}
             className="relative z-10 flex h-9 flex-none items-center justify-center rounded-full bg-tint px-4 text-[12.5px] font-semibold text-navy-900 transition-colors duration-150 hover:bg-tint-strong"
           >
             Elegir

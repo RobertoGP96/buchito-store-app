@@ -9,7 +9,7 @@ import { Money } from "@/components/money";
 import { ProductImage } from "@/components/product-image";
 import { StockLabel } from "@/components/stock-label";
 import { cn } from "@/lib/utils";
-import { useCart, type CartCombo } from "@/modules/cart/store";
+import { useCartActions, type CartCombo } from "@/modules/cart/store";
 import { comboItemsSummary as summarize } from "../lib/labels";
 import type { CatalogCombo } from "../queries/combo-catalog-queries";
 
@@ -44,7 +44,7 @@ interface ComboCardProps {
 /** Card de combo en la retícula: misma silueta que la de producto, con la
  *  etiqueta "Combo", lo que incluye y el ahorro frente a comprar por separado. */
 export function ComboCard({ combo, priority = false }: ComboCardProps) {
-  const { addCombo } = useCart();
+  const { addCombo } = useCartActions();
   const soldOut = combo.available <= 0;
   const [adding, setAdding] = useState(false);
   const href = `/combos/${encodeURIComponent(combo.slug)}`;

@@ -10,13 +10,13 @@ import { ProductImage } from "@/components/product-image";
 import { QtyStepper } from "@/components/qty-stepper";
 import { StockLabel } from "@/components/stock-label";
 import { fmtDate } from "@/lib/format";
-import { useCart } from "@/modules/cart/store";
+import { useCartActions } from "@/modules/cart/store";
 import { fmtQty, perUnitSuffix } from "@/modules/products/lib/units";
 import type { CatalogCombo } from "../queries/combo-catalog-queries";
 import { cartComboFor } from "./combo-card";
 
 export function ComboDetail({ combo }: { combo: CatalogCombo }) {
-  const { addCombo } = useCart();
+  const { addCombo } = useCartActions();
   const [qty, setQty] = useState(1);
   const soldOut = combo.available <= 0;
   const savings = combo.regularPrice - combo.price;

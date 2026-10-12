@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect } from "react";
 import { Drawer } from "@heroui/react";
 import { ChevronRight, Menu, Store } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
@@ -23,12 +24,15 @@ interface AdminTopbarProps {
 export function AdminTopbar({ userName, role }: AdminTopbarProps) {
   const pathname = usePathname();
   const { sheetOpen, setSheetOpen } = useAdminNav();
+  // Salvavidas para navegaciones que no pasan por la lista (atrás del
+  // navegador, buscador): el Drawer vive en el layout y no se desmonta.
+  useEffect(() => setSheetOpen(false), [pathname, setSheetOpen]);
   const entry = findNavEntry(pathname);
   const section = entry ? findNavSection(entry.id) : undefined;
 
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-line bg-canvas/90 backdrop-blur-md">
+      <header className="sticky top-0 z-40 border-b border-line bg-canvas/95 md:bg-canvas/90 md:backdrop-blur-md">
         <div className="flex h-14 items-center gap-2 px-3 md:h-[60px] md:px-8">
           <button
             type="button"
@@ -73,7 +77,8 @@ export function AdminTopbar({ userName, role }: AdminTopbarProps) {
             <Drawer.Dialog className="w-[300px] max-w-[88vw] bg-canvas">
               <Drawer.CloseTrigger />
               <Drawer.Header>
-                <BrandLogo href="/admin" />
+                {/* Si ya se está en /admin el pathname no cambia: cierre explícito. */}
+                <BrandLogo href="/admin" onClick={() => setSheetOpen(false)} />
               </Drawer.Header>
               <Drawer.Body className="pb-[max(16px,env(safe-area-inset-bottom))]">
                 <AdminNavList layout="list" onNavigate={() => setSheetOpen(false)} />

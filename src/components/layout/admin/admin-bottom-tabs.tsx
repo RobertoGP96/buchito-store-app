@@ -30,7 +30,7 @@ export function AdminBottomTabs({ userName }: { userName: string }) {
     <>
       <nav
         aria-label="Secciones del panel"
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-canvas/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-canvas/95 pb-[env(safe-area-inset-bottom)] md:hidden"
       >
         <div className="grid grid-cols-5 px-2 pt-1.5 pb-1.5">
           {tabs.map((entry) => {
@@ -41,7 +41,7 @@ export function AdminBottomTabs({ userName }: { userName: string }) {
                 key={entry.id}
                 href={entry.href}
                 aria-current={active ? "page" : undefined}
-                className={cn(TAB, active ? "text-navy-700" : "text-slate-400")}
+                className={cn(TAB, active ? "text-navy-700" : "text-slate-500")}
               >
                 <span
                   className={cn(
@@ -59,7 +59,8 @@ export function AdminBottomTabs({ userName }: { userName: string }) {
             type="button"
             onClick={() => setMoreOpen(true)}
             aria-expanded={moreOpen}
-            className={cn(TAB, restActive ? "text-navy-700" : "text-slate-400")}
+            aria-haspopup="dialog"
+            className={cn(TAB, restActive ? "text-navy-700" : "text-slate-500")}
           >
             <span
               className={cn(
