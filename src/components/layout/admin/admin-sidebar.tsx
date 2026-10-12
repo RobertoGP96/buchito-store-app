@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown, ChevronsLeft, ChevronsRight, Store } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
-import { NavPendingSkeleton } from "@/components/nav-icon";
 import {
   ADMIN_NAV_SECTIONS,
   findNavEntry,
@@ -29,7 +28,7 @@ function SidebarLink({ entry, collapsed }: { entry: NavEntry; collapsed: boolean
         title={collapsed ? entry.label : undefined}
         aria-label={collapsed ? entry.label : undefined}
         className={cn(
-          "relative flex items-center gap-3 rounded-chip text-[13px] font-medium transition-colors duration-150",
+          "flex items-center gap-3 rounded-chip text-[13px] font-medium transition-colors duration-150",
           collapsed ? "h-10 w-10 justify-center" : "px-3 py-2",
           active
             ? "bg-white/10 font-semibold text-white"
@@ -38,7 +37,6 @@ function SidebarLink({ entry, collapsed }: { entry: NavEntry; collapsed: boolean
       >
         <Icon className="h-4 w-4 flex-none" strokeWidth={active ? 2.1 : 1.9} />
         {!collapsed && <span className="truncate">{entry.label}</span>}
-        <NavPendingSkeleton iconOnly={collapsed} />
       </Link>
     </li>
   );
@@ -133,11 +131,10 @@ export function AdminSidebar() {
         {!collapsed && (
           <Link
             href="/"
-            className="relative flex items-center gap-3 rounded-chip px-3 py-2 text-[13px] font-medium text-footer-muted transition-colors duration-150 hover:bg-white/5 hover:text-white"
+            className="flex items-center gap-3 rounded-chip px-3 py-2 text-[13px] font-medium text-footer-muted transition-colors duration-150 hover:bg-white/5 hover:text-white"
           >
             <Store className="h-4 w-4 flex-none" strokeWidth={1.9} />
             Ver la tienda
-            <NavPendingSkeleton />
           </Link>
         )}
         <div className={cn("flex items-center", collapsed ? "justify-center" : "justify-end px-3 pt-1")}>

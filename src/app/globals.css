@@ -438,29 +438,6 @@ html {
   }
 }
 
-/* Silueta de un enlace de navegación pendiente (NavPendingSkeleton): cubre el
-   enlace pulsado con su propio esqueleto, con el mismo retardo que el spinner. */
-@keyframes navShimmer {
-  50% {
-    opacity: 0.45;
-  }
-}
-
-.nav-skeleton {
-  opacity: 0;
-  animation: pendingIn 120ms ease 150ms forwards;
-}
-
-.nav-skeleton-bar {
-  animation: navShimmer 1.4s ease-in-out infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .nav-skeleton-bar {
-    animation: none;
-  }
-}
-
 /* Sección plegable del sidebar: el alto anima de 0fr a 1fr sin medir nada. */
 .nav-section-body {
   display: grid;

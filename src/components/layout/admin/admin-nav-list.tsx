@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { NavPendingSkeleton } from "@/components/nav-icon";
 import { ADMIN_NAV_SECTIONS, findNavEntry, type NavSection } from "@/lib/nav-registry";
 import { cn } from "@/lib/utils";
 
@@ -41,7 +40,7 @@ export function AdminNavList({ exclude = [], layout = "list", onNavigate }: Admi
                     onClick={onNavigate}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "relative flex items-center gap-3 rounded-field border-[1.5px] px-3.5 py-3 text-[13px] font-semibold transition-colors duration-150",
+                      "flex items-center gap-3 rounded-field border-[1.5px] px-3.5 py-3 text-[13px] font-semibold transition-colors duration-150",
                       layout === "list" && "border-transparent py-2.5",
                       active
                         ? "border-navy-700 bg-tint text-navy-700"
@@ -52,7 +51,6 @@ export function AdminNavList({ exclude = [], layout = "list", onNavigate }: Admi
                   >
                     <Icon className="h-4 w-4 flex-none" strokeWidth={1.9} />
                     <span className="truncate">{entry.label}</span>
-                    <NavPendingSkeleton className="bg-canvas px-3.5" barClassName="bg-hover" />
                   </Link>
                 </li>
               );
