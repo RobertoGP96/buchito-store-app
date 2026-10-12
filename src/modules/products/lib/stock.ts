@@ -1,3 +1,5 @@
+import { roundQty } from "./units";
+
 export type StockMovementKind = "entry" | "exit" | "adjustment";
 
 export interface StockPlan {
@@ -21,27 +23,30 @@ export function isStockRuleError(error: unknown): error is StockRuleError {
   return error instanceof StockRuleError;
 }
 
-/** Calcula el resultado de un movimiento sin tocar la DB. Para `adjustment`
+/** Calcula el resultado de un movimiento sin tocar la DB. Las cantidades van
+ *  en la unidad de la variante (hasta 3 decimales). Para `adjustment`
  *  `quantity` es el conteo real (stock final), no un delta. */
 export function planStockMovement(
   currentStock: number,
   type: StockMovementKind,
   quantity: number
 ): StockPlanResult {
-  if (!Number.isInteger(quantity) || quantity <= 0) {
+  if (!Number.isFinite(quantity) || quantity <= 0) {
     return { ok: false, error: "La cantidad debe ser mayor que cero" };
   }
+  const qty = roundQty(quantity);
+  const current = roundQty(currentStock);
 
   switch (type) {
     case "entry":
-      return { ok: true, plan: { stockAfter: currentStock + quantity, movementQuantity: quantity } };
+      return { ok: true, plan: { stockAfter: roundQty(current + qty), movementQuantity: qty } };
     case "exit":
-      if (quantity > currentStock) return { ok: false, error: "Stock insuficiente" };
-      return { ok: true, plan: { stockAfter: currentStock - quantity, movementQuantity: quantity } };
+      if (qty > current) return { ok: false, error: "Stock insuficiente" };
+      return { ok: true, plan: { stockAfter: roundQty(current - qty), movementQuantity: qty } };
     case "adjustment": {
-      const delta = quantity - currentStock;
+      const delta = roundQty(qty - current);
       if (delta === 0) return { ok: false, error: "El stock ya es ese" };
-      return { ok: true, plan: { stockAfter: quantity, movementQuantity: Math.abs(delta) } };
+      return { ok: true, plan: { stockAfter: qty, movementQuantity: Math.abs(delta) } };
     }
   }
 }

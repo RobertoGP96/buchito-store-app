@@ -1,13 +1,15 @@
 import "server-only";
 import { Prisma } from "@/generated/prisma";
 import { getRatesToBase, type BaseCurrencyInfo, type DbOrTx, type RateSnapshot } from "@/lib/currency";
-import { decimalToNumber } from "@/lib/money";
+import { roundToCurrency } from "@/lib/currency-math";
+import { decimalToNullableNumber, decimalToNumber } from "@/lib/money";
 import {
   parseAttributeSchema,
   parseAttributeValues,
   variantLabel,
   type AttributeValues,
 } from "@/modules/products/lib/attribute-schema";
+import type { SaleUnit } from "@/modules/products/lib/units";
 
 /** Variante tal como la necesita `createOrder` para snapshotear la línea.
  *  El precio va en su moneda original; la conversión a base la hace la
@@ -21,11 +23,16 @@ export interface OrderVariantRow {
   sku: string;
   attributes: AttributeValues;
   imageUrl: string | null;
+  unit: SaleUnit;
+  /** Mínimo vendible: la cantidad pedida debe ser múltiplo. */
+  qtyStep: number;
   stock: number;
   origUnitPrice: number;
   priceCurrency: { currencyId: number; code: string };
   /** Base por 1 unidad de la moneda del precio (1 si ya está en base). */
   rateToBase: number | null;
+  /** Costo de compra por unidad convertido a base; null sin costo o sin tasa. */
+  costBase: number | null;
 }
 
 const VARIANT_INCLUDE = {
@@ -71,6 +78,8 @@ export async function getOrderVariants(
     const schema = parseAttributeSchema(v.product.type.attributeSchema);
     const attributes = parseAttributeValues(v.attributes);
     const label = Object.keys(attributes).length ? variantLabel(schema, attributes) : "";
+    const cost = decimalToNullableNumber(v.cost);
+    const costRate = v.costCurrencyId != null ? rates.get(v.costCurrencyId)?.rate : undefined;
     return {
       variantId: v.variantId,
       productId: v.product.productId,
@@ -81,10 +90,13 @@ export async function getOrderVariants(
       attributes,
       // La imagen propia de la variante manda; si no tiene, la primera del producto.
       imageUrl: v.imageUrl ?? v.product.images[0]?.url ?? null,
-      stock: v.stock,
+      unit: v.unit,
+      qtyStep: decimalToNumber(v.qtyStep),
+      stock: decimalToNumber(v.stock),
       origUnitPrice: decimalToNumber(v.price),
       priceCurrency: { currencyId: v.priceCurrency.currencyId, code: v.priceCurrency.code },
       rateToBase: rates.get(v.priceCurrencyId)?.rate ?? null,
+      costBase: cost != null && costRate != null ? roundToCurrency(cost * costRate, base.decimalPlaces) : null,
     };
   });
   return { variants, rates };

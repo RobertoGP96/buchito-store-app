@@ -6,6 +6,7 @@ import { Button } from "@heroui/react";
 import { Bike, Pencil, Plus } from "lucide-react";
 import { DeleteButton } from "@/components/delete-button";
 import { EmptyState } from "@/components/empty-state";
+import { Money } from "@/components/money";
 import { ListCard, ResponsiveList, type ListColumn } from "@/components/responsive-list";
 import { StatusChip } from "@/components/status-chip";
 import { deleteCourier } from "../actions/courier-actions";
@@ -60,6 +61,13 @@ export function CourierList({ rows }: { rows: CourierRow[] }) {
     { id: "vehicle", header: "Vehículo", cell: (r) => VEHICLE_LABELS[r.vehicle] },
     { id: "open", header: "En curso", align: "right", cell: (r) => <span className="tabular">{r.openDeliveries}</span> },
     { id: "delivered", header: "Entregadas", align: "right", cell: (r) => <span className="tabular">{r.deliveredCount}</span> },
+    { id: "fee", header: "Por entrega", align: "right", cell: (r) => <Money value={r.deliveryFee} /> },
+    {
+      id: "pending",
+      header: "Por pagar",
+      align: "right",
+      cell: (r) => <Money value={r.pendingFees} className={r.pendingFees > 0 ? "font-semibold text-warn" : "text-slate-400"} />,
+    },
     { id: "status", header: "Estado", cell: (r) => <StatusChip label={r.active ? "Activo" : "Inactivo"} tone={r.active ? "success" : "neutral"} /> },
     {
       id: "actions",
@@ -103,6 +111,8 @@ export function CourierList({ rows }: { rows: CourierRow[] }) {
             rows={[
               { label: "En curso", value: r.openDeliveries },
               { label: "Entregadas", value: r.deliveredCount },
+              { label: "Por entrega", value: <Money value={r.deliveryFee} /> },
+              { label: "Por pagar", value: <Money value={r.pendingFees} /> },
             ]}
             actions={
               <>

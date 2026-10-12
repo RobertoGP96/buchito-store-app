@@ -5,6 +5,7 @@ import type { CurrencyInfo } from "@/lib/format";
 import { decimalToNullableNumber, decimalToNumber } from "@/lib/money";
 import type { DeliveryStatus } from "@/modules/deliveries/lib/labels";
 import type { PaymentStatus } from "@/modules/payments/lib/labels";
+import type { SaleUnit } from "@/modules/products/lib/units";
 import type { FulfillmentType, OrderStatus } from "../lib/labels";
 import type { DeliveryAddress } from "../lib/schemas";
 
@@ -31,10 +32,18 @@ export interface OrderLineRow {
   productName: string;
   variantName: string | null;
   sku: string;
+  /** En `unit` (snapshot de la unidad de la variante). */
   qty: number;
+  unit: SaleUnit;
   unitPrice: number;
   lineTotal: number;
   imageUrl: string | null;
+  /** Costo de compra por unidad en base (snapshot); null si no se registró. */
+  unitCost: number | null;
+  /** Línea generada por un combo: las del mismo combo se agrupan en la ficha. */
+  comboId: number | null;
+  comboName: string | null;
+  comboQty: number | null;
 }
 
 export interface OrderPaymentRow {
@@ -185,10 +194,15 @@ function toDetail(row: DetailRow): OrderDetailData {
       productName: l.productName,
       variantName: l.variantName,
       sku: l.sku,
-      qty: l.qty,
+      qty: decimalToNumber(l.qty),
+      unit: l.unit,
       unitPrice: decimalToNumber(l.unitPrice),
       lineTotal: decimalToNumber(l.lineTotal),
       imageUrl: l.imageUrl,
+      unitCost: decimalToNullableNumber(l.unitCost),
+      comboId: l.comboId,
+      comboName: l.comboName,
+      comboQty: l.comboQty,
     })),
     payments: row.payments.map((p) => ({
       paymentId: p.paymentId,

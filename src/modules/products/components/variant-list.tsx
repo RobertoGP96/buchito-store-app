@@ -13,9 +13,10 @@ import type { CurrencyInfo } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useCurrency } from "@/modules/currency/store/currency-provider";
 import { deleteVariant } from "../actions/variant-actions";
-import { variantLabel, type AttributeDef } from "../lib/attribute-schema";
+import { variantDisplayName, type AttributeDef } from "../lib/attribute-schema";
 import type { ProductStatus } from "../lib/labels";
-import type { AdminVariantRow } from "../queries/product-queries";
+import { fmtQty } from "../lib/units";
+import type { AdminVariantRow, AdminVariantSummary } from "../queries/product-queries";
 
 const StockAdjustForm = lazyDialog(() => import("./stock-adjust-form").then((m) => m.StockAdjustForm));
 const VariantForm = lazyDialog(() => import("./variant-form").then((m) => m.VariantForm));
@@ -29,13 +30,8 @@ interface VariantListProps {
   lowStockThreshold: number;
 }
 
-function displayName(variant: AdminVariantRow, schema: AttributeDef[]): string {
-  if (variant.name) return variant.name;
-  const derived = variantLabel(schema, variant.attributes);
-  return derived || variant.sku;
-}
-
-function PriceCell({ variant }: { variant: AdminVariantRow }) {
+/** Celdas compartidas con la lista de productos (variantes desplegadas). */
+export function VariantPriceCell({ variant }: { variant: AdminVariantSummary }) {
   const { base } = useCurrency();
   const foreign = variant.priceCurrency.currencyId !== base.currencyId;
   return (
@@ -59,16 +55,34 @@ function PriceCell({ variant }: { variant: AdminVariantRow }) {
             Sin tasa
           </span>
         ))}
+      <VariantCostLine variant={variant} />
     </div>
   );
 }
 
-function StockCell({ variant, threshold }: { variant: AdminVariantRow; threshold: number }) {
+/** Costo de compra y margen bajo el precio; "Sin costo" invita a registrarlo. */
+export function VariantCostLine({ variant }: { variant: AdminVariantSummary }) {
+  if (variant.cost == null || !variant.costCurrency) {
+    return <span className="text-[11px] text-slate-400">Sin costo</span>;
+  }
+  return (
+    <span className="text-[11px] text-slate-400">
+      Costo <Money value={variant.cost} currency={variant.costCurrency} />
+      {variant.marginPct != null && (
+        <span className={cn("ml-1 font-semibold", variant.marginPct < 0 ? "text-danger" : "text-ok")}>
+          · margen {variant.marginPct} %
+        </span>
+      )}
+    </span>
+  );
+}
+
+export function VariantStockCell({ variant, threshold }: { variant: AdminVariantSummary; threshold: number }) {
   const out = variant.stock <= 0;
   const low = !out && variant.stock <= threshold;
   return (
     <span className={cn("tabular font-semibold", out ? "text-danger" : low ? "text-warn" : "text-ink")}>
-      {variant.stock}
+      {fmtQty(variant.stock, variant.unit)}
       {out && <span className="ml-1.5 text-[11px] font-medium">Agotado</span>}
       {low && <span className="ml-1.5 text-[11px] font-medium">Bajo</span>}
     </span>
@@ -100,7 +114,7 @@ function DeleteVariantButton({
   schema: AttributeDef[];
   appearance: "icon" | "button";
 }) {
-  const label = displayName(variant, schema);
+  const label = variantDisplayName(variant, schema);
   return (
     <DeleteButton
       appearance={appearance}
@@ -112,7 +126,7 @@ function DeleteVariantButton({
     >
       {variant.stock > 0 && (
         <p className="font-medium text-warn">
-          Tiene {variant.stock} {variant.stock === 1 ? "unidad" : "unidades"} en stock que desaparecerán del inventario.
+          Tiene {fmtQty(variant.stock, variant.unit, true)} en stock que desaparecerán del inventario.
         </p>
       )}
       {variant.isDefault && all.length > 1 && <p>Otra variante pasará a ser la predeterminada.</p>}
@@ -120,7 +134,7 @@ function DeleteVariantButton({
   );
 }
 
-function VariantChips({ variant }: { variant: AdminVariantRow }) {
+export function VariantChips({ variant }: { variant: AdminVariantSummary }) {
   return (
     <div className="flex flex-wrap gap-1.5">
       {variant.isDefault && <StatusChip label="Por defecto" tone="info" />}
@@ -155,13 +169,13 @@ export function VariantList({ productId, productStatus, variants, attributeSchem
       isRowHeader: true,
       cell: (v) => (
         <div className="min-w-0">
-          <p className="font-semibold text-ink">{displayName(v, attributeSchema)}</p>
+          <p className="font-semibold text-ink">{variantDisplayName(v, attributeSchema)}</p>
           <p className="tabular text-[12px] text-slate-400">{v.sku}</p>
         </div>
       ),
     },
-    { id: "price", header: "Precio", align: "right", cell: (v) => <PriceCell variant={v} /> },
-    { id: "stock", header: "Stock", align: "right", cell: (v) => <StockCell variant={v} threshold={lowStockThreshold} /> },
+    { id: "price", header: "Precio", align: "right", cell: (v) => <VariantPriceCell variant={v} /> },
+    { id: "stock", header: "Stock", align: "right", cell: (v) => <VariantStockCell variant={v} threshold={lowStockThreshold} /> },
     { id: "status", header: "Estado", cell: (v) => <VariantChips variant={v} /> },
     {
       id: "actions",
@@ -214,12 +228,12 @@ export function VariantList({ productId, productStatus, variants, attributeSchem
         }
         renderCard={(v) => (
           <ListCard
-            title={displayName(v, attributeSchema)}
+            title={variantDisplayName(v, attributeSchema)}
             subtitle={<span className="tabular">{v.sku}</span>}
             badge={<VariantChips variant={v} />}
             rows={[
-              { label: "Precio", value: <PriceCell variant={v} /> },
-              { label: "Stock", value: <StockCell variant={v} threshold={lowStockThreshold} /> },
+              { label: "Precio", value: <VariantPriceCell variant={v} /> },
+              { label: "Stock", value: <VariantStockCell variant={v} threshold={lowStockThreshold} /> },
             ]}
             actions={
               <>

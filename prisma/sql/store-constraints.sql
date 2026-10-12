@@ -111,3 +111,51 @@ ALTER TABLE deliveries ADD CONSTRAINT chk_delivery_courier_required
 
 ALTER TABLE deliveries DROP CONSTRAINT IF EXISTS chk_delivery_attempts_nonneg;
 ALTER TABLE deliveries ADD CONSTRAINT chk_delivery_attempts_nonneg CHECK (attempts >= 0);
+
+-- ===================== COSTOS Y COMBOS =====================
+
+ALTER TABLE product_variants DROP CONSTRAINT IF EXISTS chk_variant_cost;
+ALTER TABLE product_variants ADD CONSTRAINT chk_variant_cost
+  CHECK (cost IS NULL OR cost >= 0);
+
+-- El costo y su moneda van juntos o no van.
+ALTER TABLE product_variants DROP CONSTRAINT IF EXISTS chk_variant_cost_currency;
+ALTER TABLE product_variants ADD CONSTRAINT chk_variant_cost_currency
+  CHECK ((cost IS NULL) = (cost_currency_id IS NULL));
+
+ALTER TABLE stock_movements DROP CONSTRAINT IF EXISTS chk_movement_unit_cost;
+ALTER TABLE stock_movements ADD CONSTRAINT chk_movement_unit_cost
+  CHECK ((unit_cost IS NULL OR unit_cost >= 0) AND ((unit_cost IS NULL) = (cost_currency_id IS NULL)));
+
+ALTER TABLE combos DROP CONSTRAINT IF EXISTS chk_combo_price_nonneg;
+ALTER TABLE combos ADD CONSTRAINT chk_combo_price_nonneg CHECK (price >= 0);
+
+ALTER TABLE combos DROP CONSTRAINT IF EXISTS chk_combo_dates;
+ALTER TABLE combos ADD CONSTRAINT chk_combo_dates
+  CHECK (starts_at IS NULL OR ends_at IS NULL OR ends_at >= starts_at);
+
+ALTER TABLE combo_items DROP CONSTRAINT IF EXISTS chk_combo_item_qty_pos;
+ALTER TABLE combo_items ADD CONSTRAINT chk_combo_item_qty_pos CHECK (qty > 0);
+
+ALTER TABLE order_lines DROP CONSTRAINT IF EXISTS chk_order_line_unit_cost;
+ALTER TABLE order_lines ADD CONSTRAINT chk_order_line_unit_cost
+  CHECK (unit_cost IS NULL OR unit_cost >= 0);
+
+-- El snapshot de combo va completo o vacío.
+ALTER TABLE order_lines DROP CONSTRAINT IF EXISTS chk_order_line_combo_trio;
+ALTER TABLE order_lines ADD CONSTRAINT chk_order_line_combo_trio
+  CHECK ((combo_id IS NULL) = (combo_name IS NULL)
+         AND (combo_id IS NULL) = (combo_qty IS NULL)
+         AND (combo_qty IS NULL OR combo_qty > 0));
+
+-- ===================== PAGOS A MENSAJEROS =====================
+
+ALTER TABLE couriers DROP CONSTRAINT IF EXISTS chk_courier_delivery_fee_nonneg;
+ALTER TABLE couriers ADD CONSTRAINT chk_courier_delivery_fee_nonneg CHECK (delivery_fee >= 0);
+
+ALTER TABLE deliveries DROP CONSTRAINT IF EXISTS chk_delivery_courier_fee_nonneg;
+ALTER TABLE deliveries ADD CONSTRAINT chk_delivery_courier_fee_nonneg CHECK (courier_fee >= 0);
+
+ALTER TABLE courier_payments DROP CONSTRAINT IF EXISTS chk_courier_payment_amounts;
+ALTER TABLE courier_payments ADD CONSTRAINT chk_courier_payment_amounts
+  CHECK (amount_base > 0 AND fees_base >= 0 AND delivery_count >= 0);

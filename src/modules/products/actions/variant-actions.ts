@@ -15,6 +15,7 @@ import {
   type AttributeValues,
 } from "../lib/attribute-schema";
 import { variantSchema, type VariantInput, type VariantValues } from "../lib/schemas";
+import { roundQty } from "../lib/units";
 import { firstAttributeError, resolveIsDefault, resolveVariantName } from "../lib/variant-rules";
 
 const UNIQUE_CONFLICT =
@@ -66,12 +67,28 @@ async function skuTaken(sku: string, excludeVariantId?: number): Promise<boolean
   return row != null;
 }
 
+type CostColumns = { cost: Prisma.Decimal | null; costCurrencyId: number | null };
+
+/** Costo de compra: sin moneda propia se asume la del precio; se redondea a
+ *  los decimales de su moneda. Null si no se registró. */
+async function resolveCost(data: VariantValues): Promise<{ ok: true; value: CostColumns } | { ok: false; error: string }> {
+  if (data.cost == null) return { ok: true, value: { cost: null, costCurrencyId: null } };
+  const costCurrencyId = data.costCurrencyId ?? data.priceCurrencyId;
+  const currency = await getCurrency(costCurrencyId);
+  if (!currency) return { ok: false, error: "La moneda del costo no existe" };
+  return {
+    ok: true,
+    value: { cost: new Prisma.Decimal(roundToCurrency(data.cost, currency.decimalPlaces)), costCurrencyId },
+  };
+}
+
 /** Columnas que escriben create/update. Nunca `stock`: solo adjustStock. */
 function toVariantColumns(
   data: VariantValues,
   attributes: AttributeValues,
   name: string | null,
-  prices: { price: number; compareAtPrice: number | null }
+  prices: { price: number; compareAtPrice: number | null },
+  cost: CostColumns
 ) {
   return {
     sku: data.sku,
@@ -80,6 +97,10 @@ function toVariantColumns(
     price: new Prisma.Decimal(prices.price),
     compareAtPrice: prices.compareAtPrice == null ? null : new Prisma.Decimal(prices.compareAtPrice),
     priceCurrencyId: data.priceCurrencyId,
+    cost: cost.cost,
+    costCurrencyId: cost.costCurrencyId,
+    unit: data.unit,
+    qtyStep: new Prisma.Decimal(roundQty(data.qtyStep)),
     imageUrl: data.imageUrl,
     isActive: data.isActive,
     sortOrder: data.sortOrder,
@@ -112,6 +133,8 @@ export async function createVariant(
     }
     const prices = roundPrices(data, currency.decimalPlaces);
     if (!prices) return { success: false, error: PRICE_ORDER_ERROR };
+    const cost = await resolveCost(data);
+    if (!cost.ok) return { success: false, error: cost.error };
     if (await skuTaken(data.sku)) {
       return { success: false, error: "Ya existe una variante con ese SKU" };
     }
@@ -123,7 +146,7 @@ export async function createVariant(
     }
     const name = resolveVariantName(data.name, schema, validation.values);
     const isDefault = resolveIsDefault(data.isDefault, product._count.variants);
-    const columns = toVariantColumns(data, validation.values, name, prices);
+    const columns = toVariantColumns(data, validation.values, name, prices, cost.value);
 
     const row = await db.$transaction(async (tx) => {
       if (isDefault) {
@@ -132,16 +155,17 @@ export async function createVariant(
           data: { isDefault: false },
         });
       }
+      const initialStock = roundQty(data.initialStock);
       const created = await tx.productVariant.create({
-        data: { productId: data.productId, ...columns, isDefault, stock: data.initialStock },
+        data: { productId: data.productId, ...columns, isDefault, stock: initialStock },
       });
-      if (data.initialStock > 0) {
+      if (initialStock > 0) {
         await tx.stockMovement.create({
           data: {
             variantId: created.variantId,
             type: "entry",
-            quantity: data.initialStock,
-            stockAfter: data.initialStock,
+            quantity: initialStock,
+            stockAfter: initialStock,
             referenceType: "manual",
             notes: "Stock inicial",
             createdById: userId,
@@ -154,7 +178,7 @@ export async function createVariant(
         entityId: created.variantId,
         module: "products",
         userId,
-        newValues: { productId: data.productId, ...columns, isDefault, stock: data.initialStock },
+        newValues: { productId: data.productId, ...columns, isDefault, stock: initialStock },
       });
       return created;
     });
@@ -199,6 +223,8 @@ export async function updateVariant(
     }
     const prices = roundPrices(data, currency.decimalPlaces);
     if (!prices) return { success: false, error: PRICE_ORDER_ERROR };
+    const cost = await resolveCost(data);
+    if (!cost.ok) return { success: false, error: cost.error };
     if (await skuTaken(data.sku, variantId)) {
       return { success: false, error: "Ya existe otra variante con ese SKU" };
     }
@@ -226,7 +252,7 @@ export async function updateVariant(
       return { success: false, error: firstAttributeError(validation.errors) ?? "Revisa los atributos" };
     }
     const name = resolveVariantName(data.name, schema, validation.values);
-    const columns = toVariantColumns(data, validation.values, name, prices);
+    const columns = toVariantColumns(data, validation.values, name, prices, cost.value);
     const { product, ...oldValues } = current;
     void product;
 

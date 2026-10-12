@@ -11,6 +11,7 @@ import { courierSchema, type CourierInput } from "../lib/schemas";
 
 function revalidateCourierPaths() {
   revalidatePath("/admin/mensajeros");
+  revalidatePath("/admin/mensajeros/pagos");
   revalidatePath("/admin/entregas");
 }
 
@@ -36,7 +37,14 @@ export async function createCourier(input: CourierInput): Promise<ActionResult<{
         data: { email: data.email, passwordHash, fullName: data.fullName, role: "courier", isActive: data.active },
       });
       const courier = await tx.courier.create({
-        data: { userId: user.userId, phone: data.phone, vehicle: data.vehicle, notes: data.notes, active: data.active },
+        data: {
+          userId: user.userId,
+          phone: data.phone,
+          vehicle: data.vehicle,
+          notes: data.notes,
+          deliveryFee: data.deliveryFee,
+          active: data.active,
+        },
       });
       await createAuditLog(tx, {
         action: "create",
@@ -44,7 +52,7 @@ export async function createCourier(input: CourierInput): Promise<ActionResult<{
         entityId: courier.courierId,
         module: "deliveries",
         userId,
-        newValues: { fullName: data.fullName, email: data.email, phone: data.phone, vehicle: data.vehicle },
+        newValues: { fullName: data.fullName, email: data.email, phone: data.phone, vehicle: data.vehicle, deliveryFee: data.deliveryFee },
       });
       return courier;
     });
@@ -93,7 +101,14 @@ export async function updateCourier(
     await db.$transaction(async (tx) => {
       const updated = await tx.courier.updateMany({
         where: { courierId, version },
-        data: { phone: data.phone, vehicle: data.vehicle, notes: data.notes, active: data.active, version: { increment: 1 } },
+        data: {
+          phone: data.phone,
+          vehicle: data.vehicle,
+          notes: data.notes,
+          deliveryFee: data.deliveryFee,
+          active: data.active,
+          version: { increment: 1 },
+        },
       });
       if (updated.count !== 1) throw new StaleVersionError();
       await tx.user.update({
@@ -106,8 +121,8 @@ export async function updateCourier(
         entityId: courierId,
         module: "deliveries",
         userId,
-        oldValues: { fullName: current.user.fullName, email: current.user.email, phone: current.phone, vehicle: current.vehicle, active: current.active },
-        newValues: { fullName: data.fullName, email: data.email, phone: data.phone, vehicle: data.vehicle, active: data.active, passwordChanged: Boolean(passwordHash) },
+        oldValues: { fullName: current.user.fullName, email: current.user.email, phone: current.phone, vehicle: current.vehicle, deliveryFee: current.deliveryFee, active: current.active },
+        newValues: { fullName: data.fullName, email: data.email, phone: data.phone, vehicle: data.vehicle, deliveryFee: data.deliveryFee, active: data.active, passwordChanged: Boolean(passwordHash) },
       });
     });
 
@@ -130,12 +145,12 @@ export async function deleteCourier(courierId: number): Promise<ActionResult<voi
       where: { courierId },
       include: {
         user: { select: { userId: true, fullName: true, email: true } },
-        _count: { select: { deliveries: true } },
+        _count: { select: { deliveries: true, payments: true } },
       },
     });
     if (!current) return { success: false, error: "Mensajero no encontrado" };
-    if (current._count.deliveries > 0) {
-      return { success: false, error: "Tiene entregas registradas. Desactívalo en su lugar." };
+    if (current._count.deliveries > 0 || current._count.payments > 0) {
+      return { success: false, error: "Tiene entregas o pagos registrados. Desactívalo en su lugar." };
     }
 
     await db.$transaction(async (tx) => {

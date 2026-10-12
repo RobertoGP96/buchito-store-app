@@ -10,6 +10,7 @@ import { PRODUCT_IMAGE_TRANSITION, ProductImage } from "@/components/product-ima
 import { StockLabel } from "@/components/stock-label";
 import { discountPct } from "@/lib/format";
 import { useCart } from "@/modules/cart/store";
+import { perUnitSuffix } from "@/modules/products/lib/units";
 import type { CatalogProduct, CatalogVariant } from "@/modules/products/queries/catalog-queries";
 import { cn } from "@/lib/utils";
 
@@ -30,6 +31,8 @@ export function cartLineFor(product: CatalogProduct, variant: CatalogVariant) {
     imageUrl: variant.imageUrl ?? product.imageUrl,
     unitPrice: variant.price,
     compareAtPrice: variant.compareAtPrice,
+    unit: variant.unit,
+    qtyStep: variant.qtyStep,
     stock: variant.stock,
   };
 }
@@ -55,7 +58,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
       return;
     }
     setAdding(true);
-    addToCart(cartLineFor(product, variant), 1);
+    addToCart(cartLineFor(product, variant), variant.qtyStep);
     toast.success(`${product.name} añadido a la bolsa`);
     window.setTimeout(() => setAdding(false), 300);
   };
@@ -112,7 +115,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
         {hasVariants && (
           <span className="text-[12px] text-slate-400">{product.variants.length} variantes</span>
         )}
-        <StockLabel stock={product.totalStock} />
+        <StockLabel stock={product.totalStock} unit={hasVariants ? "unit" : variant.unit} />
       </div>
 
       <div className="mt-auto flex items-end justify-between gap-2.5 border-t border-line pt-3">
@@ -120,6 +123,9 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           <div className="text-[15px] leading-tight font-bold text-navy-900 sm:text-[16px]">
             {hasVariants && <span className="mr-1 text-[11px] font-medium text-slate-400">desde</span>}
             <Money value={variant.price} />
+            {perUnitSuffix(variant.unit) && (
+              <span className="ml-1 text-[11px] font-medium text-slate-400">{perUnitSuffix(variant.unit)}</span>
+            )}
           </div>
           {variant.compareAtPrice != null && variant.compareAtPrice > variant.price && (
             <div className="mt-0.5 text-[11px] font-medium text-slate-400 line-through">

@@ -14,6 +14,7 @@ import { ListCard, ResponsiveList, type ListColumn } from "@/components/responsi
 import { StatusChip } from "@/components/status-chip";
 import { cn } from "@/lib/utils";
 import { PRODUCT_STATUS_META } from "../lib/labels";
+import { fmtQty } from "../lib/units";
 import type { AdminVariantRow } from "../queries/product-queries";
 import type { InventoryRow } from "../queries/inventory-queries";
 
@@ -46,6 +47,12 @@ function toAdjustVariant(row: InventoryRow): AdminVariantRow {
     compareAtPrice: null,
     priceCurrency: row.priceCurrency,
     priceBase: null,
+    cost: null,
+    costCurrency: null,
+    costBase: null,
+    marginPct: null,
+    unit: row.unit,
+    qtyStep: row.qtyStep,
     stock: row.stock,
     imageUrl: null,
     isDefault: false,
@@ -61,7 +68,7 @@ function StockCell({ row }: { row: InventoryRow }) {
   const low = !out && row.isLow;
   return (
     <span className={cn("tabular font-semibold", out ? "text-danger" : low ? "text-warn" : "text-ink")}>
-      {row.stock}
+      {fmtQty(row.stock, row.unit)}
       {out && <span className="ml-1.5 text-[11px] font-medium">Agotado</span>}
       {low && <span className="ml-1.5 text-[11px] font-medium">Bajo</span>}
     </span>

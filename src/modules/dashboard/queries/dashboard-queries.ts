@@ -4,6 +4,7 @@ import { decimalToNumber } from "@/lib/money";
 import type { DeliveryStatus } from "@/modules/deliveries/lib/labels";
 import { ORDER_STATUSES, type OrderStatus } from "@/modules/orders/lib/labels";
 import type { PaymentStatus } from "@/modules/payments/lib/labels";
+import type { SaleUnit } from "@/modules/products/lib/units";
 import { getStoreSettings } from "@/modules/settings/queries/settings-queries";
 
 export interface DashboardKpis {
@@ -57,6 +58,7 @@ export interface LowStockVariantRow {
   productName: string;
   variantName: string | null;
   sku: string;
+  unit: SaleUnit;
   stock: number;
 }
 
@@ -153,6 +155,7 @@ export async function getDashboardData(): Promise<DashboardData> {
         variantId: true,
         sku: true,
         name: true,
+        unit: true,
         stock: true,
         product: { select: { productId: true, name: true } },
       },
@@ -215,7 +218,8 @@ export async function getDashboardData(): Promise<DashboardData> {
       productName: v.product.name,
       variantName: v.name,
       sku: v.sku,
-      stock: v.stock,
+      unit: v.unit,
+      stock: decimalToNumber(v.stock),
     })),
   };
 }

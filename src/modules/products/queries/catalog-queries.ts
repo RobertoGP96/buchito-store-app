@@ -15,6 +15,7 @@ import {
   type AttributeDef,
   type AttributeValues,
 } from "../lib/attribute-schema";
+import type { SaleUnit } from "../lib/units";
 
 /** Variante tal como la ve la tienda: precios YA en moneda base. */
 export interface CatalogVariant {
@@ -27,6 +28,10 @@ export interface CatalogVariant {
   /** Precio en su moneda original, solo informativo ("12.50 USD"). */
   origPrice: number;
   origCurrency: CurrencyInfo;
+  /** Unidad de venta: el precio es por 1 unidad de ella. */
+  unit: SaleUnit;
+  /** Mínimo vendible y paso del selector, en `unit`. */
+  qtyStep: number;
   stock: number;
   imageUrl: string | null;
   isDefault: boolean;
@@ -118,7 +123,9 @@ function toCatalogProduct(row: ProductRow, ctx: RateContext): CatalogProduct | n
         symbol: v.priceCurrency.symbol,
         decimalPlaces: v.priceCurrency.decimalPlaces,
       },
-      stock: v.stock,
+      unit: v.unit,
+      qtyStep: decimalToNumber(v.qtyStep),
+      stock: decimalToNumber(v.stock),
       imageUrl: v.imageUrl,
       isDefault: v.isDefault,
     });
@@ -150,6 +157,8 @@ export interface CatalogFilters {
   q?: string;
   category?: string;
   featured?: boolean;
+  /** Solo productos con alguna variante rebajada (precio anterior tachado). */
+  onSale?: boolean;
   limit?: number;
 }
 
@@ -159,6 +168,8 @@ export async function getCatalogProducts(filters: CatalogFilters = {}): Promise<
 
   const where: Prisma.ProductWhereInput = { status: "active" };
   if (filters.featured) where.featured = true;
+  // El CHECK de la DB garantiza compare_at_price > price: basta con que exista.
+  if (filters.onSale) where.variants = { some: { isActive: true, compareAtPrice: { not: null } } };
   if (filters.category) {
     // Una categoría padre incluye los productos de sus hijas directas.
     where.category = {
@@ -181,11 +192,19 @@ export async function getCatalogProducts(filters: CatalogFilters = {}): Promise<
     take: filters.limit,
   });
 
-  return rows.map((row) => toCatalogProduct(row, ctx)).filter((p): p is CatalogProduct => p !== null);
+  const products = rows.map((row) => toCatalogProduct(row, ctx)).filter((p): p is CatalogProduct => p !== null);
+  if (!filters.onSale) return products;
+  // La variante rebajada pudo quedar fuera por falta de tasa: se comprueba
+  // sobre lo que realmente se muestra.
+  return products.filter((p) => p.variants.some((v) => v.compareAtPrice != null && v.compareAtPrice > v.price));
 }
 
 export async function getFeaturedProducts(limit = 8): Promise<CatalogProduct[]> {
   return getCatalogProducts({ featured: true, limit });
+}
+
+export async function getOnSaleProducts(limit?: number): Promise<CatalogProduct[]> {
+  return getCatalogProducts({ onSale: true, limit });
 }
 
 export async function getProductBySlug(slug: string): Promise<CatalogProduct | null> {

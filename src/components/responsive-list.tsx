@@ -20,6 +20,11 @@ interface ResponsiveListProps<Row> {
   columns: ListColumn<Row>[];
   /** Card de móvil por fila; la tabla es solo para ≥md. */
   renderCard: (row: Row) => ReactNode;
+  /** Filas de la tabla cuando difieren de las cards (p. ej. sub-filas
+   *  desplegadas que en móvil van dentro de la card). Por defecto `rows`. */
+  tableRows?: Row[];
+  /** Clases extra por fila de la tabla (p. ej. resaltar sub-filas). */
+  rowClassName?: (row: Row) => string | undefined;
   ariaLabel: string;
   empty: ReactNode;
   className?: string;
@@ -31,6 +36,8 @@ export function ResponsiveList<Row>({
   rowKey,
   columns,
   renderCard,
+  tableRows = rows,
+  rowClassName,
   ariaLabel,
   empty,
   className,
@@ -62,8 +69,8 @@ export function ResponsiveList<Row>({
                 ))}
               </Table.Header>
               <Table.Body>
-                {rows.map((row) => (
-                  <Table.Row key={rowKey(row)} id={String(rowKey(row))}>
+                {tableRows.map((row) => (
+                  <Table.Row key={rowKey(row)} id={String(rowKey(row))} className={rowClassName?.(row)}>
                     {columns.map((column) => (
                       <Table.Cell
                         key={column.id}
@@ -83,7 +90,8 @@ export function ResponsiveList<Row>({
   );
 }
 
-/** Card de fila en móvil: título + chip + filas clave/valor. */
+/** Card de fila en móvil: título + chip + filas clave/valor. `children` va
+ *  entre las filas y las acciones (p. ej. un desplegable con sub-elementos). */
 export function ListCard({
   title,
   subtitle,
@@ -91,6 +99,7 @@ export function ListCard({
   rows,
   actions,
   className,
+  children,
 }: {
   title: ReactNode;
   subtitle?: ReactNode;
@@ -98,6 +107,7 @@ export function ListCard({
   rows?: { label: string; value: ReactNode }[];
   actions?: ReactNode;
   className?: string;
+  children?: ReactNode;
 }) {
   return (
     <article className={cn("rounded-card bg-canvas p-4 shadow-card", className)}>
@@ -118,6 +128,7 @@ export function ListCard({
           ))}
         </dl>
       )}
+      {children}
       {actions && <div className="mt-3 flex flex-wrap justify-end gap-2 border-t border-line pt-3">{actions}</div>}
     </article>
   );

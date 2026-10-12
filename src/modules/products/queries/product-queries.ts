@@ -1,6 +1,7 @@
 import "server-only";
+import type { Prisma } from "@/generated/prisma";
 import { db } from "@/lib/db";
-import { BaseCurrencyNotConfiguredError, getBaseCurrencyCached, getRatesToBaseCached } from "@/lib/currency";
+import { BaseCurrencyNotConfiguredError, getRatesToBaseCached } from "@/lib/currency";
 import { roundToCurrency } from "@/lib/currency-math";
 import type { CurrencyInfo } from "@/lib/format";
 import { decimalToNullableNumber, decimalToNumber } from "@/lib/money";
@@ -10,7 +11,9 @@ import {
   type AttributeDef,
   type AttributeValues,
 } from "../lib/attribute-schema";
+import { marginPct } from "@/modules/finance/lib/profit";
 import type { ProductStatus } from "../lib/labels";
+import type { SaleUnit } from "../lib/units";
 
 export interface AdminProductRow {
   productId: number;
@@ -27,41 +30,140 @@ export interface AdminProductRow {
   /** Alguna variante tiene precio en una moneda sin tasa a base. */
   hasMissingRate: boolean;
   imageUrl: string | null;
+  /** Esquema del tipo: la lista lo necesita para nombrar y editar variantes. */
+  attributeSchema: AttributeDef[];
+  /** Todas las variantes (activas e inactivas), en el orden del producto. */
+  variants: AdminVariantSummary[];
   updatedAt: string;
 }
 
-export async function getAdminProducts(): Promise<AdminProductRow[]> {
-  let rates = new Map<number, { rate: number }>();
-  let baseDecimals = 0;
+export interface AdminVariantSummary {
+  variantId: number;
+  version: number;
+  sku: string;
+  name: string | null;
+  attributes: AttributeValues;
+  /** Precio en SU moneda (`priceCurrency`), sin convertir. */
+  price: number;
+  compareAtPrice: number | null;
+  priceCurrency: CurrencyInfo;
+  /** Precio convertido a base con la tasa vigente; null si no hay tasa. */
+  priceBase: number | null;
+  /** Último costo de compra por unidad en SU moneda; null si no se registró. */
+  cost: number | null;
+  costCurrency: CurrencyInfo | null;
+  /** Costo convertido a base; null sin costo o sin tasa. */
+  costBase: number | null;
+  /** (precio − costo) / precio, en base; null si falta alguno. */
+  marginPct: number | null;
+  /** Unidad de venta; el precio es por 1 unidad de ella. */
+  unit: SaleUnit;
+  /** Mínimo vendible y paso del selector, en `unit`. */
+  qtyStep: number;
+  /** En `unit`, hasta 3 decimales. */
+  stock: number;
+  imageUrl: string | null;
+  isDefault: boolean;
+  isActive: boolean;
+  sortOrder: number;
+}
+
+type RatesToBase = Map<number, { rate: number }>;
+
+/** Tasas a base; sin moneda base configurada devuelve un mapa vacío (nada se vende). */
+async function loadRatesToBase(): Promise<{ rates: RatesToBase; baseDecimals: number }> {
   try {
-    const base = await getBaseCurrencyCached();
-    baseDecimals = base.decimalPlaces;
-    rates = (await getRatesToBaseCached()).rates;
+    const { base, rates } = await getRatesToBaseCached();
+    return { rates, baseDecimals: base.decimalPlaces };
   } catch (error) {
-    if (!(error instanceof BaseCurrencyNotConfiguredError)) throw error;
+    if (error instanceof BaseCurrencyNotConfiguredError) return { rates: new Map(), baseDecimals: 0 };
+    throw error;
   }
+}
+
+type VariantSource = {
+  variantId: number;
+  version: number;
+  sku: string;
+  name: string | null;
+  attributes: unknown;
+  price: Prisma.Decimal;
+  compareAtPrice: Prisma.Decimal | null;
+  priceCurrencyId: number;
+  priceCurrency: CurrencyInfo;
+  cost: Prisma.Decimal | null;
+  costCurrencyId: number | null;
+  costCurrency: CurrencyInfo | null;
+  unit: SaleUnit;
+  qtyStep: Prisma.Decimal;
+  stock: Prisma.Decimal;
+  imageUrl: string | null;
+  isDefault: boolean;
+  isActive: boolean;
+  sortOrder: number;
+};
+
+function toVariantSummary(v: VariantSource, rates: RatesToBase, baseDecimals: number): AdminVariantSummary {
+  const price = decimalToNumber(v.price);
+  const rate = rates.get(v.priceCurrencyId);
+  const priceBase = rate ? roundToCurrency(price * rate.rate, baseDecimals) : null;
+  const cost = decimalToNullableNumber(v.cost);
+  const costRate = v.costCurrencyId != null ? rates.get(v.costCurrencyId) : undefined;
+  const costBase = cost != null && costRate ? roundToCurrency(cost * costRate.rate, baseDecimals) : null;
+  return {
+    variantId: v.variantId,
+    version: v.version,
+    sku: v.sku,
+    name: v.name,
+    attributes: parseAttributeValues(v.attributes),
+    price,
+    compareAtPrice: decimalToNullableNumber(v.compareAtPrice),
+    priceCurrency: v.priceCurrency,
+    priceBase,
+    cost,
+    costCurrency: v.costCurrency,
+    costBase,
+    marginPct: priceBase != null ? marginPct(priceBase, costBase) : null,
+    unit: v.unit,
+    qtyStep: decimalToNumber(v.qtyStep),
+    stock: decimalToNumber(v.stock),
+    imageUrl: v.imageUrl,
+    isDefault: v.isDefault,
+    isActive: v.isActive,
+    sortOrder: v.sortOrder,
+  };
+}
+
+const VARIANT_CURRENCY_SELECT = { select: { currencyId: true, code: true, symbol: true, decimalPlaces: true } } as const;
+
+export async function getAdminProducts(): Promise<AdminProductRow[]> {
+  const { rates, baseDecimals } = await loadRatesToBase();
 
   const rows = await db.product.findMany({
     orderBy: [{ updatedAt: "desc" }],
     include: {
-      type: { select: { name: true } },
+      type: { select: { name: true, attributeSchema: true } },
       category: { select: { name: true } },
       images: { orderBy: { sortOrder: "asc" }, take: 1 },
-      variants: { where: { isActive: true }, select: { price: true, priceCurrencyId: true, stock: true, imageUrl: true } },
+      variants: {
+        orderBy: [{ sortOrder: "asc" }, { variantId: "asc" }],
+        include: { priceCurrency: VARIANT_CURRENCY_SELECT, costCurrency: VARIANT_CURRENCY_SELECT },
+      },
     },
   });
 
   return rows.map((row) => {
+    const variants = row.variants.map((v) => toVariantSummary(v, rates, baseDecimals));
+    // El resumen (conteo, stock, precio mínimo) solo cuenta las variantes vendibles.
+    const active = variants.filter((v) => v.isActive);
     let minPrice: number | null = null;
     let hasMissingRate = false;
-    for (const v of row.variants) {
-      const rate = rates.get(v.priceCurrencyId);
-      if (!rate) {
+    for (const v of active) {
+      if (v.priceBase == null) {
         hasMissingRate = true;
         continue;
       }
-      const price = roundToCurrency(decimalToNumber(v.price) * rate.rate, baseDecimals);
-      minPrice = minPrice == null ? price : Math.min(minPrice, price);
+      minPrice = minPrice == null ? v.priceBase : Math.min(minPrice, v.priceBase);
     }
     return {
       productId: row.productId,
@@ -71,11 +173,13 @@ export async function getAdminProducts(): Promise<AdminProductRow[]> {
       categoryName: row.category?.name ?? null,
       status: row.status,
       featured: row.featured,
-      variantCount: row.variants.length,
-      totalStock: row.variants.reduce((sum, v) => sum + v.stock, 0),
+      variantCount: active.length,
+      totalStock: active.reduce((sum, v) => sum + v.stock, 0),
       minPrice,
       hasMissingRate,
-      imageUrl: row.images[0]?.url ?? row.variants.find((v) => v.imageUrl)?.imageUrl ?? null,
+      imageUrl: row.images[0]?.url ?? active.find((v) => v.imageUrl)?.imageUrl ?? null,
+      attributeSchema: parseAttributeSchema(row.type.attributeSchema),
+      variants,
       updatedAt: row.updatedAt.toISOString(),
     };
   });
@@ -102,23 +206,7 @@ export interface AdminStockMovement {
   createdAt: string;
 }
 
-export interface AdminVariantRow {
-  variantId: number;
-  version: number;
-  sku: string;
-  name: string | null;
-  attributes: AttributeValues;
-  /** Precio en SU moneda (`priceCurrency`), sin convertir. */
-  price: number;
-  compareAtPrice: number | null;
-  priceCurrency: CurrencyInfo;
-  /** Precio convertido a base con la tasa vigente; null si no hay tasa. */
-  priceBase: number | null;
-  stock: number;
-  imageUrl: string | null;
-  isDefault: boolean;
-  isActive: boolean;
-  sortOrder: number;
+export interface AdminVariantRow extends AdminVariantSummary {
   /** Últimos movimientos, el más reciente primero. */
   recentMovements: AdminStockMovement[];
   /** Líneas de pedido que la referencian: con alguna no se puede borrar. */
@@ -159,7 +247,8 @@ export async function getAdminProduct(productId: number): Promise<AdminProductDe
       variants: {
         orderBy: [{ sortOrder: "asc" }, { variantId: "asc" }],
         include: {
-          priceCurrency: { select: { currencyId: true, code: true, symbol: true, decimalPlaces: true } },
+          priceCurrency: VARIANT_CURRENCY_SELECT,
+          costCurrency: VARIANT_CURRENCY_SELECT,
           stockMovements: {
             orderBy: { createdAt: "desc" },
             take: RECENT_MOVEMENTS,
@@ -172,15 +261,7 @@ export async function getAdminProduct(productId: number): Promise<AdminProductDe
   });
   if (!row) return null;
 
-  let rates = new Map<number, { rate: number }>();
-  let baseDecimals = 0;
-  try {
-    const base = await getBaseCurrencyCached();
-    baseDecimals = base.decimalPlaces;
-    rates = (await getRatesToBaseCached()).rates;
-  } catch (error) {
-    if (!(error instanceof BaseCurrencyNotConfiguredError)) throw error;
-  }
+  const { rates, baseDecimals } = await loadRatesToBase();
 
   return {
     productId: row.productId,
@@ -201,38 +282,21 @@ export async function getAdminProduct(productId: number): Promise<AdminProductDe
     },
     categoryName: row.category?.name ?? null,
     images: row.images.map((i) => ({ imageId: i.imageId, url: i.url, alt: i.alt, sortOrder: i.sortOrder })),
-    variants: row.variants.map((v) => {
-      const price = decimalToNumber(v.price);
-      const rate = rates.get(v.priceCurrencyId);
-      return {
-        variantId: v.variantId,
-        version: v.version,
-        sku: v.sku,
-        name: v.name,
-        attributes: parseAttributeValues(v.attributes),
-        price,
-        compareAtPrice: decimalToNullableNumber(v.compareAtPrice),
-        priceCurrency: v.priceCurrency,
-        priceBase: rate ? roundToCurrency(price * rate.rate, baseDecimals) : null,
-        stock: v.stock,
-        imageUrl: v.imageUrl,
-        isDefault: v.isDefault,
-        isActive: v.isActive,
-        sortOrder: v.sortOrder,
-        recentMovements: v.stockMovements.map((m) => ({
-          movementId: m.movementId,
-          type: m.type,
-          quantity: m.quantity,
-          stockAfter: m.stockAfter,
-          referenceType: m.referenceType,
-          referenceId: m.referenceId,
-          notes: m.notes,
-          createdBy: m.createdBy?.fullName ?? null,
-          createdAt: m.createdAt.toISOString(),
-        })),
-        orderLineCount: v._count.orderLines,
-      };
-    }),
+    variants: row.variants.map((v) => ({
+      ...toVariantSummary(v, rates, baseDecimals),
+      recentMovements: v.stockMovements.map((m) => ({
+        movementId: m.movementId,
+        type: m.type,
+        quantity: decimalToNumber(m.quantity),
+        stockAfter: decimalToNumber(m.stockAfter),
+        referenceType: m.referenceType,
+        referenceId: m.referenceId,
+        notes: m.notes,
+        createdBy: m.createdBy?.fullName ?? null,
+        createdAt: m.createdAt.toISOString(),
+      })),
+      orderLineCount: v._count.orderLines,
+    })),
     orderLineCount: row.variants.reduce((sum, v) => sum + v._count.orderLines, 0),
     updatedAt: row.updatedAt.toISOString(),
   };

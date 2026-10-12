@@ -2,6 +2,7 @@ import { Boxes, PackageCheck } from "lucide-react";
 import { ButtonLink } from "@/components/button-link";
 import { EmptyState } from "@/components/empty-state";
 import { cn } from "@/lib/utils";
+import { fmtQty } from "@/modules/products/lib/units";
 import type { LowStockVariantRow } from "../queries/dashboard-queries";
 import { DashboardCard, DashboardCount, DashboardRow } from "./dashboard-card";
 
@@ -79,7 +80,7 @@ export function LowStock({ rows, total, threshold }: LowStockProps) {
                       out ? "bg-danger-soft text-danger" : "bg-gold-100 text-gold-600"
                     )}
                   >
-                    {out ? "Agotado" : `${v.stock} ${v.stock === 1 ? "ud." : "uds."}`}
+                    {out ? "Agotado" : fmtQty(v.stock, v.unit)}
                   </span>
                 </DashboardRow>
               </li>

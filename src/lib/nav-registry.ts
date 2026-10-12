@@ -3,7 +3,10 @@ import {
   Boxes,
   Coins,
   FolderTree,
+  Gift,
+  HandCoins,
   Inbox,
+  Landmark,
   LayoutDashboard,
   MapPin,
   Package,
@@ -64,6 +67,7 @@ export const ADMIN_NAV_SECTIONS: NavSection[] = [
       { id: "product-types", label: "Tipos de producto", href: "/admin/productos/tipos", icon: Tags, description: "Atributos por tipo (talla, color…)" },
       { id: "categories", label: "Categorías", href: "/admin/categorias", icon: FolderTree, description: "Árbol de categorías" },
       { id: "inventory", label: "Inventario", href: "/admin/inventario", icon: Boxes, matchPrefix: true, description: "Stock por variante y movimientos" },
+      { id: "combos", label: "Combos", href: "/admin/combos", icon: Gift, matchPrefix: true, description: "Paquetes de productos a precio cerrado" },
     ],
   },
   {
@@ -73,12 +77,14 @@ export const ADMIN_NAV_SECTIONS: NavSection[] = [
       { id: "deliveries", label: "Entregas", href: "/admin/entregas", icon: Truck, matchPrefix: true, description: "Asignar mensajeros y seguir entregas" },
       { id: "zones", label: "Zonas de entrega", href: "/admin/entregas/zonas", icon: MapPin, description: "Tarifas y tiempos por zona" },
       { id: "couriers", label: "Mensajeros", href: "/admin/mensajeros", icon: Bike, description: "Repartidores y su actividad" },
+      { id: "courier-payments", label: "Pagos a mensajeros", href: "/admin/mensajeros/pagos", icon: HandCoins, description: "Liquidar las entregas completadas" },
     ],
   },
   {
     id: "finance",
     label: "Finanzas",
     items: [
+      { id: "finance", label: "Resultados", href: "/admin/finanzas", icon: Landmark, description: "Ventas, costos y ganancia" },
       { id: "currencies", label: "Monedas", href: "/admin/monedas", icon: Coins, description: "Monedas y moneda base" },
       { id: "rates", label: "Tasas de cambio", href: "/admin/monedas/tasas", icon: TrendingUp, description: "Tasa vigente e historial" },
       { id: "payment-methods", label: "Métodos de pago", href: "/admin/metodos-pago", icon: Wallet, description: "Formas de pago del checkout" },

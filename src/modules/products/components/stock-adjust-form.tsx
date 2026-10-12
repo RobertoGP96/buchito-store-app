@@ -9,14 +9,18 @@ import { FormSelect, FormTextField, type SelectOption } from "@/components/form/
 import { ResponsiveFormDialog } from "@/components/responsive-form-dialog";
 import { fmtDateTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { useCurrency } from "@/modules/currency/store/currency-provider";
 import { adjustStock } from "../actions/stock-actions";
 import { stockAdjustmentSchema, type StockAdjustmentInput } from "../lib/schemas";
+import { fmtQty, fmtQtyNumber } from "../lib/units";
 import type { AdminStockMovementType, AdminVariantRow } from "../queries/product-queries";
 
 type StockAdjustmentValues = {
   variantId: number;
   type: AdminStockMovementType;
   quantity: number;
+  unitCost?: number | null;
+  costCurrencyId?: number | null;
   notes: string | null;
 };
 
@@ -27,14 +31,14 @@ export const STOCK_MOVEMENT_TYPE_LABELS: Record<AdminStockMovementType, string> 
 };
 
 const TYPE_OPTIONS: SelectOption[] = [
-  { value: "entry", label: "Entrada", description: "Suma unidades al stock actual." },
-  { value: "exit", label: "Salida", description: "Resta unidades; no puede quedar en negativo." },
+  { value: "entry", label: "Entrada", description: "Suma al stock actual." },
+  { value: "exit", label: "Salida", description: "Resta del stock; no puede quedar en negativo." },
   { value: "adjustment", label: "Recuento", description: "Escribe el stock real tras contar." },
 ];
 
 const QUANTITY_LABEL: Record<AdminStockMovementType, string> = {
-  entry: "Unidades que entran",
-  exit: "Unidades que salen",
+  entry: "Cantidad que entra",
+  exit: "Cantidad que sale",
   adjustment: "Stock real (conteo)",
 };
 
@@ -48,12 +52,14 @@ const FORM_ID = "stock-adjust-form";
 
 /** Signo visual de un movimiento: el recuento no tiene signo, es el stock final. */
 function movementDelta(type: AdminStockMovementType, quantity: number): string {
-  if (type === "entry") return `+${quantity}`;
-  if (type === "exit") return `−${quantity}`;
-  return `= ${quantity}`;
+  const n = fmtQtyNumber(quantity);
+  if (type === "entry") return `+${n}`;
+  if (type === "exit") return `−${n}`;
+  return `= ${n}`;
 }
 
 export function StockAdjustForm({ open, onOpenChange, variant }: StockAdjustFormProps) {
+  const { currencies } = useCurrency();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { control, handleSubmit } = useForm<StockAdjustmentInput, unknown, StockAdjustmentValues>({
     resolver: zodResolver(stockAdjustmentSchema),
@@ -61,10 +67,13 @@ export function StockAdjustForm({ open, onOpenChange, variant }: StockAdjustForm
       variantId: variant?.variantId ?? 0,
       type: "entry",
       quantity: "",
+      unitCost: "",
+      costCurrencyId: variant?.costCurrency?.currencyId ?? variant?.priceCurrency.currencyId ?? "",
       notes: "",
     },
   });
   const type = (useWatch({ control, name: "type" }) ?? "entry") as AdminStockMovementType;
+  const currencyOptions: SelectOption[] = currencies.map((c) => ({ value: String(c.currencyId), label: c.code }));
 
   const onSubmit = async (values: StockAdjustmentValues) => {
     setIsSubmitting(true);
@@ -74,7 +83,7 @@ export function StockAdjustForm({ open, onOpenChange, variant }: StockAdjustForm
         toast.danger(result.error);
         return;
       }
-      toast.success(`Stock actualizado: ${result.data.stockAfter} ${result.data.stockAfter === 1 ? "unidad" : "unidades"}`);
+      toast.success(`Stock actualizado: ${fmtQty(result.data.stockAfter, variant?.unit ?? "unit", true)}`);
       onOpenChange(false);
     } catch (error) {
       console.error("StockAdjustForm:", error);
@@ -91,7 +100,7 @@ export function StockAdjustForm({ open, onOpenChange, variant }: StockAdjustForm
       open={open}
       onOpenChange={onOpenChange}
       title={`Stock de ${variant.name ?? variant.sku}`}
-      description={`Stock actual: ${variant.stock} ${variant.stock === 1 ? "unidad" : "unidades"} · SKU ${variant.sku}`}
+      description={`Stock actual: ${fmtQty(variant.stock, variant.unit, true)} · SKU ${variant.sku}`}
       size="sm"
       footer={
         <FormFooter
@@ -107,19 +116,37 @@ export function StockAdjustForm({ open, onOpenChange, variant }: StockAdjustForm
         <FormTextField
           control={control}
           name="quantity"
-          label={QUANTITY_LABEL[type]}
+          label={`${QUANTITY_LABEL[type]}${variant.unit !== "unit" ? ` (${fmtQty(1, variant.unit).replace(/^1 /, "")})` : ""}`}
           type="number"
-          step="1"
-          min={1}
+          step="any"
+          min={0}
           isRequired
           description={
             type === "adjustment"
               ? "Se registra la diferencia con el stock actual. Para dejarlo en cero usa una salida."
               : type === "exit"
-                ? `Máximo ${variant.stock}.`
+                ? `Máximo ${fmtQty(variant.stock, variant.unit)}.`
                 : undefined
           }
         />
+        {type === "entry" && (
+          <div className="grid grid-cols-[minmax(0,1fr)_112px] gap-3">
+            <FormTextField
+              control={control}
+              name="unitCost"
+              label="Precio de compra por unidad"
+              type="number"
+              step="0.01"
+              min={0}
+              description={
+                variant.cost != null && variant.costCurrency
+                  ? `Costo actual: ${variant.cost} ${variant.costCurrency.code}. Vacío = no cambiar.`
+                  : "Opcional. Pasa a ser el costo de la variante."
+              }
+            />
+            <FormSelect control={control} name="costCurrencyId" label="Moneda" options={currencyOptions} />
+          </div>
+        )}
         <FormTextField control={control} name="notes" label="Notas (opcional)" placeholder="Compra a proveedor, rotura…" />
       </form>
 
@@ -146,7 +173,7 @@ export function StockAdjustForm({ open, onOpenChange, variant }: StockAdjustForm
                   <p className={cn("font-semibold", m.type === "exit" ? "text-danger" : "text-ink")}>
                     {movementDelta(m.type, m.quantity)}
                   </p>
-                  <p className="text-[11.5px] text-slate-400">quedan {m.stockAfter}</p>
+                  <p className="text-[11.5px] text-slate-400">quedan {fmtQty(m.stockAfter, variant.unit)}</p>
                 </div>
               </li>
             ))}

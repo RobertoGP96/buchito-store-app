@@ -13,6 +13,9 @@ import { DOC_TYPES, nextFolio } from "@/lib/folio";
 import { decimalToNullableNumber, decimalToNumber } from "@/lib/money";
 import type { ActionResult } from "@/types";
 import { computeCartTotals } from "@/modules/cart/cart-totals";
+import { prorateComboLines } from "@/modules/combos/lib/combo-pricing";
+import { getOrderCombos } from "@/modules/combos/queries/order-combo-queries";
+import { fmtQty, isValidQty, roundQty } from "@/modules/products/lib/units";
 import { resolveCustomer } from "@/modules/customers/lib/resolve-customer";
 import { validateCoupon } from "../lib/coupon";
 import {
@@ -61,40 +64,105 @@ export async function createOrder(
         decimalPlaces: settings.baseCurrency.decimalPlaces,
       };
 
-      // El carrito puede repetir una variante: se consolida para descontar
-      // stock y crear la línea una sola vez.
+      // El carrito puede repetir una variante o un combo: se consolidan para
+      // descontar stock y crear cada línea una sola vez.
       const qtyByVariant = new Map<number, number>();
       for (const line of data.lines) {
         qtyByVariant.set(line.variantId, (qtyByVariant.get(line.variantId) ?? 0) + line.qty);
       }
+      const qtyByCombo = new Map<number, number>();
+      for (const c of data.combos) {
+        qtyByCombo.set(c.comboId, (qtyByCombo.get(c.comboId) ?? 0) + c.qty);
+      }
+      const comboIds = [...qtyByCombo.keys()].sort((a, b) => a - b);
+      const combos = await getOrderCombos(tx, comboIds, new Date());
+      for (const comboId of comboIds) {
+        if (!combos.has(comboId)) throw new CheckoutError("Un combo de tu bolsa ya no está disponible");
+      }
+
       // Orden ascendente: las filas de stock se bloquean siempre en el mismo
       // orden en todas las transacciones (checkout y cancelación) para evitar
       // deadlocks entre pedidos concurrentes con las mismas variantes.
-      const variantIds = [...qtyByVariant.keys()].sort((a, b) => a - b);
+      const variantIds = [
+        ...new Set([...qtyByVariant.keys(), ...[...combos.values()].flatMap((c) => c.items.map((i) => i.variantId))]),
+      ].sort((a, b) => a - b);
       const { variants, rates } = await getOrderVariants(tx, variantIds, base);
       const byId = new Map(variants.map((v) => [v.variantId, v]));
 
-      const lines = variantIds.map((variantId) => {
+      const requireVariant = (variantId: number, missing: string) => {
         const variant = byId.get(variantId);
-        if (!variant) throw new CheckoutError("Un producto de tu bolsa ya no está disponible");
+        if (!variant) throw new CheckoutError(missing);
         if (variant.rateToBase == null) {
-          throw new CheckoutError("Un producto no tiene tasa de cambio configurada");
+          throw new CheckoutError(`${variant.productName} no tiene tasa de cambio configurada`);
         }
-        const qty = qtyByVariant.get(variantId)!;
         const inBase = variant.priceCurrency.currencyId === base.currencyId;
         const unitPrice = inBase
           ? roundToCurrency(variant.origUnitPrice, base.decimalPlaces)
           : roundToCurrency(variant.origUnitPrice * variant.rateToBase, base.decimalPlaces);
         return {
           variant,
-          qty,
-          unitPrice,
-          lineTotal: roundToCurrency(unitPrice * qty, base.decimalPlaces),
+          unitPriceBase: unitPrice,
           origCurrencyId: inBase ? null : variant.priceCurrency.currencyId,
           origUnitPrice: inBase ? null : variant.origUnitPrice,
           exchangeRate: inBase ? null : variant.rateToBase,
         };
-      });
+      };
+
+      type OrderLineDraft = ReturnType<typeof requireVariant> & {
+        qty: number;
+        unitPrice: number;
+        lineTotal: number;
+        combo: { comboId: number; name: string; qty: number } | null;
+      };
+
+      const lines: OrderLineDraft[] = [...qtyByVariant.keys()]
+        .sort((a, b) => a - b)
+        .map((variantId) => {
+          const priced = requireVariant(variantId, "Un producto de tu bolsa ya no está disponible");
+          const qty = roundQty(qtyByVariant.get(variantId)!);
+          // La UI ya ajusta al paso, pero el cliente controla el payload.
+          if (!isValidQty(qty, priced.variant.qtyStep)) {
+            throw new CheckoutError(
+              `${priced.variant.productName} se vende en múltiplos de ${fmtQty(priced.variant.qtyStep, priced.variant.unit)}`
+            );
+          }
+          return {
+            ...priced,
+            qty,
+            unitPrice: priced.unitPriceBase,
+            lineTotal: roundToCurrency(priced.unitPriceBase * qty, base.decimalPlaces),
+            combo: null,
+          };
+        });
+
+      // Cada componente del combo es una línea con el precio del combo
+      // prorrateado: stock y costo siguen siendo por variante y la suma de las
+      // líneas del combo es exactamente su precio.
+      const comboPriceLines: { unitPrice: number; qty: number }[] = [];
+      for (const comboId of comboIds) {
+        const combo = combos.get(comboId)!;
+        const comboQty = qtyByCombo.get(comboId)!;
+        const comboRate = rates.get(combo.priceCurrencyId)?.rate;
+        if (comboRate == null) {
+          throw new CheckoutError(`El combo "${combo.name}" no tiene tasa de cambio configurada`);
+        }
+        const comboPriceBase = roundToCurrency(combo.origPrice * comboRate, base.decimalPlaces);
+        const items = combo.items.map((item) => ({
+          ...requireVariant(item.variantId, `Un producto del combo "${combo.name}" ya no está disponible`),
+          qty: item.qty,
+        }));
+        const prorated = prorateComboLines({ comboPriceBase, comboQty, items, decimals: base.decimalPlaces });
+        for (const p of prorated) {
+          lines.push({
+            ...p.item,
+            qty: roundQty(p.qty),
+            unitPrice: p.unitPrice,
+            lineTotal: p.lineTotal,
+            combo: { comboId: combo.comboId, name: combo.name, qty: comboQty },
+          });
+        }
+        comboPriceLines.push({ unitPrice: comboPriceBase, qty: comboQty });
+      }
 
       // La UI oculta la recogida cuando está deshabilitada, pero el cliente
       // controla el payload: sin esta comprobación anularía el envío.
@@ -134,8 +202,13 @@ export async function createOrder(
         exchangeRate: paymentRate,
         decimals: method.currency.decimalPlaces,
       };
+      // Misma fórmula que el carrito: los productos sueltos por su precio y cada
+      // combo por el suyo (no por sus líneas prorrateadas, que ya suman igual).
       const totalsInput = {
-        lines: lines.map((l) => ({ unitPrice: l.unitPrice, qty: l.qty })),
+        lines: [
+          ...lines.filter((l) => l.combo == null).map((l) => ({ unitPrice: l.unitPrice, qty: l.qty })),
+          ...comboPriceLines,
+        ],
         baseDecimals: base.decimalPlaces,
         fulfillment: data.fulfillment,
         shipping,
@@ -182,21 +255,26 @@ export async function createOrder(
         email: data.customerEmail,
       });
 
-      // Salida de stock condicionada: nunca un decrement ciego.
-      const stockAfter = new Map<number, number>();
+      // Salida de stock condicionada: nunca un decrement ciego. Una variante
+      // puede venir suelta y dentro de combos: se descuenta su total una vez.
+      const stockNeeded = new Map<number, number>();
       for (const line of lines) {
+        stockNeeded.set(line.variant.variantId, roundQty((stockNeeded.get(line.variant.variantId) ?? 0) + line.qty));
+      }
+      const stockAfter = new Map<number, number>();
+      for (const variantId of [...stockNeeded.keys()].sort((a, b) => a - b)) {
+        const qty = stockNeeded.get(variantId)!;
+        const variant = byId.get(variantId)!;
         const taken = await tx.productVariant.updateManyAndReturn({
-          where: { variantId: line.variant.variantId, stock: { gte: line.qty } },
-          data: { stock: { decrement: line.qty } },
+          where: { variantId, stock: { gte: qty } },
+          data: { stock: { decrement: qty } },
           select: { stock: true },
         });
         if (taken.length !== 1) {
-          const label = line.variant.variantName
-            ? `${line.variant.productName} (${line.variant.variantName})`
-            : line.variant.productName;
+          const label = variant.variantName ? `${variant.productName} (${variant.variantName})` : variant.productName;
           throw new CheckoutError(`No hay stock suficiente de ${label}`);
         }
-        stockAfter.set(line.variant.variantId, taken[0].stock);
+        stockAfter.set(variantId, decimalToNumber(taken[0].stock));
       }
 
       const orderNo = await nextFolio(tx, DOC_TYPES.ORDER, settings.orderPrefix);
@@ -245,10 +323,15 @@ export async function createOrder(
               imageUrl: l.variant.imageUrl,
               unitPrice: l.unitPrice,
               qty: l.qty,
+              unit: l.variant.unit,
               lineTotal: l.lineTotal,
               origCurrencyId: l.origCurrencyId,
               origUnitPrice: l.origUnitPrice,
               exchangeRate: l.exchangeRate,
+              unitCost: l.variant.costBase,
+              comboId: l.combo?.comboId ?? null,
+              comboName: l.combo?.name ?? null,
+              comboQty: l.combo?.qty ?? null,
             })),
           },
         },
@@ -256,11 +339,11 @@ export async function createOrder(
       });
 
       await tx.stockMovement.createMany({
-        data: lines.map((l) => ({
-          variantId: l.variant.variantId,
+        data: [...stockNeeded.entries()].map(([variantId, qty]) => ({
+          variantId,
           type: "exit" as const,
-          quantity: l.qty,
-          stockAfter: stockAfter.get(l.variant.variantId) ?? 0,
+          quantity: qty,
+          stockAfter: stockAfter.get(variantId) ?? 0,
           referenceType: "order",
           referenceId: order.orderId,
           notes: `Pedido ${order.orderNo}`,
@@ -296,7 +379,16 @@ export async function createOrder(
           discount: totals.discount,
           paymentSurcharge: totals.paymentSurcharge,
           total: totals.total,
-          lines: lines.map((l) => ({ variantId: l.variant.variantId, sku: l.variant.sku, qty: l.qty, unitPrice: l.unitPrice })),
+          lines: lines.map((l) => ({
+            variantId: l.variant.variantId,
+            sku: l.variant.sku,
+            qty: l.qty,
+            unitPrice: l.unitPrice,
+            lineTotal: l.lineTotal,
+            unitCost: l.variant.costBase,
+            comboId: l.combo?.comboId ?? null,
+          })),
+          combos: comboIds.map((comboId) => ({ comboId, qty: qtyByCombo.get(comboId) })),
         },
       });
 
