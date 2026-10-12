@@ -61,6 +61,32 @@ export default async function HomePage() {
       </section>
 
       <div className="mx-auto flex w-full max-w-[1120px] flex-1 flex-col gap-11 px-5 py-10 md:px-6 md:py-11">
+        {recentlyAdded.length > 0 && (
+          <section>
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <p className="eyebrow inline-flex items-center gap-1.5">
+                  <Sparkles className="h-3.5 w-3.5" strokeWidth={2} />
+                  Novedades
+                </p>
+                <h2 className="font-display mt-2 text-[20px] leading-tight text-navy-900 md:text-[24px]">
+                  Recién añadidos
+                </h2>
+              </div>
+              <ButtonLink href="/catalogo" variant="ghost" size="sm">
+                Ver catálogo
+              </ButtonLink>
+            </div>
+            <ProductGrid className="mt-5">
+              {recentlyAdded.map((product, i) => (
+                <ProductGridCell key={product.productId}>
+                  <ProductCard product={product} priority={i < 4} />
+                </ProductGridCell>
+              ))}
+            </ProductGrid>
+          </section>
+        )}
+
         <section>
           <div className="flex items-end justify-between gap-4">
             <div>
@@ -84,40 +110,14 @@ export default async function HomePage() {
             />
           ) : (
             <ProductGrid className="mt-5">
-              {featured.map((product, i) => (
-                <ProductGridCell key={product.productId}>
-                  <ProductCard product={product} priority={i < 4} />
-                </ProductGridCell>
-              ))}
-            </ProductGrid>
-          )}
-        </section>
-
-        {recentlyAdded.length > 0 && (
-          <section>
-            <div className="flex items-end justify-between gap-4">
-              <div>
-                <p className="eyebrow inline-flex items-center gap-1.5">
-                  <Sparkles className="h-3.5 w-3.5" strokeWidth={2} />
-                  Novedades
-                </p>
-                <h2 className="font-display mt-2 text-[20px] leading-tight text-navy-900 md:text-[24px]">
-                  Recién añadidos
-                </h2>
-              </div>
-              <ButtonLink href="/catalogo" variant="ghost" size="sm">
-                Ver catálogo
-              </ButtonLink>
-            </div>
-            <ProductGrid className="mt-5">
-              {recentlyAdded.map((product) => (
+              {featured.map((product) => (
                 <ProductGridCell key={product.productId}>
                   <ProductCard product={product} />
                 </ProductGridCell>
               ))}
             </ProductGrid>
-          </section>
-        )}
+          )}
+        </section>
 
         {combos.length > 0 && (
           <section>
