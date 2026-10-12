@@ -6,17 +6,25 @@ import { AdminTopbar } from "@/components/layout/admin/admin-topbar";
 interface AdminShellProps {
   userName: string;
   role: string;
-  /** Preferencia guardada en cookie: el servidor ya pinta el ancho correcto. */
+  /** Preferencias guardadas en cookies: el servidor ya pinta el ancho y las
+   *  secciones plegadas correctas. */
   initialCollapsed?: boolean;
+  initialCollapsedSections?: string[];
   children: React.ReactNode;
 }
 
 /** Sidebar colapsable en desktop; cabecera con menú de usuario en todas las
  *  anchuras; panel lateral y tabs inferiores en móvil. El `main` reserva el
  *  alto de las tabs para que nada quede debajo. */
-export function AdminShell({ userName, role, initialCollapsed = false, children }: AdminShellProps) {
+export function AdminShell({
+  userName,
+  role,
+  initialCollapsed = false,
+  initialCollapsedSections,
+  children,
+}: AdminShellProps) {
   return (
-    <AdminNavProvider initialCollapsed={initialCollapsed}>
+    <AdminNavProvider initialCollapsed={initialCollapsed} initialCollapsedSections={initialCollapsedSections}>
       <div className="flex min-h-dvh">
         <AdminSidebar />
         <div className="flex min-w-0 flex-1 flex-col">

@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { requireRole } from "@/lib/auth-guard";
-import { ADMIN_NAV_COOKIE } from "@/lib/preferences";
+import { ADMIN_NAV_COOKIE, ADMIN_NAV_SECTIONS_COOKIE, parseCollapsedSections } from "@/lib/preferences";
 import { AdminShell } from "@/components/layout/admin/admin-shell";
 import { CurrencyProvider } from "@/modules/currency/store/currency-provider";
 import { getCurrencyContext } from "@/modules/currency/queries/currency-queries";
@@ -17,9 +17,15 @@ export default async function AdminLayout({
     cookies(),
   ]);
   const collapsed = cookieStore.get(ADMIN_NAV_COOKIE)?.value === "collapsed";
+  const collapsedSections = parseCollapsedSections(cookieStore.get(ADMIN_NAV_SECTIONS_COOKIE)?.value);
   return (
     <CurrencyProvider data={currency} lockToBase>
-      <AdminShell userName={session.user.fullName} role={session.user.role} initialCollapsed={collapsed}>
+      <AdminShell
+        userName={session.user.fullName}
+        role={session.user.role}
+        initialCollapsed={collapsed}
+        initialCollapsedSections={collapsedSections}
+      >
         {children}
       </AdminShell>
     </CurrencyProvider>
