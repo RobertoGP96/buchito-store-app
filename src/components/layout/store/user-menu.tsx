@@ -102,33 +102,31 @@ export function UserMenu({ user }: { user: NavUser | null }) {
       <Dropdown.Popover placement="bottom end" className="w-[256px]">
         {/* La cabecera va fuera del Menu: React Aria solo admite ítems dentro
             de una sección y descartaba el bloque junto con los enlaces. */}
-        <div className="p-1 pb-0">
-          <div className="rounded-field border border-line px-3.5 py-3">
-            <p className="truncate text-[14px] font-semibold text-ink">
-              {user ? user.fullName : "Cliente invitado"}
-            </p>
-            <p className="mt-0.5 truncate text-[12px] text-slate-400">
-              {user ? user.email : "Inicia sesión o crea tu cuenta"}
-            </p>
-            {!user && (
-              <div className="mt-3 grid grid-cols-2 gap-2">
-                <Link
-                  href={loginHref}
-                  onClick={() => setIsOpen(false)}
-                  className={buttonLinkClasses("solid", "sm", "px-3")}
-                >
-                  Iniciar sesión
-                </Link>
-                <Link
-                  href="/registro"
-                  onClick={() => setIsOpen(false)}
-                  className={buttonLinkClasses("soft", "sm", "px-3")}
-                >
-                  Crear cuenta
-                </Link>
-              </div>
-            )}
-          </div>
+        <div className="border-b border-line px-4 pt-3.5 pb-3">
+          <p className="truncate text-[14px] font-semibold text-ink">
+            {user ? user.fullName : "Cliente invitado"}
+          </p>
+          <p className="mt-0.5 truncate text-[12px] text-slate-400">
+            {user ? user.email : "Inicia sesión o crea tu cuenta"}
+          </p>
+          {!user && (
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <Link
+                href={loginHref}
+                onClick={() => setIsOpen(false)}
+                className={buttonLinkClasses("solid", "sm", "px-3")}
+              >
+                Iniciar sesión
+              </Link>
+              <Link
+                href="/registro"
+                onClick={() => setIsOpen(false)}
+                className={buttonLinkClasses("soft", "sm", "px-3")}
+              >
+                Crear cuenta
+              </Link>
+            </div>
+          )}
         </div>
         {/* El foco lo marca el ítem resaltado; el anillo global del contenedor
             solo asomaba como una línea bajo la cabecera. */}
