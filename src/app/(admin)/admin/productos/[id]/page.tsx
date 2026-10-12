@@ -6,6 +6,7 @@ import { ButtonLink } from "@/components/button-link";
 import { PageHeader } from "@/components/page-header";
 import { StatusChip } from "@/components/status-chip";
 import { getActiveCurrencies } from "@/modules/currency/queries/currency-queries";
+import { DeleteProductButton } from "@/modules/products/components/delete-product-button";
 import { ProductForm } from "@/modules/products/components/product-form";
 import { ProductImages } from "@/modules/products/components/product-images";
 import { ProductStatusActions } from "@/modules/products/components/product-status-actions";
@@ -72,6 +73,13 @@ export default async function AdminProductPage({ params }: AdminProductPageProps
           status={product.status}
           hasActiveVariants={hasActiveVariants}
         />
+        <DeleteProductButton
+          productId={product.productId}
+          name={product.name}
+          variantCount={product.variants.length}
+          orderLineCount={product.orderLineCount}
+          totalStock={product.variants.reduce((sum, v) => sum + v.stock, 0)}
+        />
         <ButtonLink href="/admin/productos" variant="ghost" size="sm">
           Volver a productos
         </ButtonLink>
@@ -113,6 +121,7 @@ export default async function AdminProductPage({ params }: AdminProductPageProps
         </div>
         <VariantList
           productId={product.productId}
+          productStatus={product.status}
           variants={product.variants}
           attributeSchema={product.type.attributeSchema}
           currencies={currencies}

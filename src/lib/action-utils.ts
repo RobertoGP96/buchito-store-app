@@ -1,3 +1,4 @@
+import { Prisma } from "@/generated/prisma";
 import { isAuthError } from "@/lib/audit";
 import { isForbiddenError } from "@/lib/auth-guard";
 import type { ActionResult } from "@/types";
@@ -30,3 +31,16 @@ export function isStaleVersionError(error: unknown): error is StaleVersionError 
 export function firstIssueMessage(error: { issues: { message: string }[] }, fallback: string): string {
   return error.issues[0]?.message ?? fallback;
 }
+
+/** Violación de clave foránea (Prisma P2003): algo sigue referenciando la
+ *  fila. Las actions de borrado comprueban antes las referencias conocidas;
+ *  esto es la red de seguridad por si aparece una nueva relación. */
+export function isForeignKeyViolation(error: unknown): boolean {
+  return error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2003";
+}
+
+export function isValidId(id: unknown): id is number {
+  return typeof id === "number" && Number.isInteger(id) && id > 0;
+}
+
+export const IN_USE_MESSAGE = "No se puede eliminar: otros registros lo utilizan. Desactívalo en su lugar.";

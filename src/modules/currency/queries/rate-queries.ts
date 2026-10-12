@@ -23,6 +23,8 @@ export interface RateOverviewRow {
   isInverse: boolean;
   updatedAt: string | null;
   history: RateHistoryRow[];
+  /** Variantes con precio en esta moneda: sin tasa dejan de venderse. */
+  variantCount: number;
 }
 
 export interface RatesOverview {
@@ -43,6 +45,7 @@ export async function getRatesOverview(): Promise<RatesOverview> {
     db.currency.findMany({
       where: { isActive: true, currencyId: { not: base.currencyId } },
       orderBy: [{ sortOrder: "asc" }, { code: "asc" }],
+      include: { _count: { select: { variants: true } } },
     }),
     db.exchangeRate.findMany({
       where: {
@@ -92,6 +95,7 @@ export async function getRatesOverview(): Promise<RatesOverview> {
         note: h.note,
         changedAt: h.changedAt.toISOString(),
       })),
+      variantCount: currency._count.variants,
     };
   });
 

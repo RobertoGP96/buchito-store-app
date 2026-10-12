@@ -72,7 +72,7 @@ export async function createX(input: XInput): Promise<ActionResult<{ id: number 
 
 ## UI
 
-Mobile-first (probar 375px). Listas: `ResponsiveList` (cards <md, tabla ≥md). Formularios: `ResponsiveFormDialog` + `FormFooter` + campos de `components/form/fields.tsx`. Montos siempre con `<Money value={base} />` (`tabular-nums`). Enlaces con aspecto de botón: `ButtonLink`; HeroUI `Button` solo con `onPress`. Sin emojis. Comentarios solo para el "por qué".
+Mobile-first (probar 375px). Listas: `ResponsiveList` (cards <md, tabla ≥md). Formularios: `ResponsiveFormDialog` + `FormFooter` + campos de `components/form/fields.tsx`. Montos siempre con `<Money value={base} />` (`tabular-nums`). Borrado: `DeleteButton` (`components/delete-button.tsx`, confirma o explica `blockedReason`) + action `deleteX(id)` que comprueba las referencias (`_count`) antes de borrar, audita con `action: "delete"` y traduce P2003 con `isForeignKeyViolation` → `IN_USE_MESSAGE`; lo que ya tiene pedidos/cobros/entregas no se borra, se desactiva. Enlaces con aspecto de botón: `ButtonLink`; HeroUI `Button` solo con `onPress`. Sin emojis. Comentarios solo para el "por qué".
 
 Navegación: cada ruta hoja sin `searchParams` lleva `loading.tsx` con las siluetas de `components/skeletons.tsx`; las que filtran por URL no lo llevan (conservan la lista y el chip pulsado muestra `LinkPending`, con `scroll={false}`). Iconos de enlaces de navegación con `NavIcon`. Transición de ruta: `RouteTransition` en el `template.tsx` de cada grupo (View Transitions). Formularios en diálogo se importan en las listas con `lazyDialog(() => import("./x-form").then((m) => m.XForm))`, nunca con import estático.
 

@@ -4,11 +4,13 @@ import { lazyDialog } from "@/components/lazy-dialog";
 import { useState } from "react";
 import { Button } from "@heroui/react";
 import { Pencil, Plus, TicketPercent } from "lucide-react";
+import { DeleteButton } from "@/components/delete-button";
 import { EmptyState } from "@/components/empty-state";
 import { Money } from "@/components/money";
 import { ListCard, ResponsiveList, type ListColumn } from "@/components/responsive-list";
 import { StatusChip } from "@/components/status-chip";
 import { fmtDate } from "@/lib/format";
+import { deleteCoupon } from "../actions/coupon-actions";
 import { COUPON_STATE_META } from "../lib/labels";
 import type { CouponRow } from "../queries/coupon-queries";
 
@@ -34,6 +36,24 @@ function Uses({ row }: { row: CouponRow }) {
       {row.usedCount}
       <span className="text-slate-400"> / {row.maxUses ?? "∞"}</span>
     </span>
+  );
+}
+
+function DeleteCouponButton({ row, appearance }: { row: CouponRow; appearance: "icon" | "button" }) {
+  const used = Math.max(row.orderCount, row.usedCount);
+  return (
+    <DeleteButton
+      appearance={appearance}
+      itemLabel={`el cupón ${row.code}`}
+      description={`Se eliminará el cupón ${row.code}. Dejará de aceptarse en el checkout.`}
+      blockedReason={
+        used > 0
+          ? `Ya se ha aplicado en ${used} ${used === 1 ? "pedido" : "pedidos"}. Desactívalo en su lugar.`
+          : null
+      }
+      successMessage={`Cupón ${row.code} eliminado`}
+      onConfirm={() => deleteCoupon(row.couponId)}
+    />
   );
 }
 
@@ -72,9 +92,12 @@ export function CouponList({ rows }: { rows: CouponRow[] }) {
       header: "",
       align: "right",
       cell: (r) => (
-        <Button variant="ghost" size="sm" isIconOnly aria-label={`Editar ${r.code}`} onPress={() => openEdit(r)}>
-          <Pencil className="h-4 w-4" strokeWidth={1.9} />
-        </Button>
+        <div className="flex items-center justify-end gap-1">
+          <Button variant="ghost" size="sm" isIconOnly aria-label={`Editar ${r.code}`} onPress={() => openEdit(r)}>
+            <Pencil className="h-4 w-4" strokeWidth={1.9} />
+          </Button>
+          <DeleteCouponButton row={r} appearance="icon" />
+        </div>
       ),
     },
   ];
@@ -114,10 +137,13 @@ export function CouponList({ rows }: { rows: CouponRow[] }) {
               { label: "Usos", value: <Uses row={r} /> },
             ]}
             actions={
-              <Button variant="outline" size="sm" className="rounded-full" onPress={() => openEdit(r)}>
-                <Pencil className="h-3.5 w-3.5" strokeWidth={1.9} />
-                Editar
-              </Button>
+              <>
+                <Button variant="outline" size="sm" className="rounded-full" onPress={() => openEdit(r)}>
+                  <Pencil className="h-3.5 w-3.5" strokeWidth={1.9} />
+                  Editar
+                </Button>
+                <DeleteCouponButton row={r} appearance="button" />
+              </>
             }
           />
         )}

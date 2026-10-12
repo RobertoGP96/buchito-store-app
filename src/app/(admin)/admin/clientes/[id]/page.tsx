@@ -5,6 +5,7 @@ import { ButtonLink } from "@/components/button-link";
 import { PageHeader } from "@/components/page-header";
 import { StatusChip } from "@/components/status-chip";
 import { CustomerDetail } from "@/modules/customers/components/customer-detail";
+import { DeleteCustomerButton } from "@/modules/customers/components/delete-customer-button";
 import { getCustomerById } from "@/modules/customers/queries/customer-queries";
 
 export const dynamic = "force-dynamic";
@@ -39,6 +40,13 @@ export default async function AdminCustomerPage({ params }: AdminCustomerPagePro
           />
         }
       >
+        <DeleteCustomerButton
+          customerId={customer.customerId}
+          name={customer.name}
+          orderCount={customer.orderCount}
+          addressCount={customer.addresses.length}
+          deletesAccount={customer.user?.role === "customer"}
+        />
         <ButtonLink href="/admin/clientes" variant="ghost" size="sm">
           Volver a clientes
         </ButtonLink>

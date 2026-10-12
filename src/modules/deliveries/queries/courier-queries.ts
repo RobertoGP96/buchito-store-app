@@ -15,6 +15,8 @@ export interface CourierRow {
   /** Entregas asignadas o en camino ahora mismo. */
   openDeliveries: number;
   deliveredCount: number;
+  /** Todas sus entregas, en cualquier estado: con alguna no se puede borrar. */
+  deliveryCount: number;
 }
 
 export async function getCouriers(): Promise<CourierRow[]> {
@@ -37,6 +39,7 @@ export async function getCouriers(): Promise<CourierRow[]> {
     version: row.version,
     openDeliveries: row.deliveries.filter((d) => d.status === "assigned" || d.status === "in_transit").length,
     deliveredCount: row.deliveries.filter((d) => d.status === "delivered").length,
+    deliveryCount: row.deliveries.length,
   }));
 }
 

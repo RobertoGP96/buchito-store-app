@@ -7,7 +7,7 @@ import { db } from "@/lib/db";
 import { assertRole } from "@/lib/auth-guard";
 import { createAuditLog } from "@/lib/audit";
 import { getBaseCurrency } from "@/lib/currency";
-import { failAction, firstIssueMessage, StaleVersionError } from "@/lib/action-utils";
+import { failAction, firstIssueMessage, IN_USE_MESSAGE, isForeignKeyViolation, isValidId, StaleVersionError } from "@/lib/action-utils";
 import type { ActionResult } from "@/types";
 import { rateSchema, type RateInput } from "../lib/schemas";
 
@@ -126,5 +126,49 @@ export async function upsertRate(
       return { success: false, error: error.message };
     }
     return failAction("upsertRate", error, "No se pudo guardar la tasa");
+  }
+}
+
+/** Borra el par de tasa y su historial. Las variantes con precio en esa
+ *  moneda dejan de venderse hasta que se fije una tasa nueva; los pedidos ya
+ *  creados no se tocan porque guardan su propio snapshot de tasa. */
+export async function deleteRate(exchangeRateId: number): Promise<ActionResult<void>> {
+  if (!isValidId(exchangeRateId)) return { success: false, error: "Tasa no válida" };
+
+  try {
+    const userId = await assertRole("admin");
+    const current = await db.exchangeRate.findUnique({
+      where: { exchangeRateId },
+      include: {
+        baseCurrency: { select: { code: true } },
+        quoteCurrency: { select: { code: true } },
+        _count: { select: { history: true } },
+      },
+    });
+    if (!current) return { success: false, error: "Tasa no encontrada" };
+
+    await db.$transaction(async (tx) => {
+      await tx.exchangeRateHistory.deleteMany({ where: { exchangeRateId } });
+      await tx.exchangeRate.delete({ where: { exchangeRateId } });
+      await createAuditLog(tx, {
+        action: "delete",
+        entityType: "ExchangeRate",
+        entityId: exchangeRateId,
+        module: "currency",
+        userId,
+        oldValues: {
+          from: current.baseCurrency.code,
+          to: current.quoteCurrency.code,
+          rate: current.rate.toString(),
+          historyEntries: current._count.history,
+        },
+      });
+    });
+
+    revalidateRatePaths();
+    return { success: true, data: undefined };
+  } catch (error) {
+    if (isForeignKeyViolation(error)) return { success: false, error: IN_USE_MESSAGE };
+    return failAction("deleteRate", error, "No se pudo eliminar la tasa");
   }
 }

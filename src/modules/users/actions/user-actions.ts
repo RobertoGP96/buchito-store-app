@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { assertRole } from "@/lib/auth-guard";
 import { createAuditLog, getCurrentUserId } from "@/lib/audit";
-import { failAction, firstIssueMessage } from "@/lib/action-utils";
+import { failAction, firstIssueMessage, IN_USE_MESSAGE, isForeignKeyViolation, isValidId } from "@/lib/action-utils";
 import type { ActionResult } from "@/types";
 import { COURIER_MANAGED_MESSAGE } from "../lib/labels";
 import { MIN_PASSWORD_LENGTH, userSchema, type UserInput } from "../lib/schemas";
@@ -156,5 +156,67 @@ export async function updateUser(userId: number, input: UserInput): Promise<Acti
     return { success: true, data: undefined };
   } catch (error) {
     return failAction("updateUser", error, "No se pudo actualizar el usuario");
+  }
+}
+
+/** Borra una cuenta de acceso. No la propia, no la del último administrador
+ *  activo y no la de un mensajero (esa se borra desde Mensajeros, con su
+ *  perfil). La ficha de cliente, si la hay, se conserva como invitado y el
+ *  historial (auditoría, cobros recibidos) queda sin autor. */
+export async function deleteUser(userId: number): Promise<ActionResult<void>> {
+  if (!isValidId(userId)) return { success: false, error: "Usuario no válido" };
+
+  try {
+    const actorId = await assertRole("admin");
+    if (actorId === userId) return { success: false, error: "No puedes eliminar tu propia cuenta" };
+
+    const current = await db.user.findUnique({
+      where: { userId },
+      select: {
+        fullName: true,
+        email: true,
+        role: true,
+        isActive: true,
+        courier: { select: { courierId: true } },
+        customer: { select: { customerId: true } },
+      },
+    });
+    if (!current) return { success: false, error: "Usuario no encontrado" };
+    if (current.role === "courier" || current.courier) {
+      return { success: false, error: "Los mensajeros se eliminan desde Mensajeros." };
+    }
+    if (current.role === "admin" && current.isActive) {
+      const otherAdmins = await db.user.count({
+        where: { role: "admin", isActive: true, userId: { not: userId } },
+      });
+      if (otherAdmins === 0) {
+        return { success: false, error: "La tienda debe conservar al menos un administrador activo" };
+      }
+    }
+
+    await db.$transaction(async (tx) => {
+      await tx.user.delete({ where: { userId } });
+      await createAuditLog(tx, {
+        action: "delete",
+        entityType: "User",
+        entityId: userId,
+        module: "users",
+        userId: actorId,
+        oldValues: {
+          fullName: current.fullName,
+          email: current.email,
+          role: current.role,
+          isActive: current.isActive,
+          customerId: current.customer?.customerId ?? null,
+        },
+      });
+    });
+
+    revalidateUserPaths();
+    revalidatePath("/admin/clientes");
+    return { success: true, data: undefined };
+  } catch (error) {
+    if (isForeignKeyViolation(error)) return { success: false, error: IN_USE_MESSAGE };
+    return failAction("deleteUser", error, "No se pudo eliminar el usuario");
   }
 }

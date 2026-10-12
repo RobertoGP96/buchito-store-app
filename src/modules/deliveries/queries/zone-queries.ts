@@ -13,6 +13,9 @@ export interface ZoneRow {
   sortOrder: number;
   active: boolean;
   orderCount: number;
+  deliveryCount: number;
+  /** Direcciones de clientes asignadas a la zona (quedan sin zona al borrarla). */
+  addressCount: number;
 }
 
 function toRow(row: {
@@ -24,7 +27,7 @@ function toRow(row: {
   etaLabel: string | null;
   sortOrder: number;
   active: boolean;
-  _count?: { orders: number };
+  _count?: { orders: number; deliveries: number; addresses: number };
 }): ZoneRow {
   return {
     zoneId: row.zoneId,
@@ -36,13 +39,15 @@ function toRow(row: {
     sortOrder: row.sortOrder,
     active: row.active,
     orderCount: row._count?.orders ?? 0,
+    deliveryCount: row._count?.deliveries ?? 0,
+    addressCount: row._count?.addresses ?? 0,
   };
 }
 
 export async function getZones(): Promise<ZoneRow[]> {
   const rows = await db.deliveryZone.findMany({
     orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
-    include: { _count: { select: { orders: true } } },
+    include: { _count: { select: { orders: true, deliveries: true, addresses: true } } },
   });
   return rows.map(toRow);
 }

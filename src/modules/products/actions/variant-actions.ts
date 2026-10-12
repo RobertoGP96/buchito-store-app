@@ -5,8 +5,9 @@ import { Prisma } from "@/generated/prisma";
 import { db } from "@/lib/db";
 import { assertRole } from "@/lib/auth-guard";
 import { createAuditLog } from "@/lib/audit";
-import { failAction, firstIssueMessage, StaleVersionError } from "@/lib/action-utils";
+import { failAction, firstIssueMessage, IN_USE_MESSAGE, isForeignKeyViolation, isValidId, StaleVersionError } from "@/lib/action-utils";
 import { roundToCurrency } from "@/lib/currency-math";
+import { deleteObjectIfOurs } from "@/lib/storage";
 import type { ActionResult } from "@/types";
 import {
   parseAttributeSchema,
@@ -260,5 +261,89 @@ export async function updateVariant(
     if (error instanceof StaleVersionError) return { success: false, error: error.message };
     if (isUniqueViolation(error)) return { success: false, error: UNIQUE_CONFLICT };
     return failAction("updateVariant", error, "No se pudo actualizar la variante");
+  }
+}
+
+/** Borra una variante que nunca se vendió, con sus movimientos de stock. Si
+ *  era la predeterminada, la primera que queda pasa a serlo; si era la única
+ *  publicada de un producto publicado, hay que publicar otra o archivar el
+ *  producto antes (misma regla que al desactivarla). */
+export async function deleteVariant(variantId: number): Promise<ActionResult<void>> {
+  if (!isValidId(variantId)) return { success: false, error: "Variante no válida" };
+
+  try {
+    const userId = await assertRole("admin");
+    const current = await db.productVariant.findUnique({
+      where: { variantId },
+      select: {
+        productId: true,
+        sku: true,
+        name: true,
+        stock: true,
+        imageUrl: true,
+        isDefault: true,
+        isActive: true,
+        product: { select: { slug: true, status: true } },
+        _count: { select: { orderLines: true, stockMovements: true } },
+      },
+    });
+    if (!current) return { success: false, error: "Variante no encontrada" };
+    if (current._count.orderLines > 0) {
+      return { success: false, error: "Tiene pedidos registrados. Desactívala en su lugar." };
+    }
+    if (current.product.status === "active" && current.isActive) {
+      const otherActive = await db.productVariant.count({
+        where: { productId: current.productId, isActive: true, variantId: { not: variantId } },
+      });
+      if (otherActive === 0) {
+        return {
+          success: false,
+          error: "Es la única variante publicada: publica otra o archiva el producto antes",
+        };
+      }
+    }
+
+    await db.$transaction(async (tx) => {
+      await tx.stockMovement.deleteMany({ where: { variantId } });
+      await tx.productVariant.delete({ where: { variantId } });
+      if (current.isDefault) {
+        const next = await tx.productVariant.findFirst({
+          where: { productId: current.productId },
+          orderBy: [{ isActive: "desc" }, { sortOrder: "asc" }, { variantId: "asc" }],
+          select: { variantId: true },
+        });
+        if (next) {
+          await tx.productVariant.update({
+            where: { variantId: next.variantId },
+            data: { isDefault: true, version: { increment: 1 } },
+          });
+        }
+      }
+      await createAuditLog(tx, {
+        action: "delete",
+        entityType: "ProductVariant",
+        entityId: variantId,
+        module: "products",
+        userId,
+        oldValues: {
+          productId: current.productId,
+          sku: current.sku,
+          name: current.name,
+          stock: current.stock,
+          isDefault: current.isDefault,
+          isActive: current.isActive,
+          stockMovements: current._count.stockMovements,
+        },
+      });
+    });
+
+    await deleteObjectIfOurs(current.imageUrl);
+
+    revalidateVariantPaths(current.productId, current.product.slug);
+    revalidatePath("/admin/inventario");
+    return { success: true, data: undefined };
+  } catch (error) {
+    if (isForeignKeyViolation(error)) return { success: false, error: IN_USE_MESSAGE };
+    return failAction("deleteVariant", error, "No se pudo eliminar la variante");
   }
 }

@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { assertRole } from "@/lib/auth-guard";
 import { createAuditLog } from "@/lib/audit";
-import { failAction, firstIssueMessage } from "@/lib/action-utils";
+import { failAction, firstIssueMessage, IN_USE_MESSAGE, isForeignKeyViolation, isValidId } from "@/lib/action-utils";
 import type { ActionResult } from "@/types";
 import { productTypeSchema, type ProductTypeInput } from "../lib/schemas";
 
@@ -100,5 +100,46 @@ export async function updateProductType(
     return { success: true, data: undefined };
   } catch (error) {
     return failAction("updateProductType", error, "No se pudo actualizar el tipo de producto");
+  }
+}
+
+/** Borra un tipo sin productos: los atributos de cada producto se validan
+ *  contra el esquema de su tipo, así que uno en uso no puede desaparecer. */
+export async function deleteProductType(typeId: number): Promise<ActionResult<void>> {
+  if (!isValidId(typeId)) return { success: false, error: "Tipo de producto no válido" };
+
+  try {
+    const userId = await assertRole("admin");
+    const current = await db.productType.findUnique({
+      where: { typeId },
+      include: { _count: { select: { products: true } } },
+    });
+    if (!current) return { success: false, error: "Tipo de producto no encontrado" };
+    if (current._count.products > 0) {
+      return { success: false, error: "Hay productos de este tipo. Cámbialos de tipo o elimínalos primero." };
+    }
+
+    await db.$transaction(async (tx) => {
+      await tx.productType.delete({ where: { typeId } });
+      await createAuditLog(tx, {
+        action: "delete",
+        entityType: "ProductType",
+        entityId: typeId,
+        module: "products",
+        userId,
+        oldValues: {
+          name: current.name,
+          slug: current.slug,
+          attributeSchema: current.attributeSchema,
+          isActive: current.isActive,
+        },
+      });
+    });
+
+    revalidateTypePaths();
+    return { success: true, data: undefined };
+  } catch (error) {
+    if (isForeignKeyViolation(error)) return { success: false, error: IN_USE_MESSAGE };
+    return failAction("deleteProductType", error, "No se pudo eliminar el tipo de producto");
   }
 }

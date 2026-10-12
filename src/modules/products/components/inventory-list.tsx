@@ -52,6 +52,7 @@ function toAdjustVariant(row: InventoryRow): AdminVariantRow {
     isActive: true,
     sortOrder: 0,
     recentMovements: [],
+    orderLineCount: 0,
   };
 }
 

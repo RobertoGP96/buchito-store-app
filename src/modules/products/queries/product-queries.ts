@@ -121,6 +121,8 @@ export interface AdminVariantRow {
   sortOrder: number;
   /** Últimos movimientos, el más reciente primero. */
   recentMovements: AdminStockMovement[];
+  /** Líneas de pedido que la referencian: con alguna no se puede borrar. */
+  orderLineCount: number;
 }
 
 export interface AdminProductDetail {
@@ -139,6 +141,8 @@ export interface AdminProductDetail {
   categoryName: string | null;
   images: { imageId: number; url: string; alt: string | null; sortOrder: number }[];
   variants: AdminVariantRow[];
+  /** Σ líneas de pedido de todas sus variantes. */
+  orderLineCount: number;
   updatedAt: string;
 }
 
@@ -161,6 +165,7 @@ export async function getAdminProduct(productId: number): Promise<AdminProductDe
             take: RECENT_MOVEMENTS,
             include: { createdBy: { select: { fullName: true } } },
           },
+          _count: { select: { orderLines: true } },
         },
       },
     },
@@ -225,8 +230,10 @@ export async function getAdminProduct(productId: number): Promise<AdminProductDe
           createdBy: m.createdBy?.fullName ?? null,
           createdAt: m.createdAt.toISOString(),
         })),
+        orderLineCount: v._count.orderLines,
       };
     }),
+    orderLineCount: row.variants.reduce((sum, v) => sum + v._count.orderLines, 0),
     updatedAt: row.updatedAt.toISOString(),
   };
 }

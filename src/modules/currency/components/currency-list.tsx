@@ -4,13 +4,40 @@ import { lazyDialog } from "@/components/lazy-dialog";
 import { useState } from "react";
 import { Button } from "@heroui/react";
 import { Coins, Pencil, Plus } from "lucide-react";
+import { DeleteButton } from "@/components/delete-button";
 import { EmptyState } from "@/components/empty-state";
 import { ListCard, ResponsiveList, type ListColumn } from "@/components/responsive-list";
 import { StatusChip } from "@/components/status-chip";
+import { deleteCurrency } from "../actions/currency-actions";
 import { SetBaseCurrencyButton } from "./set-base-currency-button";
 import type { CurrencyRow } from "../queries/currency-queries";
 
 const CurrencyForm = lazyDialog(() => import("./currency-form").then((m) => m.CurrencyForm));
+
+function deleteBlockedReason(row: CurrencyRow): string | null {
+  if (row.isBase) return "Es la moneda base. Elige otra moneda base antes de eliminarla.";
+  if (row.paymentMethodCount > 0) {
+    return `Hay ${row.paymentMethodCount} ${row.paymentMethodCount === 1 ? "método de pago" : "métodos de pago"} en esta moneda. Elimínalos o cámbialos de moneda primero.`;
+  }
+  if (row.variantCount > 0) {
+    return `Hay ${row.variantCount} ${row.variantCount === 1 ? "variante con precio" : "variantes con precio"} en esta moneda. Cambia su moneda primero.`;
+  }
+  if (row.orderCount > 0) return "Hay pedidos o cobros registrados en esta moneda. Desactívala en su lugar.";
+  return null;
+}
+
+function DeleteCurrencyButton({ row, appearance }: { row: CurrencyRow; appearance: "icon" | "button" }) {
+  return (
+    <DeleteButton
+      appearance={appearance}
+      itemLabel={row.code}
+      description={`Se eliminará la moneda ${row.code} (${row.name}) junto con sus tasas de cambio y su historial.`}
+      blockedReason={deleteBlockedReason(row)}
+      successMessage={`Moneda ${row.code} eliminada`}
+      onConfirm={() => deleteCurrency(row.currencyId)}
+    />
+  );
+}
 
 function RateCell({ row, baseCode }: { row: CurrencyRow; baseCode: string | null }) {
   if (row.isBase) return <span className="text-slate-400">Base</span>;
@@ -62,6 +89,7 @@ export function CurrencyList({ rows }: { rows: CurrencyRow[] }) {
           <Button variant="ghost" size="sm" isIconOnly aria-label={`Editar ${r.code}`} onPress={() => openEdit(r)}>
             <Pencil className="h-4 w-4" strokeWidth={1.9} />
           </Button>
+          <DeleteCurrencyButton row={r} appearance="icon" />
         </div>
       ),
     },
@@ -105,6 +133,7 @@ export function CurrencyList({ rows }: { rows: CurrencyRow[] }) {
                   <Pencil className="h-3.5 w-3.5" strokeWidth={1.9} />
                   Editar
                 </Button>
+                <DeleteCurrencyButton row={r} appearance="button" />
               </>
             }
           />

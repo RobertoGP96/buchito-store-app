@@ -4,14 +4,34 @@ import { lazyDialog } from "@/components/lazy-dialog";
 import { useState } from "react";
 import { Button } from "@heroui/react";
 import { Pencil, Plus, Wallet } from "lucide-react";
+import { DeleteButton } from "@/components/delete-button";
 import { EmptyState } from "@/components/empty-state";
 import type { SelectOption } from "@/components/form/fields";
 import { ListCard, ResponsiveList, type ListColumn } from "@/components/responsive-list";
 import { StatusChip } from "@/components/status-chip";
+import { deletePaymentMethod } from "../actions/payment-method-actions";
 import { PAYMENT_KIND_LABELS } from "../lib/labels";
 import type { PaymentMethodRow } from "../queries/payment-queries";
 
 const PaymentMethodForm = lazyDialog(() => import("./payment-method-form").then((m) => m.PaymentMethodForm));
+
+function DeleteMethodButton({ row, appearance }: { row: PaymentMethodRow; appearance: "icon" | "button" }) {
+  const used = row.orderCount + row.paymentCount;
+  return (
+    <DeleteButton
+      appearance={appearance}
+      itemLabel={row.name}
+      description={`Se eliminará el método de pago ${row.name} (${row.code}). Dejará de ofrecerse en el checkout.`}
+      blockedReason={
+        used > 0
+          ? `Hay ${used} ${used === 1 ? "pedido o cobro registrado" : "pedidos o cobros registrados"} con este método. Desactívalo en su lugar.`
+          : null
+      }
+      successMessage={`Método ${row.name} eliminado`}
+      onConfirm={() => deletePaymentMethod(row.paymentMethodId)}
+    />
+  );
+}
 
 interface PaymentMethodListProps {
   rows: PaymentMethodRow[];
@@ -62,9 +82,12 @@ export function PaymentMethodList({ rows, currencies }: PaymentMethodListProps) 
       header: "",
       align: "right",
       cell: (r) => (
-        <Button variant="ghost" size="sm" isIconOnly aria-label={`Editar ${r.name}`} onPress={() => openEdit(r)}>
-          <Pencil className="h-4 w-4" strokeWidth={1.9} />
-        </Button>
+        <div className="flex items-center justify-end gap-1">
+          <Button variant="ghost" size="sm" isIconOnly aria-label={`Editar ${r.name}`} onPress={() => openEdit(r)}>
+            <Pencil className="h-4 w-4" strokeWidth={1.9} />
+          </Button>
+          <DeleteMethodButton row={r} appearance="icon" />
+        </div>
       ),
     },
   ];
@@ -99,10 +122,13 @@ export function PaymentMethodList({ rows, currencies }: PaymentMethodListProps) 
               { label: "Referencia", value: r.requiresReference ? "Obligatoria" : "No" },
             ]}
             actions={
-              <Button variant="outline" size="sm" className="rounded-full" onPress={() => openEdit(r)}>
-                <Pencil className="h-3.5 w-3.5" strokeWidth={1.9} />
-                Editar
-              </Button>
+              <>
+                <Button variant="outline" size="sm" className="rounded-full" onPress={() => openEdit(r)}>
+                  <Pencil className="h-3.5 w-3.5" strokeWidth={1.9} />
+                  Editar
+                </Button>
+                <DeleteMethodButton row={r} appearance="button" />
+              </>
             }
           />
         )}

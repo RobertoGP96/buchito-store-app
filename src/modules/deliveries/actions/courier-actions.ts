@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { assertRole } from "@/lib/auth-guard";
 import { createAuditLog } from "@/lib/audit";
-import { failAction, firstIssueMessage, StaleVersionError } from "@/lib/action-utils";
+import { failAction, firstIssueMessage, IN_USE_MESSAGE, isForeignKeyViolation, isValidId, StaleVersionError } from "@/lib/action-utils";
 import type { ActionResult } from "@/types";
 import { courierSchema, type CourierInput } from "../lib/schemas";
 
@@ -116,5 +116,53 @@ export async function updateCourier(
   } catch (error) {
     if (error instanceof StaleVersionError) return { success: false, error: error.message };
     return failAction("updateCourier", error, "No se pudo actualizar el mensajero");
+  }
+}
+
+/** Borra el mensajero y su cuenta de acceso. Solo si nunca tuvo entregas:
+ *  las entregas (incluso las ya cerradas) apuntan a su fila y son historial. */
+export async function deleteCourier(courierId: number): Promise<ActionResult<void>> {
+  if (!isValidId(courierId)) return { success: false, error: "Mensajero no válido" };
+
+  try {
+    const userId = await assertRole("admin");
+    const current = await db.courier.findUnique({
+      where: { courierId },
+      include: {
+        user: { select: { userId: true, fullName: true, email: true } },
+        _count: { select: { deliveries: true } },
+      },
+    });
+    if (!current) return { success: false, error: "Mensajero no encontrado" };
+    if (current._count.deliveries > 0) {
+      return { success: false, error: "Tiene entregas registradas. Desactívalo en su lugar." };
+    }
+
+    await db.$transaction(async (tx) => {
+      await tx.courier.delete({ where: { courierId } });
+      await tx.user.delete({ where: { userId: current.user.userId } });
+      await createAuditLog(tx, {
+        action: "delete",
+        entityType: "Courier",
+        entityId: courierId,
+        module: "deliveries",
+        userId,
+        oldValues: {
+          userId: current.user.userId,
+          fullName: current.user.fullName,
+          email: current.user.email,
+          phone: current.phone,
+          vehicle: current.vehicle,
+          active: current.active,
+        },
+      });
+    });
+
+    revalidateCourierPaths();
+    revalidatePath("/admin/usuarios");
+    return { success: true, data: undefined };
+  } catch (error) {
+    if (isForeignKeyViolation(error)) return { success: false, error: IN_USE_MESSAGE };
+    return failAction("deleteCourier", error, "No se pudo eliminar el mensajero");
   }
 }

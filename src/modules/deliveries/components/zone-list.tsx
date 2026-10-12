@@ -4,13 +4,41 @@ import { lazyDialog } from "@/components/lazy-dialog";
 import { useState } from "react";
 import { Button } from "@heroui/react";
 import { MapPin, Pencil, Plus } from "lucide-react";
+import { DeleteButton } from "@/components/delete-button";
 import { EmptyState } from "@/components/empty-state";
 import { Money } from "@/components/money";
 import { ListCard, ResponsiveList, type ListColumn } from "@/components/responsive-list";
 import { StatusChip } from "@/components/status-chip";
+import { deleteZone } from "../actions/zone-actions";
 import type { ZoneRow } from "../queries/zone-queries";
 
 const ZoneForm = lazyDialog(() => import("./zone-form").then((m) => m.ZoneForm));
+
+function DeleteZoneButton({ row, appearance }: { row: ZoneRow; appearance: "icon" | "button" }) {
+  return (
+    <DeleteButton
+      appearance={appearance}
+      itemLabel={`la zona ${row.name}`}
+      description={`Se eliminará la zona ${row.name}. Dejará de ofrecerse en el checkout.`}
+      blockedReason={
+        row.orderCount > 0 || row.deliveryCount > 0
+          ? "Hay pedidos o entregas en esta zona. Desactívala en su lugar."
+          : null
+      }
+      successMessage={`Zona ${row.name} eliminada`}
+      onConfirm={() => deleteZone(row.zoneId)}
+    >
+      {row.addressCount > 0 && (
+        <p>
+          {row.addressCount === 1
+            ? "1 dirección de cliente quedará sin zona"
+            : `${row.addressCount} direcciones de clientes quedarán sin zona`}{" "}
+          hasta que el cliente la vuelva a elegir.
+        </p>
+      )}
+    </DeleteButton>
+  );
+}
 
 export function ZoneList({ rows }: { rows: ZoneRow[] }) {
   const [editing, setEditing] = useState<ZoneRow | null>(null);
@@ -52,9 +80,12 @@ export function ZoneList({ rows }: { rows: ZoneRow[] }) {
       header: "",
       align: "right",
       cell: (r) => (
-        <Button variant="ghost" size="sm" isIconOnly aria-label={`Editar ${r.name}`} onPress={() => openEdit(r)}>
-          <Pencil className="h-4 w-4" strokeWidth={1.9} />
-        </Button>
+        <div className="flex items-center justify-end gap-1">
+          <Button variant="ghost" size="sm" isIconOnly aria-label={`Editar ${r.name}`} onPress={() => openEdit(r)}>
+            <Pencil className="h-4 w-4" strokeWidth={1.9} />
+          </Button>
+          <DeleteZoneButton row={r} appearance="icon" />
+        </div>
       ),
     },
   ];
@@ -89,10 +120,13 @@ export function ZoneList({ rows }: { rows: ZoneRow[] }) {
               { label: "Pedidos", value: r.orderCount },
             ]}
             actions={
-              <Button variant="outline" size="sm" className="rounded-full" onPress={() => openEdit(r)}>
-                <Pencil className="h-3.5 w-3.5" strokeWidth={1.9} />
-                Editar
-              </Button>
+              <>
+                <Button variant="outline" size="sm" className="rounded-full" onPress={() => openEdit(r)}>
+                  <Pencil className="h-3.5 w-3.5" strokeWidth={1.9} />
+                  Editar
+                </Button>
+                <DeleteZoneButton row={r} appearance="button" />
+              </>
             }
           />
         )}

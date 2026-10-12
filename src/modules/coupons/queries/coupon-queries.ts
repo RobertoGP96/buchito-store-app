@@ -18,11 +18,16 @@ export interface CouponRow {
   isActive: boolean;
   state: CouponState;
   createdAt: string;
+  /** Pedidos que lo aplicaron: con alguno no se puede borrar. */
+  orderCount: number;
 }
 
 export async function getCoupons(): Promise<CouponRow[]> {
   const now = new Date();
-  const rows = await db.coupon.findMany({ orderBy: [{ isActive: "desc" }, { createdAt: "desc" }] });
+  const rows = await db.coupon.findMany({
+    orderBy: [{ isActive: "desc" }, { createdAt: "desc" }],
+    include: { _count: { select: { orders: true } } },
+  });
   return rows.map((row) => ({
     couponId: row.couponId,
     code: row.code,
@@ -36,5 +41,6 @@ export async function getCoupons(): Promise<CouponRow[]> {
     isActive: row.isActive,
     state: deriveCouponState(row, now),
     createdAt: row.createdAt.toISOString(),
+    orderCount: row._count.orders,
   }));
 }

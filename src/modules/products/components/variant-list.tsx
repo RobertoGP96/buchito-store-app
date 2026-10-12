@@ -4,6 +4,7 @@ import { lazyDialog } from "@/components/lazy-dialog";
 import { useState } from "react";
 import { Button } from "@heroui/react";
 import { AlertTriangle, Boxes, Layers, Pencil, Plus } from "lucide-react";
+import { DeleteButton } from "@/components/delete-button";
 import { EmptyState } from "@/components/empty-state";
 import { Money } from "@/components/money";
 import { ListCard, ResponsiveList, type ListColumn } from "@/components/responsive-list";
@@ -11,7 +12,9 @@ import { StatusChip } from "@/components/status-chip";
 import type { CurrencyInfo } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useCurrency } from "@/modules/currency/store/currency-provider";
+import { deleteVariant } from "../actions/variant-actions";
 import { variantLabel, type AttributeDef } from "../lib/attribute-schema";
+import type { ProductStatus } from "../lib/labels";
 import type { AdminVariantRow } from "../queries/product-queries";
 
 const StockAdjustForm = lazyDialog(() => import("./stock-adjust-form").then((m) => m.StockAdjustForm));
@@ -19,6 +22,7 @@ const VariantForm = lazyDialog(() => import("./variant-form").then((m) => m.Vari
 
 interface VariantListProps {
   productId: number;
+  productStatus: ProductStatus;
   variants: AdminVariantRow[];
   attributeSchema: AttributeDef[];
   currencies: CurrencyInfo[];
@@ -71,6 +75,51 @@ function StockCell({ variant, threshold }: { variant: AdminVariantRow; threshold
   );
 }
 
+function deleteBlockedReason(variant: AdminVariantRow, all: AdminVariantRow[], productStatus: ProductStatus): string | null {
+  if (variant.orderLineCount > 0) {
+    return `Aparece en ${variant.orderLineCount} ${variant.orderLineCount === 1 ? "pedido" : "pedidos"}. Desactívala en su lugar.`;
+  }
+  const onlyActive =
+    productStatus === "active" &&
+    variant.isActive &&
+    !all.some((v) => v.variantId !== variant.variantId && v.isActive);
+  if (onlyActive) return "Es la única variante publicada: publica otra o archiva el producto antes.";
+  return null;
+}
+
+function DeleteVariantButton({
+  variant,
+  all,
+  productStatus,
+  schema,
+  appearance,
+}: {
+  variant: AdminVariantRow;
+  all: AdminVariantRow[];
+  productStatus: ProductStatus;
+  schema: AttributeDef[];
+  appearance: "icon" | "button";
+}) {
+  const label = displayName(variant, schema);
+  return (
+    <DeleteButton
+      appearance={appearance}
+      itemLabel={`la variante ${label}`}
+      description={`Se eliminará la variante ${label} (${variant.sku}) con su stock y sus movimientos.`}
+      blockedReason={deleteBlockedReason(variant, all, productStatus)}
+      successMessage={`Variante ${label} eliminada`}
+      onConfirm={() => deleteVariant(variant.variantId)}
+    >
+      {variant.stock > 0 && (
+        <p className="font-medium text-warn">
+          Tiene {variant.stock} {variant.stock === 1 ? "unidad" : "unidades"} en stock que desaparecerán del inventario.
+        </p>
+      )}
+      {variant.isDefault && all.length > 1 && <p>Otra variante pasará a ser la predeterminada.</p>}
+    </DeleteButton>
+  );
+}
+
 function VariantChips({ variant }: { variant: AdminVariantRow }) {
   return (
     <div className="flex flex-wrap gap-1.5">
@@ -80,7 +129,7 @@ function VariantChips({ variant }: { variant: AdminVariantRow }) {
   );
 }
 
-export function VariantList({ productId, variants, attributeSchema, currencies, lowStockThreshold }: VariantListProps) {
+export function VariantList({ productId, productStatus, variants, attributeSchema, currencies, lowStockThreshold }: VariantListProps) {
   const [editing, setEditing] = useState<AdminVariantRow | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [stockTarget, setStockTarget] = useState<AdminVariantRow | null>(null);
@@ -127,6 +176,7 @@ export function VariantList({ productId, variants, attributeSchema, currencies, 
           <Button variant="ghost" size="sm" isIconOnly aria-label={`Editar ${v.sku}`} onPress={() => openEdit(v)}>
             <Pencil className="h-4 w-4" strokeWidth={1.9} />
           </Button>
+          <DeleteVariantButton variant={v} all={variants} productStatus={productStatus} schema={attributeSchema} appearance="icon" />
         </div>
       ),
     },
@@ -181,6 +231,7 @@ export function VariantList({ productId, variants, attributeSchema, currencies, 
                   <Pencil className="h-3.5 w-3.5" strokeWidth={1.9} />
                   Editar
                 </Button>
+                <DeleteVariantButton variant={v} all={variants} productStatus={productStatus} schema={attributeSchema} appearance="button" />
               </>
             }
           />

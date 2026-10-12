@@ -17,12 +17,14 @@ export interface PaymentMethodRow {
   sortOrder: number;
   version: number;
   orderCount: number;
+  /** Cobros registrados con este método. */
+  paymentCount: number;
 }
 
 export async function getPaymentMethods(): Promise<PaymentMethodRow[]> {
   const rows = await db.paymentMethod.findMany({
     orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
-    include: { currency: true, _count: { select: { orders: true } } },
+    include: { currency: true, _count: { select: { orders: true, payments: true } } },
   });
   return rows.map((row) => ({
     paymentMethodId: row.paymentMethodId,
@@ -43,6 +45,7 @@ export async function getPaymentMethods(): Promise<PaymentMethodRow[]> {
     sortOrder: row.sortOrder,
     version: row.version,
     orderCount: row._count.orders,
+    paymentCount: row._count.payments,
   }));
 }
 

@@ -5,8 +5,9 @@ import { Prisma } from "@/generated/prisma";
 import { db } from "@/lib/db";
 import { assertRole } from "@/lib/auth-guard";
 import { createAuditLog } from "@/lib/audit";
-import { failAction, firstIssueMessage, StaleVersionError } from "@/lib/action-utils";
+import { failAction, firstIssueMessage, IN_USE_MESSAGE, isForeignKeyViolation, isValidId, StaleVersionError } from "@/lib/action-utils";
 import { slugify } from "@/lib/slug";
+import { deleteObjectIfOurs } from "@/lib/storage";
 import type { ActionResult } from "@/types";
 import {
   parseAttributeSchema,
@@ -270,5 +271,67 @@ export async function setProductStatus(
     return { success: true, data: undefined };
   } catch (error) {
     return failAction("setProductStatus", error, "No se pudo cambiar el estado del producto");
+  }
+}
+
+/** Borra un producto que nunca se vendió, con sus variantes, movimientos de
+ *  stock manuales y fotos. Con líneas de pedido no se puede: el pedido apunta
+ *  a la variante y es historial; ahí se archiva. */
+export async function deleteProduct(productId: number): Promise<ActionResult<void>> {
+  if (!isValidId(productId)) return { success: false, error: "Producto no válido" };
+
+  try {
+    const userId = await assertRole("admin");
+    const current = await db.product.findUnique({
+      where: { productId },
+      select: {
+        name: true,
+        slug: true,
+        status: true,
+        images: { select: { url: true } },
+        variants: {
+          select: { variantId: true, sku: true, imageUrl: true, _count: { select: { orderLines: true } } },
+        },
+      },
+    });
+    if (!current) return { success: false, error: "Producto no encontrado" };
+    if (current.variants.some((v) => v._count.orderLines > 0)) {
+      return { success: false, error: "Tiene pedidos registrados. Archívalo en su lugar." };
+    }
+
+    const variantIds = current.variants.map((v) => v.variantId);
+    await db.$transaction(async (tx) => {
+      if (variantIds.length > 0) {
+        await tx.stockMovement.deleteMany({ where: { variantId: { in: variantIds } } });
+        await tx.productVariant.deleteMany({ where: { variantId: { in: variantIds } } });
+      }
+      // Las fotos (ProductImage) caen en cascada con el producto.
+      await tx.product.delete({ where: { productId } });
+      await createAuditLog(tx, {
+        action: "delete",
+        entityType: "Product",
+        entityId: productId,
+        module: "products",
+        userId,
+        oldValues: {
+          name: current.name,
+          slug: current.slug,
+          status: current.status,
+          variants: current.variants.map((v) => v.sku),
+          images: current.images.length,
+        },
+      });
+    });
+
+    // Fuera de la tx: un objeto huérfano en el bucket no afecta a la tienda.
+    const urls = [...current.images.map((i) => i.url), ...current.variants.map((v) => v.imageUrl)];
+    await Promise.all(urls.map((url) => deleteObjectIfOurs(url)));
+
+    revalidateProductPaths(productId, [current.slug]);
+    revalidatePath("/admin/inventario");
+    return { success: true, data: undefined };
+  } catch (error) {
+    if (isForeignKeyViolation(error)) return { success: false, error: IN_USE_MESSAGE };
+    return failAction("deleteProduct", error, "No se pudo eliminar el producto");
   }
 }

@@ -5,7 +5,7 @@ import { CACHE_TAGS } from "@/lib/cache-tags";
 import { db } from "@/lib/db";
 import { assertRole } from "@/lib/auth-guard";
 import { createAuditLog } from "@/lib/audit";
-import { failAction, firstIssueMessage } from "@/lib/action-utils";
+import { failAction, firstIssueMessage, IN_USE_MESSAGE, isForeignKeyViolation, isValidId } from "@/lib/action-utils";
 import type { ActionResult } from "@/types";
 import { currencySchema, type CurrencyInput } from "../lib/schemas";
 
@@ -145,5 +145,81 @@ export async function setBaseCurrency(currencyId: number): Promise<ActionResult<
     return { success: true, data: undefined };
   } catch (error) {
     return failAction("setBaseCurrency", error, "No se pudo cambiar la moneda base");
+  }
+}
+
+/** Borra una moneda sin uso. La base, las que fijan precios de variantes o
+ *  métodos de pago y las que aparecen en pedidos o cobros no se pueden borrar
+ *  (ahí se desactivan). Sus tasas de cambio se van con ella: sin la moneda no
+ *  significan nada. */
+export async function deleteCurrency(currencyId: number): Promise<ActionResult<void>> {
+  if (!isValidId(currencyId)) return { success: false, error: "Moneda no válida" };
+
+  try {
+    const userId = await assertRole("admin");
+    const current = await db.currency.findUnique({
+      where: { currencyId },
+      include: {
+        _count: {
+          select: {
+            settingsAsBase: true,
+            variants: true,
+            paymentMethods: true,
+            orderPayments: true,
+            orderLinesOrig: true,
+            ordersAsBase: true,
+            ordersAsPayment: true,
+          },
+        },
+      },
+    });
+    if (!current) return { success: false, error: "Moneda no encontrada" };
+    const used = current._count;
+    if (used.settingsAsBase > 0) {
+      return { success: false, error: "Es la moneda base. Elige otra moneda base antes de eliminarla." };
+    }
+    if (used.paymentMethods > 0) {
+      return { success: false, error: "Hay métodos de pago en esta moneda. Elimínalos o cámbialos de moneda primero." };
+    }
+    if (used.variants > 0) {
+      return { success: false, error: "Hay variantes con precio en esta moneda. Cambia su moneda primero." };
+    }
+    if (used.ordersAsBase + used.ordersAsPayment + used.orderPayments + used.orderLinesOrig > 0) {
+      return { success: false, error: "Hay pedidos o cobros registrados en esta moneda. Desactívala en su lugar." };
+    }
+
+    await db.$transaction(async (tx) => {
+      const rates = await tx.exchangeRate.findMany({
+        where: { OR: [{ baseCurrencyId: currencyId }, { quoteCurrencyId: currencyId }] },
+        select: { exchangeRateId: true },
+      });
+      const rateIds = rates.map((r) => r.exchangeRateId);
+      if (rateIds.length > 0) {
+        await tx.exchangeRateHistory.deleteMany({ where: { exchangeRateId: { in: rateIds } } });
+        await tx.exchangeRate.deleteMany({ where: { exchangeRateId: { in: rateIds } } });
+      }
+      await tx.currency.delete({ where: { currencyId } });
+      await createAuditLog(tx, {
+        action: "delete",
+        entityType: "Currency",
+        entityId: currencyId,
+        module: "currency",
+        userId,
+        oldValues: {
+          code: current.code,
+          name: current.name,
+          symbol: current.symbol,
+          decimalPlaces: current.decimalPlaces,
+          isActive: current.isActive,
+          deletedRates: rateIds.length,
+        },
+      });
+    });
+
+    revalidateCurrencyPaths();
+    return { success: true, data: undefined };
+  } catch (error) {
+    if (isForeignKeyViolation(error)) return { success: false, error: IN_USE_MESSAGE };
+    return failAction("deleteCurrency", error, "No se pudo eliminar la moneda");
   }
 }

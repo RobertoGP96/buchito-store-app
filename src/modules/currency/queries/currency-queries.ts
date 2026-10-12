@@ -21,13 +21,28 @@ export interface CurrencyRow extends CurrencyInfo {
   /** Tasa a base vigente (base por 1 unidad); null si no hay par configurado. */
   rateToBase: number | null;
   paymentMethodCount: number;
+  /** Variantes con precio en esta moneda. */
+  variantCount: number;
+  /** Pedidos, líneas y cobros que la referencian: con alguno no se puede borrar. */
+  orderCount: number;
 }
 
 export async function getCurrencies(): Promise<CurrencyRow[]> {
   const [rows, settings] = await Promise.all([
     db.currency.findMany({
       orderBy: [{ sortOrder: "asc" }, { code: "asc" }],
-      include: { _count: { select: { paymentMethods: true } } },
+      include: {
+        _count: {
+          select: {
+            paymentMethods: true,
+            variants: true,
+            ordersAsBase: true,
+            ordersAsPayment: true,
+            orderPayments: true,
+            orderLinesOrig: true,
+          },
+        },
+      },
     }),
     db.storeSetting.findUnique({ where: { id: 1 }, select: { baseCurrencyId: true } }),
   ]);
@@ -49,6 +64,9 @@ export async function getCurrencies(): Promise<CurrencyRow[]> {
     isBase: row.currencyId === baseId,
     rateToBase: rates.get(row.currencyId)?.rate ?? null,
     paymentMethodCount: row._count.paymentMethods,
+    variantCount: row._count.variants,
+    orderCount:
+      row._count.ordersAsBase + row._count.ordersAsPayment + row._count.orderPayments + row._count.orderLinesOrig,
   }));
 }
 

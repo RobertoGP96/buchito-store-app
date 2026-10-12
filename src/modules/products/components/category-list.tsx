@@ -4,10 +4,12 @@ import { lazyDialog } from "@/components/lazy-dialog";
 import { useMemo, useState } from "react";
 import { Button } from "@heroui/react";
 import { CornerDownRight, FolderTree, Pencil, Plus } from "lucide-react";
+import { DeleteButton } from "@/components/delete-button";
 import { EmptyState } from "@/components/empty-state";
 import type { SelectOption } from "@/components/form/fields";
 import { ListCard, ResponsiveList, type ListColumn } from "@/components/responsive-list";
 import { StatusChip } from "@/components/status-chip";
+import { deleteCategory } from "../actions/category-actions";
 import type { CategoryRow } from "../queries/category-queries";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +29,32 @@ function subtreeIds(rows: CategoryRow[], rootId: number): Set<number> {
     }
   }
   return ids;
+}
+
+function DeleteCategoryButton({ row, appearance }: { row: CategoryRow; appearance: "icon" | "button" }) {
+  return (
+    <DeleteButton
+      appearance={appearance}
+      itemLabel={`la categoría ${row.name}`}
+      description={`Se eliminará la categoría ${row.name} del catálogo.`}
+      blockedReason={
+        row.childCount > 0
+          ? `Tiene ${row.childCount} ${row.childCount === 1 ? "subcategoría" : "subcategorías"}. Muévelas o elimínalas primero.`
+          : null
+      }
+      successMessage={`Categoría ${row.name} eliminada`}
+      onConfirm={() => deleteCategory(row.categoryId)}
+    >
+      {row.productCount > 0 && (
+        <p className="font-medium text-warn">
+          {row.productCount === 1
+            ? "1 producto quedará sin categoría"
+            : `${row.productCount} productos quedarán sin categoría`}{" "}
+          (siguen visibles en el catálogo general).
+        </p>
+      )}
+    </DeleteButton>
+  );
 }
 
 export function CategoryList({ rows }: { rows: CategoryRow[] }) {
@@ -76,9 +104,12 @@ export function CategoryList({ rows }: { rows: CategoryRow[] }) {
       header: "",
       align: "right",
       cell: (r) => (
-        <Button variant="ghost" size="sm" isIconOnly aria-label={`Editar ${r.name}`} onPress={() => openEdit(r)}>
-          <Pencil className="h-4 w-4" strokeWidth={1.9} />
-        </Button>
+        <div className="flex items-center justify-end gap-1">
+          <Button variant="ghost" size="sm" isIconOnly aria-label={`Editar ${r.name}`} onPress={() => openEdit(r)}>
+            <Pencil className="h-4 w-4" strokeWidth={1.9} />
+          </Button>
+          <DeleteCategoryButton row={r} appearance="icon" />
+        </div>
       ),
     },
   ];
@@ -112,10 +143,13 @@ export function CategoryList({ rows }: { rows: CategoryRow[] }) {
               { label: "Subcategorías", value: r.childCount },
             ]}
             actions={
-              <Button variant="outline" size="sm" className="rounded-full" onPress={() => openEdit(r)}>
-                <Pencil className="h-3.5 w-3.5" strokeWidth={1.9} />
-                Editar
-              </Button>
+              <>
+                <Button variant="outline" size="sm" className="rounded-full" onPress={() => openEdit(r)}>
+                  <Pencil className="h-3.5 w-3.5" strokeWidth={1.9} />
+                  Editar
+                </Button>
+                <DeleteCategoryButton row={r} appearance="button" />
+              </>
             }
           />
         )}

@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { assertRole } from "@/lib/auth-guard";
 import { createAuditLog } from "@/lib/audit";
-import { failAction, firstIssueMessage, StaleVersionError } from "@/lib/action-utils";
+import { failAction, firstIssueMessage, IN_USE_MESSAGE, isForeignKeyViolation, isValidId, StaleVersionError } from "@/lib/action-utils";
 import type { ActionResult } from "@/types";
 import { paymentMethodSchema, type PaymentMethodInput } from "../lib/schemas";
 
@@ -98,5 +98,49 @@ export async function updatePaymentMethod(
   } catch (error) {
     if (error instanceof StaleVersionError) return { success: false, error: error.message };
     return failAction("updatePaymentMethod", error, "No se pudo actualizar el método de pago");
+  }
+}
+
+/** Borra un método de pago que ningún pedido ni cobro referencia; los que
+ *  ya se usaron se desactivan (el pedido guarda el nombre, pero el cobro
+ *  apunta a la fila). */
+export async function deletePaymentMethod(paymentMethodId: number): Promise<ActionResult<void>> {
+  if (!isValidId(paymentMethodId)) return { success: false, error: "Método de pago no válido" };
+
+  try {
+    const userId = await assertRole("admin");
+    const current = await db.paymentMethod.findUnique({
+      where: { paymentMethodId },
+      include: { _count: { select: { orders: true, payments: true } } },
+    });
+    if (!current) return { success: false, error: "Método de pago no encontrado" };
+    if (current._count.orders > 0 || current._count.payments > 0) {
+      return { success: false, error: "Hay pedidos o cobros con este método. Desactívalo en su lugar." };
+    }
+
+    await db.$transaction(async (tx) => {
+      await tx.paymentMethod.delete({ where: { paymentMethodId } });
+      await createAuditLog(tx, {
+        action: "delete",
+        entityType: "PaymentMethod",
+        entityId: paymentMethodId,
+        module: "payments",
+        userId,
+        oldValues: {
+          code: current.code,
+          name: current.name,
+          kind: current.kind,
+          currencyId: current.currencyId,
+          surchargePercent: current.surchargePercent?.toString() ?? null,
+          isActive: current.isActive,
+        },
+      });
+    });
+
+    revalidatePaymentPaths();
+    return { success: true, data: undefined };
+  } catch (error) {
+    if (isForeignKeyViolation(error)) return { success: false, error: IN_USE_MESSAGE };
+    return failAction("deletePaymentMethod", error, "No se pudo eliminar el método de pago");
   }
 }

@@ -5,7 +5,7 @@ import { CACHE_TAGS } from "@/lib/cache-tags";
 import { db } from "@/lib/db";
 import { assertRole } from "@/lib/auth-guard";
 import { createAuditLog } from "@/lib/audit";
-import { failAction, firstIssueMessage } from "@/lib/action-utils";
+import { failAction, firstIssueMessage, IN_USE_MESSAGE, isForeignKeyViolation, isValidId } from "@/lib/action-utils";
 import type { ActionResult } from "@/types";
 import { categorySchema, type CategoryInput } from "../lib/schemas";
 
@@ -117,5 +117,48 @@ export async function updateCategory(
     return { success: true, data: undefined };
   } catch (error) {
     return failAction("updateCategory", error, "No se pudo actualizar la categoría");
+  }
+}
+
+/** Borra una categoría hoja. Sus productos quedan sin categoría (la DB los
+ *  desenlaza sola); con subcategorías hay que mover o borrar esas antes. */
+export async function deleteCategory(categoryId: number): Promise<ActionResult<void>> {
+  if (!isValidId(categoryId)) return { success: false, error: "Categoría no válida" };
+
+  try {
+    const userId = await assertRole("admin");
+    const current = await db.category.findUnique({
+      where: { categoryId },
+      include: { _count: { select: { children: true, products: true } } },
+    });
+    if (!current) return { success: false, error: "Categoría no encontrada" };
+    if (current._count.children > 0) {
+      return { success: false, error: "Tiene subcategorías. Muévelas o elimínalas primero." };
+    }
+
+    await db.$transaction(async (tx) => {
+      await tx.category.delete({ where: { categoryId } });
+      await createAuditLog(tx, {
+        action: "delete",
+        entityType: "Category",
+        entityId: categoryId,
+        module: "products",
+        userId,
+        oldValues: {
+          name: current.name,
+          slug: current.slug,
+          parentId: current.parentId,
+          isActive: current.isActive,
+          unlinkedProducts: current._count.products,
+        },
+      });
+    });
+
+    revalidateCategoryPaths();
+    revalidatePath("/", "layout");
+    return { success: true, data: undefined };
+  } catch (error) {
+    if (isForeignKeyViolation(error)) return { success: false, error: IN_USE_MESSAGE };
+    return failAction("deleteCategory", error, "No se pudo eliminar la categoría");
   }
 }
