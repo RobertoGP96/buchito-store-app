@@ -103,7 +103,7 @@ export function UserMenu({ user }: { user: NavUser | null }) {
         {/* La cabecera va fuera del Menu: React Aria solo admite ítems dentro
             de una sección y descartaba el bloque junto con los enlaces. */}
         <div className="p-1 pb-0">
-          <div className="rounded-field bg-page px-3.5 py-3">
+          <div className="rounded-field border border-line px-3.5 py-3">
             <p className="truncate text-[14px] font-semibold text-ink">
               {user ? user.fullName : "Cliente invitado"}
             </p>
@@ -130,8 +130,14 @@ export function UserMenu({ user }: { user: NavUser | null }) {
             )}
           </div>
         </div>
+        {/* El foco lo marca el ítem resaltado; el anillo global del contenedor
+            solo asomaba como una línea bajo la cabecera. */}
         {user && (
-          <Dropdown.Menu aria-label="Cuenta" onAction={handleAction}>
+          <Dropdown.Menu
+            aria-label="Cuenta"
+            className="focus-visible:outline-none!"
+            onAction={handleAction}
+          >
             <Dropdown.Section>
               {links.map((link) => {
                 const Icon = link.icon;

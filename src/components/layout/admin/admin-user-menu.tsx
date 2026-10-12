@@ -85,12 +85,18 @@ export function AdminUserMenu({ userName, role, className }: AdminUserMenuProps)
         {/* Fuera del Menu: React Aria solo admite ítems dentro de una sección
             y descartaba la cabecera junto con los atajos. */}
         <div className="p-1 pb-0">
-          <div className="rounded-field bg-page px-3.5 py-3">
+          <div className="rounded-field border border-line px-3.5 py-3">
             <p className="truncate text-[14px] font-semibold text-ink">{userName}</p>
             <p className="mt-0.5 text-[12px] text-slate-400">{roleLabel}</p>
           </div>
         </div>
-        <Dropdown.Menu aria-label="Cuenta" onAction={handleAction}>
+        {/* El foco lo marca el ítem resaltado; el anillo global del contenedor
+            solo asomaba como una línea bajo la cabecera. */}
+        <Dropdown.Menu
+          aria-label="Cuenta"
+          className="focus-visible:outline-none!"
+          onAction={handleAction}
+        >
           <Dropdown.Section>
             {QUICK_LINKS.map((link) => {
               const Icon = link.icon;
