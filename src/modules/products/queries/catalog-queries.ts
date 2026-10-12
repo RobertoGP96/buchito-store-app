@@ -159,6 +159,8 @@ export interface CatalogFilters {
   featured?: boolean;
   /** Solo productos con alguna variante rebajada (precio anterior tachado). */
   onSale?: boolean;
+  /** `newest`: los publicados más recientemente primero (portada). */
+  sort?: "default" | "newest";
   limit?: number;
 }
 
@@ -188,7 +190,10 @@ export async function getCatalogProducts(filters: CatalogFilters = {}): Promise<
   const rows = await db.product.findMany({
     where,
     include: PRODUCT_INCLUDE,
-    orderBy: [{ featured: "desc" }, { sortOrder: "asc" }, { name: "asc" }],
+    orderBy:
+      filters.sort === "newest"
+        ? [{ createdAt: "desc" }, { productId: "desc" }]
+        : [{ featured: "desc" }, { sortOrder: "asc" }, { name: "asc" }],
     take: filters.limit,
   });
 
@@ -201,6 +206,11 @@ export async function getCatalogProducts(filters: CatalogFilters = {}): Promise<
 
 export async function getFeaturedProducts(limit = 8): Promise<CatalogProduct[]> {
   return getCatalogProducts({ featured: true, limit });
+}
+
+/** Últimos productos añadidos al catálogo, el más nuevo primero. */
+export async function getNewestProducts(limit = 8): Promise<CatalogProduct[]> {
+  return getCatalogProducts({ sort: "newest", limit });
 }
 
 export async function getOnSaleProducts(limit?: number): Promise<CatalogProduct[]> {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { unstable_rethrow } from "next/navigation";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,7 +9,6 @@ import { loginUser } from "../actions/auth-actions";
 import { loginSchema, type LoginInput } from "../lib/schemas";
 
 export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
-  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { control, handleSubmit } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -19,17 +18,19 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
   const onSubmit = async (values: LoginInput) => {
     setIsSubmitting(true);
     try {
+      // Con éxito la action redirige y esta pantalla se reemplaza: el botón
+      // se queda en "Entrando…" hasta entonces, por eso no hay `finally`.
       const result = await loginUser(values);
       if (!result.success) {
         toast.danger(result.error);
-        return;
+        setIsSubmitting(false);
       }
-      router.push(result.data.redirectTo);
-      router.refresh();
     } catch (error) {
+      // El redirect de la action llega aquí como rechazo de la promesa: se
+      // relanza para que Next lo ejecute en vez de tratarlo como fallo.
+      unstable_rethrow(error);
       console.error("LoginForm:", error);
       toast.danger("No se pudo iniciar sesión. Inténtalo de nuevo.");
-    } finally {
       setIsSubmitting(false);
     }
   };

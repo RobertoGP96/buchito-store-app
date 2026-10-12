@@ -43,7 +43,7 @@ export default async function StoreLayout({
               address: settings?.address ?? null,
             }}
           />
-          <BottomNav />
+          <BottomNav isLoggedIn={user !== null} />
         </div>
       </CartProvider>
     </CurrencyProvider>

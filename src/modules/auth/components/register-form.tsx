@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { unstable_rethrow } from "next/navigation";
 import { useState } from "react";
 import { Controller, useForm, type Control, type FieldPath } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -43,7 +43,6 @@ function Field({ control, name, label, type = "text", autoComplete, placeholder 
 }
 
 export function RegisterForm() {
-  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { control, handleSubmit } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
@@ -53,18 +52,16 @@ export function RegisterForm() {
   const onSubmit = async (values: RegisterInput) => {
     setIsSubmitting(true);
     try {
+      // Con éxito la action redirige (ver LoginForm): sin `finally`.
       const result = await registerCustomer(values);
       if (!result.success) {
         toast.danger(result.error);
-        return;
+        setIsSubmitting(false);
       }
-      toast.success("Cuenta creada");
-      router.push(result.data.redirectTo);
-      router.refresh();
     } catch (error) {
+      unstable_rethrow(error);
       console.error("RegisterForm:", error);
       toast.danger("No se pudo crear la cuenta. Inténtalo de nuevo.");
-    } finally {
       setIsSubmitting(false);
     }
   };

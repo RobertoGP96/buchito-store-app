@@ -13,7 +13,24 @@ import {
 import { cartCount, useCart } from "@/modules/cart/store";
 import { cn } from "@/lib/utils";
 
-const VISIBLE_PATHS = ["/", "/catalogo", "/combos", "/ofertas", "/pagos", "/carrito", "/perfil", "/perfil/pedidos"];
+// Login y registro también: al tocar "Perfil" sin sesión se llega ahí, y si
+// la barra se desmontara se vería desaparecer de golpe y volver animada.
+const VISIBLE_PATHS = [
+  "/",
+  "/catalogo",
+  "/combos",
+  "/ofertas",
+  "/pagos",
+  "/carrito",
+  "/perfil",
+  "/perfil/pedidos",
+  "/login",
+  "/registro",
+];
+
+/** Sin sesión, "Perfil" apunta directo al login: evita el viaje al middleware
+ *  (prefetch desperdiciado y un segundo en blanco hasta el redirect). */
+const PROFILE_LOGIN_HREF = "/login?callbackUrl=%2Fperfil";
 
 interface NavItem {
   href: string;
@@ -40,7 +57,7 @@ const ITEMS: NavItem[] = [
     href: "/perfil",
     icon: UserRound,
     label: "Perfil",
-    isActive: (p) => p === "/perfil" || p === "/perfil/pedidos",
+    isActive: (p) => p.startsWith("/perfil") || p === "/login" || p === "/registro",
   },
 ];
 
@@ -81,7 +98,7 @@ function useHideOnScroll(enabled: boolean, resetKey: string) {
   return hidden;
 }
 
-export function BottomNav() {
+export function BottomNav({ isLoggedIn }: { isLoggedIn: boolean }) {
   const pathname = usePathname();
   const { state } = useCart();
   const visible = VISIBLE_PATHS.includes(pathname);
@@ -111,28 +128,32 @@ export function BottomNav() {
           style={{ padding: PAD }}
         >
           {/* Indicador deslizante: una sola píldora azul que viaja entre
-              pestañas en lugar de encender y apagar fondos por ítem. */}
+              pestañas en lugar de encender y apagar fondos por ítem. Se mueve
+              con `transform`, que anima en el compositor; animar `left`
+              recalculaba el layout en cada frame. */}
           <span
             aria-hidden
             className={cn(
-              "absolute rounded-full bg-navy-700 transition-[left,opacity] duration-[380ms] motion-reduce:transition-none",
+              "absolute rounded-full bg-navy-700 transition-[transform,opacity] duration-[380ms] motion-reduce:transition-none",
               activeIndex < 0 && "opacity-0"
             )}
             style={{
               top: PAD,
               bottom: PAD,
+              left: PAD,
               width: `calc(${slot})`,
-              left: `calc(${PAD}px + ${Math.max(activeIndex, 0)} * ${slot})`,
+              transform: `translateX(${Math.max(activeIndex, 0) * 100}%)`,
               transitionTimingFunction: EASE,
             }}
           />
           {ITEMS.map((item) => {
             const active = item.isActive(pathname);
             const Icon = item.icon;
+            const href = item.href === "/perfil" && !isLoggedIn ? PROFILE_LOGIN_HREF : item.href;
             return (
               <Link
                 key={item.href}
-                href={item.href}
+                href={href}
                 aria-label={item.label}
                 aria-current={active ? "page" : undefined}
                 className={cn(

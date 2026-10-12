@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BadgePercent, Gift, PackageOpen, Wallet, type LucideIcon } from "lucide-react";
+import { ArrowRight, BadgePercent, Gift, PackageOpen, Sparkles, Wallet, type LucideIcon } from "lucide-react";
 import { ButtonLink } from "@/components/button-link";
 import { EmptyState } from "@/components/empty-state";
 import { ProductCard } from "@/components/product-card";
@@ -7,7 +7,7 @@ import { ProductGrid, ProductGridCell } from "@/components/product-grid";
 import { STORE_NAME } from "@/lib/config";
 import { ComboCard } from "@/modules/combos/components/combo-card";
 import { getCatalogCombos } from "@/modules/combos/queries/combo-catalog-queries";
-import { getFeaturedProducts } from "@/modules/products/queries/catalog-queries";
+import { getFeaturedProducts, getNewestProducts } from "@/modules/products/queries/catalog-queries";
 
 export const dynamic = "force-dynamic";
 
@@ -26,8 +26,18 @@ const INFO_LINKS: InfoLink[] = [
   { href: "/pagos", icon: Wallet, title: "Formas de pago", description: "Métodos, monedas y tasa del día." },
 ];
 
+/** Una fila completa en desktop; se piden de más por si hay que descartar destacados. */
+const NEWEST_LIMIT = 4;
+
 export default async function HomePage() {
-  const [featured, combos] = await Promise.all([getFeaturedProducts(8), getCatalogCombos({ limit: 4 })]);
+  const [featured, newest, combos] = await Promise.all([
+    getFeaturedProducts(8),
+    getNewestProducts(NEWEST_LIMIT + 8),
+    getCatalogCombos({ limit: 4 }),
+  ]);
+  // Un producto destacado y recién creado ya está arriba: no se repite.
+  const featuredIds = new Set(featured.map((p) => p.productId));
+  const recentlyAdded = newest.filter((p) => !featuredIds.has(p.productId)).slice(0, NEWEST_LIMIT);
 
   return (
     <>
@@ -82,6 +92,32 @@ export default async function HomePage() {
             </ProductGrid>
           )}
         </section>
+
+        {recentlyAdded.length > 0 && (
+          <section>
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <p className="eyebrow inline-flex items-center gap-1.5">
+                  <Sparkles className="h-3.5 w-3.5" strokeWidth={2} />
+                  Novedades
+                </p>
+                <h2 className="font-display mt-2 text-[20px] leading-tight text-navy-900 md:text-[24px]">
+                  Recién añadidos
+                </h2>
+              </div>
+              <ButtonLink href="/catalogo" variant="ghost" size="sm">
+                Ver catálogo
+              </ButtonLink>
+            </div>
+            <ProductGrid className="mt-5">
+              {recentlyAdded.map((product) => (
+                <ProductGridCell key={product.productId}>
+                  <ProductCard product={product} />
+                </ProductGridCell>
+              ))}
+            </ProductGrid>
+          </section>
+        )}
 
         {combos.length > 0 && (
           <section>

@@ -1,5 +1,6 @@
 "use server";
 
+import { redirect } from "next/navigation";
 import { AuthError } from "next-auth";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
@@ -16,9 +17,11 @@ import {
   type RegisterInput,
 } from "../lib/schemas";
 
-export async function loginUser(
-  input: LoginInput
-): Promise<ActionResult<{ redirectTo: string }>> {
+/** Con credenciales válidas no devuelve: redirige desde el servidor. La
+ *  respuesta de la action ya trae el destino renderizado con la cookie nueva
+ *  (layout incluido), así el cliente no necesita `push` + `refresh`, que
+ *  pintaban dos veces y competían con el middleware de `/login`. */
+export async function loginUser(input: LoginInput): Promise<ActionResult<never>> {
   const parsed = loginSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, error: "Revisa el correo y la contraseña" };
@@ -38,13 +41,11 @@ export async function loginUser(
   // La cookie recién puesta no se refleja en auth() dentro de esta misma
   // petición: el rol se lee de la DB para decidir el destino.
   const user = await db.user.findUnique({ where: { email }, select: { role: true } });
-  const redirectTo = safeCallbackUrl(callbackUrl, homeForRole(user?.role));
-  return { success: true, data: { redirectTo } };
+  redirect(safeCallbackUrl(callbackUrl, homeForRole(user?.role)));
 }
 
-export async function registerCustomer(
-  input: RegisterInput
-): Promise<ActionResult<{ redirectTo: string }>> {
+/** Igual que `loginUser`: con éxito redirige desde el servidor. */
+export async function registerCustomer(input: RegisterInput): Promise<ActionResult<never>> {
   const parsed = registerSchema.safeParse(input);
   if (!parsed.success) {
     return {
@@ -94,13 +95,15 @@ export async function registerCustomer(
     return { success: false, error: "No se pudo crear la cuenta. Inténtalo de nuevo." };
   }
 
+  let signedIn = true;
   try {
     await signIn("credentials", { email, password, redirect: false });
   } catch (error) {
     console.error("registerCustomer signIn:", error);
-    return { success: true, data: { redirectTo: "/login" } };
+    signedIn = false;
   }
-  return { success: true, data: { redirectTo: "/" } };
+  // `redirect` lanza: fuera del try para que el catch no la trague.
+  redirect(signedIn ? "/" : "/login");
 }
 
 export async function logoutUser(): Promise<void> {
