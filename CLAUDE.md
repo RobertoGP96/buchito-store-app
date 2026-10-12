@@ -13,6 +13,7 @@ Tienda web + panel de gestión + app de mensajero en UNA app Next.js. Hereda el 
 
 ## Comandos
 
+
 `pnpm dev` (3000) · `pnpm typecheck` · `pnpm lint` · `pnpm test` · `pnpm db:push` · `pnpm db:constraints` · `pnpm db:seed` · `pnpm db:studio`.
 Tras cambiar `prisma/schema.prisma`: `pnpm exec prisma validate`, `pnpm db:generate`, `pnpm db:push`, y añadir CHECKs a `prisma/sql/store-constraints.sql` si aplica.
 
