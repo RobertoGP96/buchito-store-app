@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 import { Drawer } from "@heroui/react";
 import { LogOut, MoreHorizontal, Store } from "lucide-react";
 import { AdminNavList } from "@/components/layout/admin/admin-nav-list";
-import { NavIcon } from "@/components/nav-icon";
 import { ADMIN_BOTTOM_TABS, ADMIN_NAV, findNavEntry, isNavActive } from "@/lib/nav-registry";
 import { logoutUser } from "@/modules/auth/actions/auth-actions";
 import { cn } from "@/lib/utils";
@@ -50,7 +49,7 @@ export function AdminBottomTabs({ userName }: { userName: string }) {
                     active && "bg-tint"
                   )}
                 >
-                  <NavIcon icon={Icon} className="h-[18px] w-[18px]" strokeWidth={active ? 2.2 : 1.8} />
+                  <Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2.2 : 1.8} />
                 </span>
                 {entry.label}
               </Link>

@@ -11,7 +11,6 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cartCount, useCart } from "@/modules/cart/store";
-import { NavIcon } from "@/components/nav-icon";
 import { cn } from "@/lib/utils";
 
 const VISIBLE_PATHS = ["/", "/catalogo", "/combos", "/ofertas", "/pagos", "/carrito", "/perfil", "/perfil/pedidos"];
@@ -149,7 +148,7 @@ export function BottomNav() {
                   )}
                   style={{ transitionTimingFunction: EASE }}
                 >
-                  <NavIcon icon={Icon} className="h-5 w-5" strokeWidth={active ? 2.2 : 1.8} />
+                  <Icon className="h-5 w-5" strokeWidth={active ? 2.2 : 1.8} />
                   {item.href === "/carrito" && count > 0 && (
                     <span className="tabular absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-navy-700 px-1 text-[9px] leading-none font-bold text-on-brand ring-2 ring-canvas">
                       {count > 99 ? "99+" : count}

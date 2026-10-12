@@ -408,7 +408,7 @@ html {
   }
 }
 
-/* Spinner de enlace pendiente (NavIcon / LinkPending): aparece con retardo
+/* Spinner de enlace pendiente (LinkPending): aparece con retardo
    para no parpadear cuando la navegación es instantánea. */
 @keyframes pendingIn {
   from {
