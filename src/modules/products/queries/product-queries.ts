@@ -11,6 +11,7 @@ import {
   type AttributeDef,
   type AttributeValues,
 } from "../lib/attribute-schema";
+import { marginPct } from "@/modules/finance/lib/profit";
 import type { ProductStatus } from "../lib/labels";
 
 export interface AdminProductRow {
@@ -47,6 +48,13 @@ export interface AdminVariantSummary {
   priceCurrency: CurrencyInfo;
   /** Precio convertido a base con la tasa vigente; null si no hay tasa. */
   priceBase: number | null;
+  /** Último costo de compra por unidad en SU moneda; null si no se registró. */
+  cost: number | null;
+  costCurrency: CurrencyInfo | null;
+  /** Costo convertido a base; null sin costo o sin tasa. */
+  costBase: number | null;
+  /** (precio − costo) / precio, en base; null si falta alguno. */
+  marginPct: number | null;
   stock: number;
   imageUrl: string | null;
   isDefault: boolean;
@@ -77,6 +85,9 @@ type VariantSource = {
   compareAtPrice: Prisma.Decimal | null;
   priceCurrencyId: number;
   priceCurrency: CurrencyInfo;
+  cost: Prisma.Decimal | null;
+  costCurrencyId: number | null;
+  costCurrency: CurrencyInfo | null;
   stock: number;
   imageUrl: string | null;
   isDefault: boolean;
@@ -87,6 +98,10 @@ type VariantSource = {
 function toVariantSummary(v: VariantSource, rates: RatesToBase, baseDecimals: number): AdminVariantSummary {
   const price = decimalToNumber(v.price);
   const rate = rates.get(v.priceCurrencyId);
+  const priceBase = rate ? roundToCurrency(price * rate.rate, baseDecimals) : null;
+  const cost = decimalToNullableNumber(v.cost);
+  const costRate = v.costCurrencyId != null ? rates.get(v.costCurrencyId) : undefined;
+  const costBase = cost != null && costRate ? roundToCurrency(cost * costRate.rate, baseDecimals) : null;
   return {
     variantId: v.variantId,
     version: v.version,
@@ -96,7 +111,11 @@ function toVariantSummary(v: VariantSource, rates: RatesToBase, baseDecimals: nu
     price,
     compareAtPrice: decimalToNullableNumber(v.compareAtPrice),
     priceCurrency: v.priceCurrency,
-    priceBase: rate ? roundToCurrency(price * rate.rate, baseDecimals) : null,
+    priceBase,
+    cost,
+    costCurrency: v.costCurrency,
+    costBase,
+    marginPct: priceBase != null ? marginPct(priceBase, costBase) : null,
     stock: v.stock,
     imageUrl: v.imageUrl,
     isDefault: v.isDefault,
@@ -118,7 +137,7 @@ export async function getAdminProducts(): Promise<AdminProductRow[]> {
       images: { orderBy: { sortOrder: "asc" }, take: 1 },
       variants: {
         orderBy: [{ sortOrder: "asc" }, { variantId: "asc" }],
-        include: { priceCurrency: VARIANT_CURRENCY_SELECT },
+        include: { priceCurrency: VARIANT_CURRENCY_SELECT, costCurrency: VARIANT_CURRENCY_SELECT },
       },
     },
   });
@@ -215,6 +234,7 @@ export async function getAdminProduct(productId: number): Promise<AdminProductDe
         orderBy: [{ sortOrder: "asc" }, { variantId: "asc" }],
         include: {
           priceCurrency: VARIANT_CURRENCY_SELECT,
+          costCurrency: VARIANT_CURRENCY_SELECT,
           stockMovements: {
             orderBy: { createdAt: "desc" },
             take: RECENT_MOVEMENTS,

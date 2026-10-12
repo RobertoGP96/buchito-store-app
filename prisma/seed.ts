@@ -53,7 +53,9 @@ async function main() {
       lowStockThreshold: 5,
       allowPickup: true,
     },
-    update: { baseCurrencyId: cup.currencyId },
+    // Una tienda ya configurada conserva su moneda base: el seed solo la fija
+    // la primera vez.
+    update: {},
   });
 
   // ----- Tasas (X → CUP): rate = CUP por 1 unidad de X -----
@@ -110,10 +112,11 @@ async function main() {
     update: { role: "customer", isActive: true },
   });
 
+  // deliveryFee: lo que la tienda paga al mensajero por entrega (en CUP).
   await db.courier.upsert({
     where: { userId: courierUser.userId },
-    create: { userId: courierUser.userId, phone: "+53 5 000 0001", vehicle: "motorcycle" },
-    update: {},
+    create: { userId: courierUser.userId, phone: "+53 5 000 0001", vehicle: "motorcycle", deliveryFee: dec(300) },
+    update: { deliveryFee: dec(300) },
   });
 
   // ----- Zonas -----
@@ -210,17 +213,49 @@ async function main() {
     },
     update: {},
   });
-  await db.productVariant.upsert({
+  // cost: precio de compra por unidad, para calcular la ganancia.
+  const riceVariant = await db.productVariant.upsert({
     where: { sku: "ARZ-1KG" },
     create: {
       productId: rice.productId,
       sku: "ARZ-1KG",
       price: dec(850),
       priceCurrencyId: cup.currencyId,
+      cost: dec(600),
+      costCurrencyId: cup.currencyId,
       stock: 40,
       isDefault: true,
     },
+    update: { cost: dec(600), costCurrencyId: cup.currencyId },
+  });
+
+  const oil = await db.product.upsert({
+    where: { slug: "aceite-vegetal-1l" },
+    create: {
+      typeId: generalType.typeId,
+      categoryId: food.categoryId,
+      slug: "aceite-vegetal-1l",
+      name: "Aceite vegetal 1 L",
+      description: "Aceite vegetal de girasol, botella de 1 litro.",
+      status: "active",
+      featured: false,
+    },
     update: {},
+  });
+  const oilVariant = await db.productVariant.upsert({
+    where: { sku: "ACE-1L" },
+    create: {
+      productId: oil.productId,
+      sku: "ACE-1L",
+      price: dec(1300),
+      compareAtPrice: dec(1500),
+      priceCurrencyId: cup.currencyId,
+      cost: dec(950),
+      costCurrencyId: cup.currencyId,
+      stock: 25,
+      isDefault: true,
+    },
+    update: { cost: dec(950), costCurrencyId: cup.currencyId },
   });
 
   const shirt = await db.product.upsert({
@@ -254,11 +289,39 @@ async function main() {
         price: dec("12.50"),
         compareAtPrice: dec("15.00"),
         priceCurrencyId: usd.currencyId,
+        cost: dec("7.80"),
+        costCurrencyId: usd.currencyId,
         stock: v.stock,
         isDefault: v.isDefault,
         sortOrder: i,
       },
-      update: {},
+      update: { cost: dec("7.80"), costCurrencyId: usd.currencyId },
+    });
+  }
+
+  // ----- Combos -----
+  // 2 × arroz + 1 × aceite: por separado 3 000 CUP; el combo sale a 2 700.
+  const basicCombo = await db.combo.upsert({
+    where: { slug: "combo-basico" },
+    create: {
+      slug: "combo-basico",
+      name: "Combo básico",
+      description: "Dos paquetes de arroz y una botella de aceite para la semana.",
+      price: dec(2700),
+      priceCurrencyId: cup.currencyId,
+      status: "active",
+      featured: true,
+    },
+    update: {},
+  });
+  for (const [i, item] of [
+    { variantId: riceVariant.variantId, qty: 2 },
+    { variantId: oilVariant.variantId, qty: 1 },
+  ].entries()) {
+    await db.comboItem.upsert({
+      where: { comboId_variantId: { comboId: basicCombo.comboId, variantId: item.variantId } },
+      create: { comboId: basicCombo.comboId, variantId: item.variantId, qty: item.qty, sortOrder: i },
+      update: { qty: item.qty, sortOrder: i },
     });
   }
 

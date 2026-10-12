@@ -9,6 +9,7 @@ import { FormSelect, FormTextField, type SelectOption } from "@/components/form/
 import { ResponsiveFormDialog } from "@/components/responsive-form-dialog";
 import { fmtDateTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { useCurrency } from "@/modules/currency/store/currency-provider";
 import { adjustStock } from "../actions/stock-actions";
 import { stockAdjustmentSchema, type StockAdjustmentInput } from "../lib/schemas";
 import type { AdminStockMovementType, AdminVariantRow } from "../queries/product-queries";
@@ -17,6 +18,8 @@ type StockAdjustmentValues = {
   variantId: number;
   type: AdminStockMovementType;
   quantity: number;
+  unitCost?: number | null;
+  costCurrencyId?: number | null;
   notes: string | null;
 };
 
@@ -54,6 +57,7 @@ function movementDelta(type: AdminStockMovementType, quantity: number): string {
 }
 
 export function StockAdjustForm({ open, onOpenChange, variant }: StockAdjustFormProps) {
+  const { currencies } = useCurrency();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { control, handleSubmit } = useForm<StockAdjustmentInput, unknown, StockAdjustmentValues>({
     resolver: zodResolver(stockAdjustmentSchema),
@@ -61,10 +65,13 @@ export function StockAdjustForm({ open, onOpenChange, variant }: StockAdjustForm
       variantId: variant?.variantId ?? 0,
       type: "entry",
       quantity: "",
+      unitCost: "",
+      costCurrencyId: variant?.costCurrency?.currencyId ?? variant?.priceCurrency.currencyId ?? "",
       notes: "",
     },
   });
   const type = (useWatch({ control, name: "type" }) ?? "entry") as AdminStockMovementType;
+  const currencyOptions: SelectOption[] = currencies.map((c) => ({ value: String(c.currencyId), label: c.code }));
 
   const onSubmit = async (values: StockAdjustmentValues) => {
     setIsSubmitting(true);
@@ -120,6 +127,24 @@ export function StockAdjustForm({ open, onOpenChange, variant }: StockAdjustForm
                 : undefined
           }
         />
+        {type === "entry" && (
+          <div className="grid grid-cols-[minmax(0,1fr)_112px] gap-3">
+            <FormTextField
+              control={control}
+              name="unitCost"
+              label="Precio de compra por unidad"
+              type="number"
+              step="0.01"
+              min={0}
+              description={
+                variant.cost != null && variant.costCurrency
+                  ? `Costo actual: ${variant.cost} ${variant.costCurrency.code}. Vacío = no cambiar.`
+                  : "Opcional. Pasa a ser el costo de la variante."
+              }
+            />
+            <FormSelect control={control} name="costCurrencyId" label="Moneda" options={currencyOptions} />
+          </div>
+        )}
         <FormTextField control={control} name="notes" label="Notas (opcional)" placeholder="Compra a proveedor, rotura…" />
       </form>
 

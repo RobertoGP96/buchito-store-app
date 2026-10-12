@@ -16,7 +16,7 @@ import { createOrderSchema, type CreateOrderInput, type CreateOrderValues } from
 import { PaymentMethodPicker } from "@/modules/payments/components/payment-method-picker";
 import type { PaymentMethodRow } from "@/modules/payments/queries/payment-queries";
 import { computeCartTotals } from "../cart-totals";
-import { useCart } from "../store";
+import { cartIsEmpty, cartPriceLines, useCart } from "../store";
 import { CartSummary } from "./cart-summary";
 
 interface CheckoutFormProps {
@@ -44,8 +44,8 @@ export function CheckoutForm({
   // Las líneas viven en el carrito, no en el formulario, y en recogida la
   // dirección/zona no aplican: se ajustan antes de validar para que el schema
   // del servidor sea también el del cliente.
-  const linesRef = useRef(state.lines);
-  linesRef.current = state.lines;
+  const cartRef = useRef(state);
+  cartRef.current = state;
   const resolver = useMemo<Resolver<CreateOrderInput, unknown, CreateOrderValues>>(() => {
     const base = zodResolver(createOrderSchema);
     return (values, context, options) =>
@@ -54,7 +54,8 @@ export function CheckoutForm({
           ...values,
           address: values.fulfillment === "pickup" ? null : values.address,
           zoneId: values.fulfillment === "pickup" ? "" : values.zoneId,
-          lines: linesRef.current.map((l) => ({ variantId: l.variantId, qty: l.qty })),
+          lines: cartRef.current.lines.map((l) => ({ variantId: l.variantId, qty: l.qty })),
+          combos: cartRef.current.combos.map((c) => ({ comboId: c.comboId, qty: c.qty })),
         },
         context,
         options
@@ -75,6 +76,7 @@ export function CheckoutForm({
       couponCode: "",
       notes: "",
       lines: [],
+      combos: [],
     },
   });
 
@@ -89,7 +91,7 @@ export function CheckoutForm({
   const totals = useMemo(
     () =>
       computeCartTotals({
-        lines: state.lines,
+        lines: cartPriceLines(state),
         baseDecimals: base.decimalPlaces,
         fulfillment: fulfillment ?? "delivery",
         shipping: {
@@ -101,12 +103,12 @@ export function CheckoutForm({
             ? { surchargePercent: method.surchargePercent, exchangeRate: paymentRate, decimals: method.currency.decimalPlaces }
             : null,
       }),
-    [state.lines, base.decimalPlaces, fulfillment, zone, defaultShippingFee, freeShippingThreshold, method, paymentRate]
+    [state, base.decimalPlaces, fulfillment, zone, defaultShippingFee, freeShippingThreshold, method, paymentRate]
   );
 
   if (!state.hydrated) return null;
 
-  if (state.lines.length === 0) {
+  if (cartIsEmpty(state)) {
     return (
       <EmptyState
         icon={ClipboardList}

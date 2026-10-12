@@ -42,8 +42,17 @@ export const createOrderSchema = z
           qty: z.number().int().positive().max(99),
         })
       )
-      .min(1, "La bolsa está vacía"),
+      .default([]),
+    combos: z
+      .array(
+        z.object({
+          comboId: z.number().int().positive(),
+          qty: z.number().int().positive().max(99),
+        })
+      )
+      .default([]),
   })
+  .refine((v) => v.lines.length + v.combos.length > 0, { message: "La bolsa está vacía", path: ["lines"] })
   .refine((v) => v.fulfillment === "pickup" || v.address != null, {
     message: "Escribe la dirección de entrega",
     path: ["address"],

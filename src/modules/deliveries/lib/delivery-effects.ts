@@ -86,6 +86,12 @@ export async function applyDeliveryTransition(
   if (to === "delivered") {
     data.deliveredAt = now;
     if (input.proofPhotoUrl) data.proofPhotoUrl = input.proofPhotoUrl;
+    // Servicio del mensajero: se fija con su tarifa vigente al completar la
+    // entrega, para que un cambio de tarifa posterior no altere lo devengado.
+    const courier = delivery.courierId
+      ? await tx.courier.findUnique({ where: { courierId: delivery.courierId }, select: { deliveryFee: true } })
+      : null;
+    data.courierFee = courier?.deliveryFee ?? 0;
   }
   if (to === "failed") {
     data.failedAt = now;

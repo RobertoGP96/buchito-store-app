@@ -35,6 +35,12 @@ export interface OrderLineRow {
   unitPrice: number;
   lineTotal: number;
   imageUrl: string | null;
+  /** Costo de compra por unidad en base (snapshot); null si no se registró. */
+  unitCost: number | null;
+  /** Línea generada por un combo: las del mismo combo se agrupan en la ficha. */
+  comboId: number | null;
+  comboName: string | null;
+  comboQty: number | null;
 }
 
 export interface OrderPaymentRow {
@@ -189,6 +195,10 @@ function toDetail(row: DetailRow): OrderDetailData {
       unitPrice: decimalToNumber(l.unitPrice),
       lineTotal: decimalToNumber(l.lineTotal),
       imageUrl: l.imageUrl,
+      unitCost: decimalToNullableNumber(l.unitCost),
+      comboId: l.comboId,
+      comboName: l.comboName,
+      comboQty: l.comboQty,
     })),
     payments: row.payments.map((p) => ({
       paymentId: p.paymentId,

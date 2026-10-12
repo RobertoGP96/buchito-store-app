@@ -104,6 +104,7 @@ model User {
   ratesUpdated     ExchangeRate[]        @relation("RateUpdatedBy")
   rateChanges      ExchangeRateHistory[] @relation("RateChangedBy")
   paymentsReceived OrderPayment[]        @relation("PaymentReceivedBy")
+  courierPayments  CourierPayment[]      @relation("CourierPaymentPaidBy")
 
   @@index([role, isActive])
   @@map("users")
@@ -177,6 +178,9 @@ model Currency {
   ratesAsBase     ExchangeRate[]   @relation("RateBase")
   ratesAsQuote    ExchangeRate[]   @relation("RateQuote")
   variants        ProductVariant[]
+  variantCosts    ProductVariant[] @relation("VariantCostCurrency")
+  movementCosts   StockMovement[]  @relation("MovementCostCurrency")
+  combos          Combo[]
   paymentMethods  PaymentMethod[]
   orderPayments   OrderPayment[]
   orderLinesOrig  OrderLine[]
@@ -199,9 +203,9 @@ model ExchangeRate {
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
 
-  baseCurrency  Currency @relation("RateBase", fields: [baseCurrencyId], references: [currencyId], onDelete: Restrict)
-  quoteCurrency Currency @relation("RateQuote", fields: [quoteCurrencyId], references: [currencyId], onDelete: Restrict)
-  updatedBy     User?    @relation("RateUpdatedBy", fields: [updatedById], references: [userId], onDelete: SetNull)
+  baseCurrency  Currency              @relation("RateBase", fields: [baseCurrencyId], references: [currencyId], onDelete: Restrict)
+  quoteCurrency Currency              @relation("RateQuote", fields: [quoteCurrencyId], references: [currencyId], onDelete: Restrict)
+  updatedBy     User?                 @relation("RateUpdatedBy", fields: [updatedById], references: [userId], onDelete: SetNull)
   history       ExchangeRateHistory[]
 
   @@unique([baseCurrencyId, quoteCurrencyId])
@@ -411,6 +415,10 @@ model ProductVariant {
   price           Decimal  @db.Decimal(20, 8)
   compareAtPrice  Decimal? @map("compare_at_price") @db.Decimal(20, 8)
   priceCurrencyId Int      @map("price_currency_id")
+  // Último precio de compra por unidad, en costCurrencyId (null = sin costo
+  // registrado: la ganancia de ese producto no se puede calcular).
+  cost            Decimal? @db.Decimal(20, 8)
+  costCurrencyId  Int?     @map("cost_currency_id")
   stock           Int      @default(0)
   imageUrl        String?  @map("image_url")
   isDefault       Boolean  @default(false) @map("is_default")
@@ -422,8 +430,10 @@ model ProductVariant {
 
   product        Product         @relation(fields: [productId], references: [productId], onDelete: Restrict)
   priceCurrency  Currency        @relation(fields: [priceCurrencyId], references: [currencyId], onDelete: Restrict)
+  costCurrency   Currency?       @relation("VariantCostCurrency", fields: [costCurrencyId], references: [currencyId], onDelete: Restrict)
   stockMovements StockMovement[]
   orderLines     OrderLine[]
+  comboItems     ComboItem[]
 
   @@index([productId, sortOrder])
   @@index([isActive, stock])
@@ -445,24 +455,77 @@ model ProductImage {
 }
 
 model StockMovement {
-  movementId    Int               @id @default(autoincrement()) @map("movement_id")
-  variantId     Int               @map("variant_id")
-  type          StockMovementType
+  movementId     Int               @id @default(autoincrement()) @map("movement_id")
+  variantId      Int               @map("variant_id")
+  type           StockMovementType
   // Siempre > 0; el signo lo da `type`.
-  quantity      Int
-  stockAfter    Int               @map("stock_after")
-  referenceType String?           @map("reference_type")
-  referenceId   Int?              @map("reference_id")
-  notes         String?
-  createdById   Int?              @map("created_by_id")
-  createdAt     DateTime          @default(now()) @map("created_at")
+  quantity       Int
+  stockAfter     Int               @map("stock_after")
+  referenceType  String?           @map("reference_type")
+  referenceId    Int?              @map("reference_id")
+  // Precio de compra por unidad de esta entrada (en costCurrencyId); solo en
+  // entradas de mercancía. Actualiza ProductVariant.cost.
+  unitCost       Decimal?          @map("unit_cost") @db.Decimal(20, 8)
+  costCurrencyId Int?              @map("cost_currency_id")
+  notes          String?
+  createdById    Int?              @map("created_by_id")
+  createdAt      DateTime          @default(now()) @map("created_at")
 
-  variant   ProductVariant @relation(fields: [variantId], references: [variantId], onDelete: Restrict)
-  createdBy User?          @relation(fields: [createdById], references: [userId], onDelete: SetNull)
+  variant      ProductVariant @relation(fields: [variantId], references: [variantId], onDelete: Restrict)
+  costCurrency Currency?      @relation("MovementCostCurrency", fields: [costCurrencyId], references: [currencyId], onDelete: Restrict)
+  createdBy    User?          @relation(fields: [createdById], references: [userId], onDelete: SetNull)
 
   @@index([variantId, createdAt])
   @@index([referenceType, referenceId])
   @@map("stock_movements")
+}
+
+// =============================================
+// COMBOS
+// =============================================
+
+// Paquete de variantes con cantidades a un precio cerrado (en
+// priceCurrencyId, convertido a base al leer como los productos). Al vender,
+// cada componente genera su OrderLine con el precio del combo prorrateado:
+// stock y costo siguen siendo por variante.
+model Combo {
+  comboId         Int           @id @default(autoincrement()) @map("combo_id")
+  slug            String        @unique
+  name            String
+  description     String?
+  imageUrl        String?       @map("image_url")
+  price           Decimal       @db.Decimal(20, 8)
+  priceCurrencyId Int           @map("price_currency_id")
+  status          ProductStatus @default(draft)
+  featured        Boolean       @default(false)
+  startsAt        DateTime?     @map("starts_at")
+  endsAt          DateTime?     @map("ends_at")
+  sortOrder       Int           @default(0) @map("sort_order")
+  version         Int           @default(0)
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @default(now()) @updatedAt @map("updated_at")
+
+  priceCurrency Currency    @relation(fields: [priceCurrencyId], references: [currencyId], onDelete: Restrict)
+  items         ComboItem[]
+  orderLines    OrderLine[]
+
+  @@index([status, featured, sortOrder])
+  @@map("combos")
+}
+
+model ComboItem {
+  comboItemId Int @id @default(autoincrement()) @map("combo_item_id")
+  comboId     Int @map("combo_id")
+  variantId   Int @map("variant_id")
+  qty         Int
+  sortOrder   Int @default(0) @map("sort_order")
+
+  combo   Combo          @relation(fields: [comboId], references: [comboId], onDelete: Cascade)
+  variant ProductVariant @relation(fields: [variantId], references: [variantId], onDelete: Restrict)
+
+  @@unique([comboId, variantId])
+  @@index([variantId])
+  @@map("combo_items")
 }
 
 // =============================================
@@ -564,13 +627,23 @@ model OrderLine {
   origCurrencyId Int?     @map("orig_currency_id")
   origUnitPrice  Decimal? @map("orig_unit_price") @db.Decimal(20, 8)
   exchangeRate   Decimal? @map("exchange_rate") @db.Decimal(20, 8)
+  // Costo de compra por unidad en base, snapshot al crear el pedido (null si
+  // la variante no tenía costo). Ganancia de la línea = lineTotal − unitCost×qty.
+  unitCost       Decimal? @map("unit_cost") @db.Decimal(20, 8)
+  // Línea generada por un combo: comboQty unidades del combo en el pedido y
+  // lineTotal ya prorrateado. Las líneas del mismo combo suman su precio exacto.
+  comboId        Int?     @map("combo_id")
+  comboName      String?  @map("combo_name")
+  comboQty       Int?     @map("combo_qty")
 
   order        Order          @relation(fields: [orderId], references: [orderId], onDelete: Cascade)
   variant      ProductVariant @relation(fields: [variantId], references: [variantId], onDelete: Restrict)
   origCurrency Currency?      @relation(fields: [origCurrencyId], references: [currencyId], onDelete: Restrict)
+  combo        Combo?         @relation(fields: [comboId], references: [comboId], onDelete: Restrict)
 
   @@index([orderId])
   @@index([variantId])
+  @@index([comboId])
   @@map("order_lines")
 }
 
@@ -601,52 +674,86 @@ model DeliveryZone {
 
 // Mensajero = User con rol courier + fila aquí.
 model Courier {
-  courierId Int         @id @default(autoincrement()) @map("courier_id")
-  userId    Int         @unique @map("user_id")
-  phone     String
-  vehicle   VehicleType @default(motorcycle)
-  notes     String?
-  active    Boolean     @default(true)
-  version   Int         @default(0)
-  createdAt DateTime    @default(now()) @map("created_at")
-  updatedAt DateTime    @default(now()) @updatedAt @map("updated_at")
+  courierId   Int         @id @default(autoincrement()) @map("courier_id")
+  userId      Int         @unique @map("user_id")
+  phone       String
+  vehicle     VehicleType @default(motorcycle)
+  notes       String?
+  // Lo que la tienda paga al mensajero por cada entrega completada, en base.
+  // Se copia a Delivery.courierFee al marcarla entregada.
+  deliveryFee Decimal     @default(0) @map("delivery_fee") @db.Decimal(20, 8)
+  active      Boolean     @default(true)
+  version     Int         @default(0)
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @default(now()) @updatedAt @map("updated_at")
 
-  user       User       @relation(fields: [userId], references: [userId], onDelete: Restrict)
+  user       User             @relation(fields: [userId], references: [userId], onDelete: Restrict)
   deliveries Delivery[]
+  payments   CourierPayment[]
 
   @@index([active])
   @@map("couriers")
 }
 
 model Delivery {
-  deliveryId    Int            @id @default(autoincrement()) @map("delivery_id")
-  orderId       Int            @unique @map("order_id")
-  courierId     Int?           @map("courier_id")
-  zoneId        Int?           @map("zone_id")
-  status        DeliveryStatus @default(pending)
+  deliveryId       Int            @id @default(autoincrement()) @map("delivery_id")
+  orderId          Int            @unique @map("order_id")
+  courierId        Int?           @map("courier_id")
+  zoneId           Int?           @map("zone_id")
+  status           DeliveryStatus @default(pending)
   // Snapshot de la tarifa de la zona, en moneda base.
-  fee           Decimal        @default(0) @db.Decimal(20, 8)
-  attempts      Int            @default(0)
-  assignedAt    DateTime?      @map("assigned_at")
-  pickedUpAt    DateTime?      @map("picked_up_at")
-  deliveredAt   DateTime?      @map("delivered_at")
-  failedAt      DateTime?      @map("failed_at")
-  failedReason  String?        @map("failed_reason")
-  proofPhotoUrl String?        @map("proof_photo_url")
-  notes         String?
-  version       Int            @default(0)
-  createdAt     DateTime       @default(now()) @map("created_at")
-  updatedAt     DateTime       @default(now()) @updatedAt @map("updated_at")
+  fee              Decimal        @default(0) @db.Decimal(20, 8)
+  // Servicio del mensajero: lo que se le paga por esta entrega (base), fijado
+  // al entregar. courierPaymentId enlaza la liquidación que lo saldó.
+  courierFee       Decimal        @default(0) @map("courier_fee") @db.Decimal(20, 8)
+  courierPaymentId Int?           @map("courier_payment_id")
+  attempts         Int            @default(0)
+  assignedAt       DateTime?      @map("assigned_at")
+  pickedUpAt       DateTime?      @map("picked_up_at")
+  deliveredAt      DateTime?      @map("delivered_at")
+  failedAt         DateTime?      @map("failed_at")
+  failedReason     String?        @map("failed_reason")
+  proofPhotoUrl    String?        @map("proof_photo_url")
+  notes            String?
+  version          Int            @default(0)
+  createdAt        DateTime       @default(now()) @map("created_at")
+  updatedAt        DateTime       @default(now()) @updatedAt @map("updated_at")
 
-  order   Order           @relation(fields: [orderId], references: [orderId], onDelete: Restrict)
-  courier Courier?        @relation(fields: [courierId], references: [courierId], onDelete: Restrict)
-  zone    DeliveryZone?   @relation(fields: [zoneId], references: [zoneId], onDelete: Restrict)
-  events  DeliveryEvent[]
+  order          Order           @relation(fields: [orderId], references: [orderId], onDelete: Restrict)
+  courier        Courier?        @relation(fields: [courierId], references: [courierId], onDelete: Restrict)
+  zone           DeliveryZone?   @relation(fields: [zoneId], references: [zoneId], onDelete: Restrict)
+  courierPayment CourierPayment? @relation(fields: [courierPaymentId], references: [courierPaymentId], onDelete: SetNull)
+  events         DeliveryEvent[]
 
   @@index([status, assignedAt])
   @@index([courierId, status])
   @@index([zoneId, status])
+  @@index([courierPaymentId])
   @@map("deliveries")
+}
+
+// Liquidación a un mensajero: salda las entregas completadas que aún no se
+// le habían pagado (Delivery.courierPaymentId). amountBase puede diferir de
+// la suma de courierFee (bonos, descuentos) y se explica en notes.
+model CourierPayment {
+  courierPaymentId Int      @id @default(autoincrement()) @map("courier_payment_id")
+  courierId        Int      @map("courier_id")
+  amountBase       Decimal  @map("amount_base") @db.Decimal(20, 8)
+  // Σ courierFee de las entregas saldadas, para comparar con amountBase.
+  feesBase         Decimal  @default(0) @map("fees_base") @db.Decimal(20, 8)
+  deliveryCount    Int      @default(0) @map("delivery_count")
+  notes            String?
+  paidAt           DateTime @map("paid_at")
+  paidById         Int?     @map("paid_by_id")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  courier    Courier    @relation(fields: [courierId], references: [courierId], onDelete: Restrict)
+  paidBy     User?      @relation("CourierPaymentPaidBy", fields: [paidById], references: [userId], onDelete: SetNull)
+  deliveries Delivery[]
+
+  @@index([courierId, paidAt])
+  @@index([paidAt])
+  @@map("courier_payments")
 }
 
 model DeliveryEvent {

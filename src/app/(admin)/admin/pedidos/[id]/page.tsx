@@ -11,7 +11,8 @@ import { getOrderById } from "@/modules/orders/queries/order-queries";
 import { RegisterPaymentForm } from "@/modules/payments/components/register-payment-form";
 import { outstandingBase } from "@/modules/payments/lib/payment-status";
 import { getActivePaymentMethods } from "@/modules/payments/queries/payment-queries";
-import { fromBaseAmount } from "@/lib/currency-math";
+import { fromBaseAmount, roundToCurrency } from "@/lib/currency-math";
+import { summarizeProfit } from "@/modules/finance/lib/profit";
 
 export const dynamic = "force-dynamic";
 
@@ -37,6 +38,15 @@ export default async function AdminOrderPage({ params }: AdminOrderPageProps) {
   const suggested = defaultMethod
     ? fromBaseAmount(outstanding, order.paymentExchangeRate, defaultMethod.currency.decimalPlaces)
     : 0;
+  // Ganancia del pedido: lo cobrado por mercancía (líneas menos descuento)
+  // menos el costo snapshot de cada línea.
+  const decimals = order.baseCurrency.decimalPlaces;
+  const lineProfit = summarizeProfit(order.lines, decimals);
+  const profit = {
+    cost: lineProfit.cost,
+    profit: roundToCurrency(lineProfit.profit - order.discount, decimals),
+    linesWithoutCost: lineProfit.linesWithoutCost,
+  };
 
   return (
     <>
@@ -73,6 +83,7 @@ export default async function AdminOrderPage({ params }: AdminOrderPageProps) {
           ) : undefined
         }
         deliveryHref={order.delivery ? "/admin/entregas" : undefined}
+        profit={profit}
       />
     </>
   );
