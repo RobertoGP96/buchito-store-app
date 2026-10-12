@@ -38,7 +38,7 @@ export async function getOrderCombos(client: DbOrTx, comboIds: number[], now: Da
         imageUrl: row.imageUrl,
         origPrice: decimalToNumber(row.price),
         priceCurrencyId: row.priceCurrencyId,
-        items: row.items,
+        items: row.items.map((i) => ({ variantId: i.variantId, qty: decimalToNumber(i.qty) })),
       },
     ])
   );

@@ -9,6 +9,7 @@ import { fmtDateTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { AdminStockMovementType } from "../queries/product-queries";
 import type { StockMovementRow } from "../queries/inventory-queries";
+import { fmtQty, fmtQtyNumber } from "../lib/units";
 import { STOCK_MOVEMENT_TYPE_LABELS } from "./stock-adjust-form";
 
 interface StockMovementListProps {
@@ -25,9 +26,10 @@ const TYPE_TONE: Record<AdminStockMovementType, StatusTone> = {
 
 /** Signo visual: el recuento no tiene signo, es el stock final. */
 function movementDelta(type: AdminStockMovementType, quantity: number): string {
-  if (type === "entry") return `+${quantity}`;
-  if (type === "exit") return `−${quantity}`;
-  return `= ${quantity}`;
+  const n = fmtQtyNumber(quantity);
+  if (type === "entry") return `+${n}`;
+  if (type === "exit") return `−${n}`;
+  return `= ${n}`;
 }
 
 function referenceLabel(r: StockMovementRow): string | null {
@@ -56,7 +58,7 @@ function DeltaCell({ row }: { row: StockMovementRow }) {
       <p className={cn("font-semibold", row.type === "exit" ? "text-danger" : "text-ink")}>
         {movementDelta(row.type, row.quantity)}
       </p>
-      <p className="text-[11.5px] text-slate-400">quedan {row.stockAfter}</p>
+      <p className="text-[11.5px] text-slate-400">quedan {fmtQty(row.stockAfter, row.unit)}</p>
     </div>
   );
 }

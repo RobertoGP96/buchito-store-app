@@ -15,6 +15,7 @@ import {
   type AttributeDef,
   type AttributeValues,
 } from "../lib/attribute-schema";
+import type { SaleUnit } from "../lib/units";
 
 /** Variante tal como la ve la tienda: precios YA en moneda base. */
 export interface CatalogVariant {
@@ -27,6 +28,10 @@ export interface CatalogVariant {
   /** Precio en su moneda original, solo informativo ("12.50 USD"). */
   origPrice: number;
   origCurrency: CurrencyInfo;
+  /** Unidad de venta: el precio es por 1 unidad de ella. */
+  unit: SaleUnit;
+  /** Mínimo vendible y paso del selector, en `unit`. */
+  qtyStep: number;
   stock: number;
   imageUrl: string | null;
   isDefault: boolean;
@@ -118,7 +123,9 @@ function toCatalogProduct(row: ProductRow, ctx: RateContext): CatalogProduct | n
         symbol: v.priceCurrency.symbol,
         decimalPlaces: v.priceCurrency.decimalPlaces,
       },
-      stock: v.stock,
+      unit: v.unit,
+      qtyStep: decimalToNumber(v.qtyStep),
+      stock: decimalToNumber(v.stock),
       imageUrl: v.imageUrl,
       isDefault: v.isDefault,
     });

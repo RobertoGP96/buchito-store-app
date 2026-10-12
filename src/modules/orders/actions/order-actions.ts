@@ -15,6 +15,7 @@ import type { ActionResult } from "@/types";
 import { computeCartTotals } from "@/modules/cart/cart-totals";
 import { prorateComboLines } from "@/modules/combos/lib/combo-pricing";
 import { getOrderCombos } from "@/modules/combos/queries/order-combo-queries";
+import { fmtQty, isValidQty, roundQty } from "@/modules/products/lib/units";
 import { resolveCustomer } from "@/modules/customers/lib/resolve-customer";
 import { validateCoupon } from "../lib/coupon";
 import {
@@ -118,7 +119,13 @@ export async function createOrder(
         .sort((a, b) => a - b)
         .map((variantId) => {
           const priced = requireVariant(variantId, "Un producto de tu bolsa ya no está disponible");
-          const qty = qtyByVariant.get(variantId)!;
+          const qty = roundQty(qtyByVariant.get(variantId)!);
+          // La UI ya ajusta al paso, pero el cliente controla el payload.
+          if (!isValidQty(qty, priced.variant.qtyStep)) {
+            throw new CheckoutError(
+              `${priced.variant.productName} se vende en múltiplos de ${fmtQty(priced.variant.qtyStep, priced.variant.unit)}`
+            );
+          }
           return {
             ...priced,
             qty,
@@ -148,7 +155,7 @@ export async function createOrder(
         for (const p of prorated) {
           lines.push({
             ...p.item,
-            qty: p.qty,
+            qty: roundQty(p.qty),
             unitPrice: p.unitPrice,
             lineTotal: p.lineTotal,
             combo: { comboId: combo.comboId, name: combo.name, qty: comboQty },
@@ -252,7 +259,7 @@ export async function createOrder(
       // puede venir suelta y dentro de combos: se descuenta su total una vez.
       const stockNeeded = new Map<number, number>();
       for (const line of lines) {
-        stockNeeded.set(line.variant.variantId, (stockNeeded.get(line.variant.variantId) ?? 0) + line.qty);
+        stockNeeded.set(line.variant.variantId, roundQty((stockNeeded.get(line.variant.variantId) ?? 0) + line.qty));
       }
       const stockAfter = new Map<number, number>();
       for (const variantId of [...stockNeeded.keys()].sort((a, b) => a - b)) {
@@ -267,7 +274,7 @@ export async function createOrder(
           const label = variant.variantName ? `${variant.productName} (${variant.variantName})` : variant.productName;
           throw new CheckoutError(`No hay stock suficiente de ${label}`);
         }
-        stockAfter.set(variantId, taken[0].stock);
+        stockAfter.set(variantId, decimalToNumber(taken[0].stock));
       }
 
       const orderNo = await nextFolio(tx, DOC_TYPES.ORDER, settings.orderPrefix);
@@ -316,6 +323,7 @@ export async function createOrder(
               imageUrl: l.variant.imageUrl,
               unitPrice: l.unitPrice,
               qty: l.qty,
+              unit: l.variant.unit,
               lineTotal: l.lineTotal,
               origCurrencyId: l.origCurrencyId,
               origUnitPrice: l.origUnitPrice,

@@ -6,6 +6,7 @@ import { roundToCurrency } from "@/lib/currency-math";
 import type { CurrencyInfo } from "@/lib/format";
 import { decimalToNumber } from "@/lib/money";
 import type { ProductStatus } from "@/modules/products/lib/labels";
+import type { SaleUnit } from "@/modules/products/lib/units";
 import { comboAvailability, comboRegularPrice, comboSavingsPct } from "../lib/combo-pricing";
 import { deriveComboState, type ComboState } from "../lib/labels";
 
@@ -18,6 +19,8 @@ export interface AdminComboItemRow {
   productName: string;
   variantName: string | null;
   sku: string;
+  unit: SaleUnit;
+  qtyStep: number;
   stock: number;
   /** Precio regular de la variante en base; null sin tasa. */
   priceBase: number | null;
@@ -64,6 +67,8 @@ const COMBO_INCLUDE = {
           name: true,
           price: true,
           priceCurrencyId: true,
+          unit: true,
+          qtyStep: true,
           stock: true,
           isActive: true,
           product: { select: { productId: true, name: true, status: true } },
@@ -101,13 +106,15 @@ function toRow(row: ComboRow, rates: RatesToBase, baseDecimals: number, now: Dat
     return {
       comboItemId: item.comboItemId,
       variantId: v.variantId,
-      qty: item.qty,
+      qty: decimalToNumber(item.qty),
       sortOrder: item.sortOrder,
       productId: v.product.productId,
       productName: v.product.name,
       variantName: v.name,
       sku: v.sku,
-      stock: v.stock,
+      unit: v.unit,
+      qtyStep: decimalToNumber(v.qtyStep),
+      stock: decimalToNumber(v.stock),
       priceBase: vPriceBase,
       sellable: v.isActive && v.product.status === "active",
     };
@@ -165,6 +172,8 @@ export interface ComboVariantOption {
   productName: string;
   variantName: string | null;
   sku: string;
+  unit: SaleUnit;
+  qtyStep: number;
   stock: number;
   priceBase: number | null;
   sellable: boolean;
@@ -184,6 +193,8 @@ export async function getComboVariantOptions(): Promise<ComboVariantOption[]> {
         name: true,
         price: true,
         priceCurrencyId: true,
+        unit: true,
+        qtyStep: true,
         stock: true,
         isActive: true,
         product: { select: { productId: true, name: true, status: true } },
@@ -198,7 +209,9 @@ export async function getComboVariantOptions(): Promise<ComboVariantOption[]> {
       productName: v.product.name,
       variantName: v.name,
       sku: v.sku,
-      stock: v.stock,
+      unit: v.unit,
+      qtyStep: decimalToNumber(v.qtyStep),
+      stock: decimalToNumber(v.stock),
       priceBase: rate ? roundToCurrency(decimalToNumber(v.price) * rate.rate, baseDecimals) : null,
       sellable: v.isActive && v.product.status === "active",
     };

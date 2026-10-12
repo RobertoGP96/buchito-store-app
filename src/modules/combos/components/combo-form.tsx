@@ -15,6 +15,7 @@ import { roundToCurrency } from "@/lib/currency-math";
 import { slugify } from "@/lib/slug";
 import { useCurrency } from "@/modules/currency/store/currency-provider";
 import { PRODUCT_STATUS_META, PRODUCT_STATUSES } from "@/modules/products/lib/labels";
+import { fmtQty } from "@/modules/products/lib/units";
 import { createCombo, updateCombo } from "../actions/combo-actions";
 import { comboRegularPrice, comboSavingsPct } from "../lib/combo-pricing";
 import { comboSchema, type ComboInput, type ComboValues } from "../lib/schemas";
@@ -65,7 +66,7 @@ export function ComboForm({ combo, variants, currencies }: ComboFormProps) {
       variants.map((v) => ({
         value: String(v.variantId),
         label: variantLabel(v),
-        description: `${v.sku} · stock ${v.stock}${v.priceBase != null ? ` · ${formatBase(v.priceBase)}` : ""}${v.sellable ? "" : " · no se vende"}`,
+        description: `${v.sku} · stock ${fmtQty(v.stock, v.unit)}${v.unit !== "unit" ? ` · pasos de ${fmtQty(v.qtyStep, v.unit)}` : ""}${v.priceBase != null ? ` · ${formatBase(v.priceBase)}` : ""}${v.sellable ? "" : " · no se vende"}`,
       })),
     [variants, formatBase]
   );
@@ -207,7 +208,7 @@ export function ComboForm({ combo, variants, currencies }: ComboFormProps) {
                   options={variantOptions}
                   isRequired
                 />
-                <FormTextField control={control} name={`items.${index}.qty`} label="Cant." type="number" step="1" min={1} isRequired />
+                <FormTextField control={control} name={`items.${index}.qty`} label="Cant." type="number" step="any" min={0} isRequired />
                 <Button
                   variant="ghost"
                   size="sm"

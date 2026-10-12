@@ -7,7 +7,9 @@ import { EmptyState } from "@/components/empty-state";
 import { Money } from "@/components/money";
 import { ProductImage } from "@/components/product-image";
 import { QtyStepper } from "@/components/qty-stepper";
+import { comboItemsSummary } from "@/modules/combos/lib/labels";
 import { useCurrency } from "@/modules/currency/store/currency-provider";
+import { maxSellable, perUnitSuffix, roundQty } from "@/modules/products/lib/units";
 import { computeCartTotals } from "../cart-totals";
 import { cartIsEmpty, cartPriceLines, useCart, type CartCombo, type CartLine } from "../store";
 import { CartSummary } from "./cart-summary";
@@ -45,17 +47,19 @@ function LineItem({ line }: { line: CartLine }) {
         <div className="mt-auto flex items-end justify-between gap-3 pt-3">
           <QtyStepper
             qty={line.qty}
-            onInc={() => setQty(line.variantId, line.qty + 1)}
-            onDec={() => setQty(line.variantId, line.qty - 1)}
-            max={line.stock}
+            onInc={() => setQty(line.variantId, roundQty(line.qty + line.qtyStep))}
+            onDec={() => setQty(line.variantId, roundQty(line.qty - line.qtyStep))}
+            max={maxSellable(line.stock, line.qtyStep)}
+            step={line.qtyStep}
+            unit={line.unit}
           />
           <div className="text-right">
             <p className="text-[14.5px] font-bold text-navy-900">
               <Money value={line.unitPrice * line.qty} />
             </p>
-            {line.qty > 1 && (
+            {(line.qty !== 1 || line.unit !== "unit") && (
               <p className="text-[11.5px] text-slate-400">
-                <Money value={line.unitPrice} /> c/u
+                <Money value={line.unitPrice} /> {perUnitSuffix(line.unit) ?? "c/u"}
               </p>
             )}
           </div>
@@ -86,7 +90,7 @@ function ComboItem({ combo }: { combo: CartCombo }) {
               {combo.name}
             </Link>
             <p className="mt-0.5 line-clamp-2 text-[12.5px] text-slate-400">
-              {combo.items.map((i) => `${i.qty} × ${i.productName}${i.variantName ? ` (${i.variantName})` : ""}`).join(", ")}
+              {comboItemsSummary(combo.items)}
             </p>
           </div>
           <button type="button" onClick={() => removeCombo(combo.comboId)} aria-label={`Quitar ${combo.name}`} className={REMOVE_BUTTON}>

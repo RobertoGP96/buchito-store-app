@@ -34,7 +34,8 @@ function optionalDay(edge: "start" | "end") {
 
 export const comboItemSchema = z.object({
   variantId: z.coerce.number().int().positive("Elige un producto"),
-  qty: z.coerce.number().int("Debe ser un número entero").positive("La cantidad debe ser mayor que cero").max(99),
+  // En la unidad de la variante (2 unidades, 0.5 kg); la action valida el paso.
+  qty: z.coerce.number().positive("La cantidad debe ser mayor que cero").max(9999),
 });
 
 export type ComboItemInput = z.input<typeof comboItemSchema>;

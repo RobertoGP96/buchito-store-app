@@ -5,6 +5,7 @@ import type { CurrencyInfo } from "@/lib/format";
 import { decimalToNullableNumber, decimalToNumber } from "@/lib/money";
 import type { DeliveryStatus } from "@/modules/deliveries/lib/labels";
 import type { PaymentStatus } from "@/modules/payments/lib/labels";
+import type { SaleUnit } from "@/modules/products/lib/units";
 import type { FulfillmentType, OrderStatus } from "../lib/labels";
 import type { DeliveryAddress } from "../lib/schemas";
 
@@ -31,7 +32,9 @@ export interface OrderLineRow {
   productName: string;
   variantName: string | null;
   sku: string;
+  /** En `unit` (snapshot de la unidad de la variante). */
   qty: number;
+  unit: SaleUnit;
   unitPrice: number;
   lineTotal: number;
   imageUrl: string | null;
@@ -191,7 +194,8 @@ function toDetail(row: DetailRow): OrderDetailData {
       productName: l.productName,
       variantName: l.variantName,
       sku: l.sku,
-      qty: l.qty,
+      qty: decimalToNumber(l.qty),
+      unit: l.unit,
       unitPrice: decimalToNumber(l.unitPrice),
       lineTotal: decimalToNumber(l.lineTotal),
       imageUrl: l.imageUrl,

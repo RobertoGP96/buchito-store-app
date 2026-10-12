@@ -2,10 +2,17 @@ import { describe, expect, it } from "vitest";
 import { planStockMovement } from "./stock";
 
 describe("planStockMovement", () => {
-  it("rechaza cantidades no positivas o no enteras", () => {
+  it("rechaza cantidades no positivas y admite decimales (venta por peso)", () => {
     expect(planStockMovement(10, "entry", 0).ok).toBe(false);
     expect(planStockMovement(10, "entry", -3).ok).toBe(false);
-    expect(planStockMovement(10, "entry", 1.5).ok).toBe(false);
+    expect(planStockMovement(10, "entry", 1.5)).toEqual({
+      ok: true,
+      plan: { stockAfter: 11.5, movementQuantity: 1.5 },
+    });
+    expect(planStockMovement(0.3, "exit", 0.1)).toEqual({
+      ok: true,
+      plan: { stockAfter: 0.2, movementQuantity: 0.1 },
+    });
   });
 
   it("entry suma al stock actual", () => {

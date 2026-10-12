@@ -23,6 +23,18 @@ enum ProductStatus {
   archived
 }
 
+// Unidad de venta de una variante. Las cantidades (stock, líneas, combos) van
+// en esa unidad con hasta 3 decimales; `qtyStep` fija el mínimo vendible.
+enum SaleUnit {
+  unit
+  kg
+  g
+  lb
+  l
+  ml
+  m
+}
+
 enum StockMovementType {
   entry
   exit
@@ -419,7 +431,11 @@ model ProductVariant {
   // registrado: la ganancia de ese producto no se puede calcular).
   cost            Decimal? @db.Decimal(20, 8)
   costCurrencyId  Int?     @map("cost_currency_id")
-  stock           Int      @default(0)
+  // Unidad de venta y paso mínimo (0.25 kg, 100 g, 1 unidad). El precio es
+  // por 1 unidad de `unit`.
+  unit            SaleUnit @default(unit)
+  qtyStep         Decimal  @default(1) @map("qty_step") @db.Decimal(14, 3)
+  stock           Decimal  @default(0) @db.Decimal(14, 3)
   imageUrl        String?  @map("image_url")
   isDefault       Boolean  @default(false) @map("is_default")
   isActive        Boolean  @default(true) @map("is_active")
@@ -459,8 +475,9 @@ model StockMovement {
   variantId      Int               @map("variant_id")
   type           StockMovementType
   // Siempre > 0; el signo lo da `type`.
-  quantity       Int
-  stockAfter     Int               @map("stock_after")
+  // En la unidad de la variante (admite decimales).
+  quantity       Decimal           @db.Decimal(14, 3)
+  stockAfter     Decimal           @map("stock_after") @db.Decimal(14, 3)
   referenceType  String?           @map("reference_type")
   referenceId    Int?              @map("reference_id")
   // Precio de compra por unidad de esta entrada (en costCurrencyId); solo en
@@ -514,11 +531,12 @@ model Combo {
 }
 
 model ComboItem {
-  comboItemId Int @id @default(autoincrement()) @map("combo_item_id")
-  comboId     Int @map("combo_id")
-  variantId   Int @map("variant_id")
-  qty         Int
-  sortOrder   Int @default(0) @map("sort_order")
+  comboItemId Int     @id @default(autoincrement()) @map("combo_item_id")
+  comboId     Int     @map("combo_id")
+  variantId   Int     @map("variant_id")
+  // En la unidad de la variante (2 unidades, 0.5 kg).
+  qty         Decimal @db.Decimal(14, 3)
+  sortOrder   Int     @default(0) @map("sort_order")
 
   combo   Combo          @relation(fields: [comboId], references: [comboId], onDelete: Cascade)
   variant ProductVariant @relation(fields: [variantId], references: [variantId], onDelete: Restrict)
@@ -622,7 +640,9 @@ model OrderLine {
   attributes     Json?
   imageUrl       String?  @map("image_url")
   unitPrice      Decimal  @map("unit_price") @db.Decimal(20, 8)
-  qty            Int
+  // Cantidad en `unit` (snapshot de la unidad de la variante).
+  qty            Decimal  @db.Decimal(14, 3)
+  unit           SaleUnit @default(unit)
   lineTotal      Decimal  @map("line_total") @db.Decimal(20, 8)
   origCurrencyId Int?     @map("orig_currency_id")
   origUnitPrice  Decimal? @map("orig_unit_price") @db.Decimal(20, 8)

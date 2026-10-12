@@ -8,6 +8,7 @@ import {
   useMemo,
   useReducer,
 } from "react";
+import { MAX_LINE_QTY, maxSellable, snapQty, type SaleUnit } from "@/modules/products/lib/units";
 
 /** Línea del carrito. `unitPrice` va en moneda BASE: lo que la tienda muestra
  *  en otra moneda es solo conversión de display. El servidor recalcula todo
@@ -22,6 +23,9 @@ export interface CartLine {
   imageUrl: string | null;
   unitPrice: number;
   compareAtPrice: number | null;
+  /** Unidad de venta y paso: la cantidad siempre es múltiplo del paso. */
+  unit: SaleUnit;
+  qtyStep: number;
   stock: number;
   qty: number;
 }
@@ -39,7 +43,7 @@ export interface CartCombo {
   regularPrice: number;
   available: number;
   qty: number;
-  items: { variantId: number; productName: string; variantName: string | null; qty: number }[];
+  items: { variantId: number; productName: string; variantName: string | null; qty: number; unit: SaleUnit }[];
 }
 
 export interface CartState {
@@ -62,7 +66,14 @@ export const CART_STORAGE_KEY = "buchito-cart-v2";
 /** Versión anterior (solo líneas): se migra al leer y se deja de escribir. */
 const LEGACY_STORAGE_KEY = "buchito-cart-v1";
 
-export const MAX_LINE_QTY = 99;
+export { MAX_LINE_QTY };
+
+/** Cantidad válida para la línea: múltiplo del paso y dentro del stock. */
+function clampLineQty(qty: number, line: Pick<CartLine, "stock" | "qtyStep">): number {
+  const cap = maxSellable(line.stock, line.qtyStep);
+  if (cap <= 0) return 0;
+  return Math.min(cap, snapQty(qty, line.qtyStep));
+}
 
 export function cartCount(state: Pick<CartState, "lines" | "combos">): number {
   return (
@@ -91,9 +102,8 @@ export function cartReducer(state: CartState, action: CartAction): CartState {
       const existing = state.lines.find(
         (l) => l.variantId === action.line.variantId
       );
-      const cap = Math.min(MAX_LINE_QTY, action.line.stock);
       if (existing) {
-        const qty = Math.min(cap, existing.qty + action.qty);
+        const qty = clampLineQty(existing.qty + action.qty, action.line);
         return {
           ...state,
           lines: state.lines.map((l) =>
@@ -103,16 +113,14 @@ export function cartReducer(state: CartState, action: CartAction): CartState {
           ),
         };
       }
-      return {
-        ...state,
-        lines: [
-          ...state.lines,
-          { ...action.line, qty: Math.max(1, Math.min(cap, action.qty)) },
-        ],
-      };
+      const qty = clampLineQty(action.qty, action.line);
+      // Sin stock para ni un paso no hay nada que añadir.
+      if (qty <= 0) return state;
+      return { ...state, lines: [...state.lines, { ...action.line, qty }] };
     }
     case "setQty": {
-      if (action.qty <= 0) {
+      // Bajar por debajo de un paso quita la línea (el "menos" en el mínimo).
+      if (action.qty < 1e-9) {
         return {
           ...state,
           lines: state.lines.filter((l) => l.variantId !== action.variantId),
@@ -121,9 +129,7 @@ export function cartReducer(state: CartState, action: CartAction): CartState {
       return {
         ...state,
         lines: state.lines.map((l) =>
-          l.variantId === action.variantId
-            ? { ...l, qty: Math.min(MAX_LINE_QTY, l.stock, action.qty) }
-            : l
+          l.variantId === action.variantId ? { ...l, qty: clampLineQty(action.qty, l) } : l
         ),
       };
     }
@@ -243,7 +249,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [state.lines, state.combos, state.hydrated]);
 
   const addToCart = useCallback(
-    (line: Omit<CartLine, "qty">, qty = 1) => dispatch({ type: "add", line, qty }),
+    (line: Omit<CartLine, "qty">, qty?: number) => dispatch({ type: "add", line, qty: qty ?? line.qtyStep }),
     []
   );
   const setQty = useCallback(

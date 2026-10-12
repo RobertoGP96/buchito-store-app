@@ -4,6 +4,7 @@ import { Prisma } from "@/generated/prisma";
 import type { CurrencyInfo } from "@/lib/format";
 import { decimalToNumber } from "@/lib/money";
 import type { DeliveryAddress } from "@/modules/orders/lib/schemas";
+import type { SaleUnit } from "@/modules/products/lib/units";
 import type { DeliveryStatus } from "../lib/labels";
 
 export interface DeliveryRow {
@@ -36,7 +37,7 @@ export interface DeliveryDetailData extends DeliveryRow {
   paymentCurrency: CurrencyInfo;
   paymentMethodName: string;
   paymentStatus: string;
-  lines: { productName: string; variantName: string | null; qty: number }[];
+  lines: { productName: string; variantName: string | null; qty: number; unit: SaleUnit }[];
   events: { eventId: number; fromStatus: DeliveryStatus | null; toStatus: DeliveryStatus; actor: string | null; note: string | null; createdAt: string }[];
 }
 
@@ -107,7 +108,7 @@ const DETAIL_INCLUDE = {
       total: true,
       paymentExchangeRate: true,
       paymentCurrency: true,
-      lines: { select: { productName: true, variantName: true, qty: true } },
+      lines: { select: { productName: true, variantName: true, qty: true, unit: true } },
     },
   },
   events: { orderBy: { createdAt: "desc" as const }, include: { actor: { select: { fullName: true } } } },
@@ -136,7 +137,7 @@ function toDetail(row: DetailRow): DeliveryDetailData {
     },
     paymentMethodName: order.paymentMethodName,
     paymentStatus: order.paymentStatus,
-    lines: order.lines,
+    lines: order.lines.map((l) => ({ ...l, qty: decimalToNumber(l.qty) })),
     events: row.events.map((e) => ({
       eventId: e.eventId,
       fromStatus: e.fromStatus,

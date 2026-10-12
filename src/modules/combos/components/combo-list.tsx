@@ -9,13 +9,11 @@ import { ProductImage } from "@/components/product-image";
 import { ListCard, ResponsiveList, type ListColumn } from "@/components/responsive-list";
 import { StatusChip } from "@/components/status-chip";
 import { fmtDate } from "@/lib/format";
-import { COMBO_STATE_META } from "../lib/labels";
+import { COMBO_STATE_META, comboItemsSummary } from "../lib/labels";
 import type { AdminComboRow } from "../queries/combo-queries";
 
 function itemsSummary(row: AdminComboRow): string {
-  return row.items
-    .map((i) => `${i.qty} × ${i.productName}${i.variantName ? ` (${i.variantName})` : ""}`)
-    .join(", ");
+  return comboItemsSummary(row.items);
 }
 
 function PriceCell({ row }: { row: AdminComboRow }) {

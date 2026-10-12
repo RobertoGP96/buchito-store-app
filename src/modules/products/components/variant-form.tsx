@@ -13,6 +13,7 @@ import { useCurrency } from "@/modules/currency/store/currency-provider";
 import { createVariant, updateVariant } from "../actions/variant-actions";
 import type { AttributeDef } from "../lib/attribute-schema";
 import { variantSchema, type VariantInput, type VariantValues } from "../lib/schemas";
+import { SALE_UNIT_LABELS, SALE_UNIT_SHORT, SALE_UNITS } from "../lib/units";
 import type { AdminVariantSummary } from "../queries/product-queries";
 import { AttributeFields, attributeDefaults } from "./attribute-fields";
 
@@ -27,6 +28,11 @@ interface VariantFormProps {
 }
 
 const FORM_ID = "variant-form";
+
+const UNIT_OPTIONS: SelectOption[] = SALE_UNITS.map((unit) => ({
+  value: unit,
+  label: unit === "unit" ? "Unidad (pieza)" : `${SALE_UNIT_LABELS[unit]} (${SALE_UNIT_SHORT[unit]})`,
+}));
 
 export function VariantForm({
   open,
@@ -63,6 +69,8 @@ export function VariantForm({
       priceCurrencyId: defaultCurrencyId,
       cost: variant?.cost ?? "",
       costCurrencyId: variant?.costCurrency?.currencyId ?? "",
+      unit: variant?.unit ?? "unit",
+      qtyStep: variant?.qtyStep ?? 1,
       imageUrl: variant?.imageUrl ?? "",
       isDefault: variant?.isDefault ?? false,
       isActive: variant?.isActive ?? true,
@@ -125,7 +133,34 @@ export function VariantForm({
             label="Nombre"
             placeholder={hasVariantAttributes ? "Se deriva de los atributos" : "Opcional"}
           />
-          <FormTextField control={control} name="price" label="Precio" type="number" step="0.01" min={0} isRequired />
+          <FormSelect
+            control={control}
+            name="unit"
+            label="Se vende por"
+            options={UNIT_OPTIONS}
+            description="El precio, el stock y las cantidades van en esta unidad."
+            isRequired
+          />
+          <FormTextField
+            control={control}
+            name="qtyStep"
+            label="Mínimo y paso de venta"
+            type="number"
+            step="any"
+            min={0}
+            description="0.25 para vender de cuarto en cuarto de kilo; 1 para piezas."
+            isRequired
+          />
+          <FormTextField
+            control={control}
+            name="price"
+            label="Precio"
+            type="number"
+            step="0.01"
+            min={0}
+            description="Por 1 unidad de venta (por kg, por litro, por pieza)."
+            isRequired
+          />
           <FormSelect control={control} name="priceCurrencyId" label="Moneda del precio" options={currencyOptions} isRequired />
           <FormTextField
             control={control}
@@ -158,7 +193,7 @@ export function VariantForm({
               name="initialStock"
               label="Stock inicial"
               type="number"
-              step="1"
+              step="any"
               min={0}
               description="Después se ajusta desde el botón Stock."
             />

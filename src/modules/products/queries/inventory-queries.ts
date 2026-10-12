@@ -4,6 +4,7 @@ import type { CurrencyInfo } from "@/lib/format";
 import { decimalToNumber } from "@/lib/money";
 import { getStoreSettings } from "@/modules/settings/queries/settings-queries";
 import type { ProductStatus } from "../lib/labels";
+import type { SaleUnit } from "../lib/units";
 import type { AdminStockMovementType } from "./product-queries";
 
 export interface InventoryRow {
@@ -13,6 +14,8 @@ export interface InventoryRow {
   variantId: number;
   variantName: string | null;
   sku: string;
+  unit: SaleUnit;
+  qtyStep: number;
   stock: number;
   /** stock ≤ lowStockThreshold de la tienda (incluye agotado). */
   isLow: boolean;
@@ -61,8 +64,10 @@ export async function getInventory({ q, low }: InventoryFilter = {}): Promise<In
     variantId: v.variantId,
     variantName: v.name,
     sku: v.sku,
-    stock: v.stock,
-    isLow: v.stock <= threshold,
+    unit: v.unit,
+    qtyStep: decimalToNumber(v.qtyStep),
+    stock: decimalToNumber(v.stock),
+    isLow: decimalToNumber(v.stock) <= threshold,
     price: decimalToNumber(v.price),
     priceCurrency: v.priceCurrency,
     updatedAt: v.updatedAt.toISOString(),
@@ -76,6 +81,7 @@ export interface StockMovementRow {
   productName: string;
   variantName: string | null;
   sku: string;
+  unit: SaleUnit;
   type: AdminStockMovementType;
   quantity: number;
   stockAfter: number;
@@ -100,7 +106,7 @@ export async function getStockMovements({ variantId, limit = 100 }: StockMovemen
     orderBy: [{ createdAt: "desc" }, { movementId: "desc" }],
     take: limit,
     include: {
-      variant: { select: { sku: true, name: true, product: { select: { productId: true, name: true } } } },
+      variant: { select: { sku: true, name: true, unit: true, product: { select: { productId: true, name: true } } } },
       createdBy: { select: { fullName: true } },
     },
   });
@@ -124,9 +130,10 @@ export async function getStockMovements({ variantId, limit = 100 }: StockMovemen
     productName: m.variant.product.name,
     variantName: m.variant.name,
     sku: m.variant.sku,
+    unit: m.variant.unit,
     type: m.type,
-    quantity: m.quantity,
-    stockAfter: m.stockAfter,
+    quantity: decimalToNumber(m.quantity),
+    stockAfter: decimalToNumber(m.stockAfter),
     referenceType: m.referenceType,
     referenceId: m.referenceId,
     orderNo:

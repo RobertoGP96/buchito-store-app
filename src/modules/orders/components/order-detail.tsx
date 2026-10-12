@@ -5,6 +5,7 @@ import { fmtDateTime } from "@/lib/format";
 import { DELIVERY_STATUS_META } from "@/modules/deliveries/lib/labels";
 import { PAYMENT_STATUS_META } from "@/modules/payments/lib/labels";
 import { outstandingBase } from "@/modules/payments/lib/payment-status";
+import { fmtQty } from "@/modules/products/lib/units";
 import { FULFILLMENT_LABELS, ORDER_STATUS_META } from "../lib/labels";
 import type { OrderDetailData, OrderLineRow } from "../queries/order-queries";
 
@@ -104,7 +105,7 @@ export function OrderDetail({ order, actions, paymentActions, deliveryHref, prof
                     <p className="font-medium text-ink">{group.line.productName}</p>
                     <p className="text-[12px] text-slate-400">
                       {group.line.variantName ? `${group.line.variantName} · ` : ""}
-                      <span className="tabular">{group.line.sku}</span> · {group.line.qty} × <Money value={group.line.unitPrice} />
+                      <span className="tabular">{group.line.sku}</span> · {fmtQty(group.line.qty, group.line.unit)} × <Money value={group.line.unitPrice} />
                     </p>
                   </div>
                   <Money value={group.line.lineTotal} className="font-semibold text-ink" />
@@ -129,7 +130,7 @@ export function OrderDetail({ order, actions, paymentActions, deliveryHref, prof
                     {group.lines.map((line) => (
                       <li key={line.lineId} className="flex items-center justify-between gap-3">
                         <span className="min-w-0 truncate">
-                          {line.qty} × {line.productName}
+                          {fmtQty(line.qty, line.unit)} × {line.productName}
                           {line.variantName ? ` (${line.variantName})` : ""}
                         </span>
                         <Money value={line.lineTotal} className="text-slate-400" />

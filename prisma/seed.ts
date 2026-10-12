@@ -24,6 +24,11 @@ function dec(value: number | string) {
 async function main() {
   const passwordHash = await bcrypt.hash(password, 12);
 
+  // Una tienda ya configurada (hay fila de configuración) conserva sus
+  // monedas, tasas, zonas y métodos de pago: el seed solo los crea la primera
+  // vez. Los datos de demostración (productos, combos, cuentas) se aplican siempre.
+  const fresh = (await db.storeSetting.findUnique({ where: { id: 1 } })) == null;
+
   // ----- Monedas y moneda base -----
   const cup = await db.currency.upsert({
     where: { code: "CUP" },
@@ -35,11 +40,13 @@ async function main() {
     create: { code: "USD", name: "Dólar estadounidense", symbol: "$", decimalPlaces: 2, sortOrder: 1 },
     update: {},
   });
-  const mlc = await db.currency.upsert({
-    where: { code: "MLC" },
-    create: { code: "MLC", name: "Moneda libremente convertible", symbol: "MLC", decimalPlaces: 2, sortOrder: 2 },
-    update: {},
-  });
+  const mlc = fresh
+    ? await db.currency.upsert({
+        where: { code: "MLC" },
+        create: { code: "MLC", name: "Moneda libremente convertible", symbol: "MLC", decimalPlaces: 2, sortOrder: 2 },
+        update: {},
+      })
+    : null;
 
   await db.storeSetting.upsert({
     where: { id: 1 },
@@ -59,10 +66,8 @@ async function main() {
   });
 
   // ----- Tasas (X → CUP): rate = CUP por 1 unidad de X -----
-  for (const [currency, rate] of [
-    [usd, 400],
-    [mlc, 320],
-  ] as const) {
+  const seedRates: [typeof usd, number][] = fresh && mlc ? [[usd, 400], [mlc, 320]] : [];
+  for (const [currency, rate] of seedRates) {
     const existing = await db.exchangeRate.findUnique({
       where: {
         baseCurrencyId_quoteCurrencyId: {
@@ -87,7 +92,7 @@ async function main() {
     { code: "cash-usd", name: "Efectivo USD", kind: "cash_on_delivery", currencyId: usd.currencyId, requiresReference: false, instructions: "Pagas en dólares al recibir el pedido, a la tasa del día.", sortOrder: 1 },
     { code: "transfer-cup", name: "Transferencia CUP", kind: "transfer", currencyId: cup.currencyId, requiresReference: true, instructions: "Transfiere a la cuenta 1234-5678-9012-3456 y escribe el número de transacción.", sortOrder: 2 },
   ] as const;
-  for (const pm of paymentMethods) {
+  for (const pm of fresh ? paymentMethods : []) {
     await db.paymentMethod.upsert({
       where: { code: pm.code },
       create: { ...pm },
@@ -126,13 +131,15 @@ async function main() {
   ];
   const zoneRows = [];
   for (const z of zones) {
-    zoneRows.push(
-      await db.deliveryZone.upsert({
-        where: { name: z.name },
-        create: { name: z.name, fee: dec(z.fee), etaLabel: z.etaLabel, sortOrder: z.sortOrder },
-        update: {},
-      })
-    );
+    const existing = await db.deliveryZone.findUnique({ where: { name: z.name } });
+    if (existing) zoneRows.push(existing);
+    else if (fresh) {
+      zoneRows.push(
+        await db.deliveryZone.create({
+          data: { name: z.name, fee: dec(z.fee), etaLabel: z.etaLabel, sortOrder: z.sortOrder },
+        })
+      );
+    }
   }
 
   const customer = await db.customer.upsert({
@@ -147,7 +154,7 @@ async function main() {
     update: {},
   });
   const hasAddress = await db.customerAddress.findFirst({ where: { customerId: customer.customerId } });
-  if (!hasAddress) {
+  if (!hasAddress && zoneRows[0]) {
     await db.customerAddress.create({
       data: {
         customerId: customer.customerId,
@@ -256,6 +263,37 @@ async function main() {
       isDefault: true,
     },
     update: { cost: dec(950), costCurrencyId: cup.currencyId },
+  });
+
+  // Venta por peso: precio por kg, de cuarto en cuarto de kilo.
+  const beans = await db.product.upsert({
+    where: { slug: "frijol-negro" },
+    create: {
+      typeId: generalType.typeId,
+      categoryId: food.categoryId,
+      slug: "frijol-negro",
+      name: "Frijol negro",
+      description: "Frijol negro a granel. Se vende por kilogramo.",
+      status: "active",
+      featured: true,
+    },
+    update: {},
+  });
+  await db.productVariant.upsert({
+    where: { sku: "FRI-NEG-KG" },
+    create: {
+      productId: beans.productId,
+      sku: "FRI-NEG-KG",
+      price: dec(1800),
+      priceCurrencyId: cup.currencyId,
+      cost: dec(1300),
+      costCurrencyId: cup.currencyId,
+      unit: "kg",
+      qtyStep: dec("0.25"),
+      stock: dec(30),
+      isDefault: true,
+    },
+    update: { unit: "kg", qtyStep: dec("0.25") },
   });
 
   const shirt = await db.product.upsert({

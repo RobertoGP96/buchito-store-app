@@ -13,6 +13,7 @@ import {
 } from "../lib/attribute-schema";
 import { marginPct } from "@/modules/finance/lib/profit";
 import type { ProductStatus } from "../lib/labels";
+import type { SaleUnit } from "../lib/units";
 
 export interface AdminProductRow {
   productId: number;
@@ -55,6 +56,11 @@ export interface AdminVariantSummary {
   costBase: number | null;
   /** (precio − costo) / precio, en base; null si falta alguno. */
   marginPct: number | null;
+  /** Unidad de venta; el precio es por 1 unidad de ella. */
+  unit: SaleUnit;
+  /** Mínimo vendible y paso del selector, en `unit`. */
+  qtyStep: number;
+  /** En `unit`, hasta 3 decimales. */
   stock: number;
   imageUrl: string | null;
   isDefault: boolean;
@@ -88,7 +94,9 @@ type VariantSource = {
   cost: Prisma.Decimal | null;
   costCurrencyId: number | null;
   costCurrency: CurrencyInfo | null;
-  stock: number;
+  unit: SaleUnit;
+  qtyStep: Prisma.Decimal;
+  stock: Prisma.Decimal;
   imageUrl: string | null;
   isDefault: boolean;
   isActive: boolean;
@@ -116,7 +124,9 @@ function toVariantSummary(v: VariantSource, rates: RatesToBase, baseDecimals: nu
     costCurrency: v.costCurrency,
     costBase,
     marginPct: priceBase != null ? marginPct(priceBase, costBase) : null,
-    stock: v.stock,
+    unit: v.unit,
+    qtyStep: decimalToNumber(v.qtyStep),
+    stock: decimalToNumber(v.stock),
     imageUrl: v.imageUrl,
     isDefault: v.isDefault,
     isActive: v.isActive,
@@ -272,8 +282,8 @@ export async function getAdminProduct(productId: number): Promise<AdminProductDe
       recentMovements: v.stockMovements.map((m) => ({
         movementId: m.movementId,
         type: m.type,
-        quantity: m.quantity,
-        stockAfter: m.stockAfter,
+        quantity: decimalToNumber(m.quantity),
+        stockAfter: decimalToNumber(m.stockAfter),
         referenceType: m.referenceType,
         referenceId: m.referenceId,
         notes: m.notes,

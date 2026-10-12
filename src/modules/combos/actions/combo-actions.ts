@@ -10,7 +10,9 @@ import { roundToCurrency } from "@/lib/currency-math";
 import { slugify } from "@/lib/slug";
 import type { ActionResult } from "@/types";
 import { PRODUCT_STATUSES, type ProductStatus } from "@/modules/products/lib/labels";
+import { isMultipleOf } from "@/modules/products/lib/units";
 import { nextAvailableSlug } from "@/modules/products/lib/variant-rules";
+import { decimalToNumber } from "@/lib/money";
 import { comboSchema, type ComboInput, type ComboValues } from "../lib/schemas";
 
 function revalidateComboPaths(comboId: number | null, slugs: string[]) {
@@ -53,11 +55,20 @@ async function prepare(data: ComboValues): Promise<{ ok: true; price: number } |
   if (!currency?.isActive) return { ok: false, error: "Elige una moneda activa para el precio" };
 
   const variantIds = data.items.map((i) => i.variantId);
-  const found = await db.productVariant.count({
+  const found = await db.productVariant.findMany({
     where: { variantId: { in: variantIds }, product: { status: { not: "archived" } } },
+    select: { variantId: true, qtyStep: true, product: { select: { name: true } } },
   });
-  if (found !== variantIds.length) {
+  if (found.length !== variantIds.length) {
     return { ok: false, error: "Alguno de los productos del combo ya no existe o está archivado" };
+  }
+  // La cantidad de cada componente debe respetar el paso de venta de su variante.
+  for (const item of data.items) {
+    const variant = found.find((v) => v.variantId === item.variantId)!;
+    const step = decimalToNumber(variant.qtyStep);
+    if (!isMultipleOf(item.qty, step)) {
+      return { ok: false, error: `${variant.product.name} se vende en múltiplos de ${step}` };
+    }
   }
   return { ok: true, price: roundToCurrency(data.price, currency.decimalPlaces) };
 }
