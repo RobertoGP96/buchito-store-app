@@ -33,3 +33,34 @@ export function LinkPending({ className }: { className?: string }) {
     />
   );
 }
+
+interface NavPendingSkeletonProps {
+  /** Solo el cuadro del icono (sidebar contraído a iconos). */
+  iconOnly?: boolean;
+  /** Fondo opaco que tapa el enlace y padding horizontal: los del contenedor. */
+  className?: string;
+  /** Color de las barras. */
+  barClassName?: string;
+}
+
+/** Esqueleto de un enlace de navegación mientras su ruta carga: se superpone
+ *  al enlace pulsado (que debe ser `relative`) con la silueta icono + texto,
+ *  con el mismo retardo que el spinner. Debe renderizarse dentro de un <Link>. */
+export function NavPendingSkeleton({ iconOnly = false, className, barClassName }: NavPendingSkeletonProps) {
+  const { pending } = useLinkStatus();
+  if (!pending) return null;
+  const bar = cn("nav-skeleton-bar rounded-full", barClassName ?? "bg-white/15");
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "nav-skeleton absolute inset-0 flex items-center gap-3 rounded-[inherit]",
+        iconOnly ? "justify-center" : "px-3",
+        className ?? "bg-footer"
+      )}
+    >
+      <span className={cn(bar, "h-4 w-4 flex-none rounded-[5px]")} />
+      {!iconOnly && <span className={cn(bar, "h-2.5 w-[58%]")} />}
+    </span>
+  );
+}
