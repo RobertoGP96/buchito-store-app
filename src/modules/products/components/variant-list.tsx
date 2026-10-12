@@ -12,6 +12,7 @@ import type { CurrencyInfo } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useCurrency } from "@/modules/currency/store/currency-provider";
 import { variantDisplayName, type AttributeDef } from "../lib/attribute-schema";
+import { fmtQty } from "../lib/units";
 import type { AdminVariantRow, AdminVariantSummary } from "../queries/product-queries";
 
 const StockAdjustForm = lazyDialog(() => import("./stock-adjust-form").then((m) => m.StockAdjustForm));
@@ -77,7 +78,7 @@ export function VariantStockCell({ variant, threshold }: { variant: AdminVariant
   const low = !out && variant.stock <= threshold;
   return (
     <span className={cn("tabular font-semibold", out ? "text-danger" : low ? "text-warn" : "text-ink")}>
-      {variant.stock}
+      {fmtQty(variant.stock, variant.unit)}
       {out && <span className="ml-1.5 text-[11px] font-medium">Agotado</span>}
       {low && <span className="ml-1.5 text-[11px] font-medium">Bajo</span>}
     </span>

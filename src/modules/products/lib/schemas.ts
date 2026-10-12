@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { attributeSchemaListSchema } from "./attribute-schema";
 import { PRODUCT_STATUSES } from "./labels";
+import { isValidStep, MAX_LINE_QTY, SALE_UNITS } from "./units";
 
 const optionalText = z
   .string()
@@ -89,16 +90,26 @@ export const variantSchema = z.object({
     .transform((v) => (v === "" ? null : v))
     .nullable(),
   imageUrl: optionalText,
+  // Unidad de venta y mínimo vendible (el precio es por 1 unidad de `unit`).
+  unit: z.enum(SALE_UNITS).default("unit"),
+  qtyStep: z
+    .union([z.literal(""), z.null(), z.coerce.number().positive("El paso debe ser mayor que cero").max(MAX_LINE_QTY)])
+    .transform((v) => (v === "" || v == null ? 1 : v)),
   isDefault: z.boolean().default(false),
   isActive: z.boolean().default(true),
   sortOrder: z.coerce.number().int().min(0).default(0),
   // Solo se usa al crear: genera el StockMovement "Stock inicial". Editar una
   // variante nunca toca el stock (eso es adjustStock).
-  initialStock: z.coerce.number().int().min(0, "No puede ser negativo").default(0),
-}).refine((v) => v.compareAtPrice == null || v.compareAtPrice > v.price, {
-  message: "El precio anterior debe ser mayor que el precio actual",
-  path: ["compareAtPrice"],
-});
+  initialStock: z.coerce.number().min(0, "No puede ser negativo").default(0),
+})
+  .refine((v) => v.compareAtPrice == null || v.compareAtPrice > v.price, {
+    message: "El precio anterior debe ser mayor que el precio actual",
+    path: ["compareAtPrice"],
+  })
+  .refine((v) => isValidStep(v.qtyStep, v.unit), {
+    message: "Si se vende por unidades, el paso debe ser un número entero",
+    path: ["qtyStep"],
+  });
 
 export type VariantInput = z.input<typeof variantSchema>;
 export type VariantValues = z.output<typeof variantSchema>;
@@ -106,7 +117,8 @@ export type VariantValues = z.output<typeof variantSchema>;
 export const stockAdjustmentSchema = z.object({
   variantId: z.coerce.number().int().positive(),
   type: z.enum(["entry", "exit", "adjustment"]),
-  quantity: z.coerce.number().int().positive("La cantidad debe ser mayor que cero"),
+  // En la unidad de la variante; admite decimales (0.5 kg).
+  quantity: z.coerce.number().positive("La cantidad debe ser mayor que cero"),
   // Solo en entradas: precio de compra por unidad de esta compra; actualiza
   // el costo de la variante.
   unitCost: z

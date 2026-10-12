@@ -14,6 +14,7 @@ import {
   type AttributeValues,
 } from "../lib/attribute-schema";
 import { variantSchema, type VariantInput, type VariantValues } from "../lib/schemas";
+import { roundQty } from "../lib/units";
 import { firstAttributeError, resolveIsDefault, resolveVariantName } from "../lib/variant-rules";
 
 const UNIQUE_CONFLICT =
@@ -97,6 +98,8 @@ function toVariantColumns(
     priceCurrencyId: data.priceCurrencyId,
     cost: cost.cost,
     costCurrencyId: cost.costCurrencyId,
+    unit: data.unit,
+    qtyStep: new Prisma.Decimal(roundQty(data.qtyStep)),
     imageUrl: data.imageUrl,
     isActive: data.isActive,
     sortOrder: data.sortOrder,
@@ -151,16 +154,17 @@ export async function createVariant(
           data: { isDefault: false },
         });
       }
+      const initialStock = roundQty(data.initialStock);
       const created = await tx.productVariant.create({
-        data: { productId: data.productId, ...columns, isDefault, stock: data.initialStock },
+        data: { productId: data.productId, ...columns, isDefault, stock: initialStock },
       });
-      if (data.initialStock > 0) {
+      if (initialStock > 0) {
         await tx.stockMovement.create({
           data: {
             variantId: created.variantId,
             type: "entry",
-            quantity: data.initialStock,
-            stockAfter: data.initialStock,
+            quantity: initialStock,
+            stockAfter: initialStock,
             referenceType: "manual",
             notes: "Stock inicial",
             createdById: userId,
@@ -173,7 +177,7 @@ export async function createVariant(
         entityId: created.variantId,
         module: "products",
         userId,
-        newValues: { productId: data.productId, ...columns, isDefault, stock: data.initialStock },
+        newValues: { productId: data.productId, ...columns, isDefault, stock: initialStock },
       });
       return created;
     });

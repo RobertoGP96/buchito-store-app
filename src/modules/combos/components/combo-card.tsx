@@ -10,6 +10,7 @@ import { ProductImage } from "@/components/product-image";
 import { StockLabel } from "@/components/stock-label";
 import { cn } from "@/lib/utils";
 import { useCart, type CartCombo } from "@/modules/cart/store";
+import { comboItemsSummary as summarize } from "../lib/labels";
 import type { CatalogCombo } from "../queries/combo-catalog-queries";
 
 export function cartComboFor(combo: CatalogCombo): Omit<CartCombo, "qty"> {
@@ -26,12 +27,13 @@ export function cartComboFor(combo: CatalogCombo): Omit<CartCombo, "qty"> {
       productName: i.productName,
       variantName: i.variantName,
       qty: i.qty,
+      unit: i.unit,
     })),
   };
 }
 
 export function comboItemsSummary(combo: Pick<CatalogCombo, "items">): string {
-  return combo.items.map((i) => `${i.qty} × ${i.productName}${i.variantName ? ` (${i.variantName})` : ""}`).join(", ");
+  return summarize(combo.items);
 }
 
 interface ComboCardProps {

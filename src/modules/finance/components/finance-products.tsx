@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/empty-state";
 import { Money } from "@/components/money";
 import { ListCard, ResponsiveList, type ListColumn } from "@/components/responsive-list";
 import { cn } from "@/lib/utils";
+import { fmtQtyNumber } from "@/modules/products/lib/units";
 import type { ProductProfitRow } from "../queries/finance-queries";
 
 function ProfitCell({ row }: { row: ProductProfitRow }) {
@@ -25,8 +26,8 @@ function Margin({ row }: { row: ProductProfitRow }) {
 function Units({ row }: { row: ProductProfitRow }) {
   return (
     <span className="tabular">
-      {row.qty}
-      {row.inComboQty > 0 && <span className="text-[11.5px] text-slate-400"> · {row.inComboQty} en combos</span>}
+      {fmtQtyNumber(row.qty)}
+      {row.inComboQty > 0 && <span className="text-[11.5px] text-slate-400"> · {fmtQtyNumber(row.inComboQty)} en combos</span>}
     </span>
   );
 }

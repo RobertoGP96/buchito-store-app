@@ -6,6 +6,7 @@ import { assertRole } from "@/lib/auth-guard";
 import { createAuditLog } from "@/lib/audit";
 import { failAction, firstIssueMessage, StaleVersionError } from "@/lib/action-utils";
 import { roundToCurrency } from "@/lib/currency-math";
+import { decimalToNumber } from "@/lib/money";
 import { Prisma } from "@/generated/prisma";
 import type { ActionResult } from "@/types";
 import { stockAdjustmentSchema, type StockAdjustmentInput } from "../lib/schemas";
@@ -64,8 +65,10 @@ export async function adjustStock(
         where: { variantId },
         select: { stock: true },
       });
-      const planned = planStockMovement(fresh.stock, type, quantity);
+      const currentStock = decimalToNumber(fresh.stock);
+      const planned = planStockMovement(currentStock, type, quantity);
       if (!planned.ok) throw new StockRuleError(planned.error);
+      const qty = planned.plan.movementQuantity;
 
       let after: number;
       switch (type) {
@@ -73,31 +76,31 @@ export async function adjustStock(
           const updated = await tx.productVariant.update({
             where: { variantId },
             data: {
-              stock: { increment: quantity },
+              stock: { increment: qty },
               ...(purchase ? { cost: purchase.unitCost, costCurrencyId: purchase.costCurrencyId } : {}),
             },
             select: { stock: true },
           });
-          after = updated.stock;
+          after = decimalToNumber(updated.stock);
           break;
         }
         case "exit": {
           const result = await tx.productVariant.updateMany({
-            where: { variantId, stock: { gte: quantity } },
-            data: { stock: { decrement: quantity } },
+            where: { variantId, stock: { gte: qty } },
+            data: { stock: { decrement: qty } },
           });
           if (result.count !== 1) throw new StockRuleError("Stock insuficiente");
           const row = await tx.productVariant.findUniqueOrThrow({
             where: { variantId },
             select: { stock: true },
           });
-          after = row.stock;
+          after = decimalToNumber(row.stock);
           break;
         }
         case "adjustment": {
           const result = await tx.productVariant.updateMany({
             where: { variantId, stock: fresh.stock },
-            data: { stock: quantity },
+            data: { stock: planned.plan.stockAfter },
           });
           if (result.count !== 1) throw new StaleVersionError();
           after = planned.plan.stockAfter;
@@ -124,10 +127,10 @@ export async function adjustStock(
         entityId: variantId,
         module: "products",
         userId,
-        oldValues: { stock: fresh.stock },
+        oldValues: { stock: currentStock },
         newValues: {
           type,
-          quantity,
+          quantity: qty,
           stockAfter: after,
           notes,
           unitCost: purchase ? purchase.unitCost.toNumber() : null,

@@ -93,7 +93,7 @@ export async function getFinanceSummary(from?: Date): Promise<FinanceSummary> {
 
   const profitLines = lines.map((l) => ({
     lineTotal: decimalToNumber(l.lineTotal),
-    qty: l.qty,
+    qty: decimalToNumber(l.qty),
     unitCost: decimalToNullableNumber(l.unitCost),
   }));
   const profit = summarizeProfit(profitLines, decimals);
@@ -116,11 +116,12 @@ export async function getFinanceSummary(from?: Date): Promise<FinanceSummary> {
     };
     const lineTotal = decimalToNumber(l.lineTotal);
     const unitCost = decimalToNullableNumber(l.unitCost);
-    row.qty += l.qty;
+    const qty = decimalToNumber(l.qty);
+    row.qty += qty;
     row.revenue += lineTotal;
     if (unitCost == null) row.missingCost = true;
-    else row.cost = (row.cost ?? 0) + unitCost * l.qty;
-    if (l.comboId != null) row.inComboQty += l.qty;
+    else row.cost = (row.cost ?? 0) + unitCost * qty;
+    if (l.comboId != null) row.inComboQty += qty;
     byProduct.set(productId, row);
   }
   const products: ProductProfitRow[] = [...byProduct.values()]

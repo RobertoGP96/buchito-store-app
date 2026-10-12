@@ -1,5 +1,23 @@
 import type { StatusMeta } from "@/components/status-chip";
 import type { ProductStatus } from "@/modules/products/lib/labels";
+import { fmtQty, fmtQtyNumber, type SaleUnit } from "@/modules/products/lib/units";
+
+export interface ComboItemLabelInput {
+  qty: number;
+  unit: SaleUnit;
+  productName: string;
+  variantName: string | null;
+}
+
+/** "2 × Arroz (M)" por unidades; "0.5 kg Arroz" por peso o medida. */
+export function comboItemLabel(item: ComboItemLabelInput): string {
+  const name = item.variantName ? `${item.productName} (${item.variantName})` : item.productName;
+  return item.unit === "unit" ? `${fmtQtyNumber(item.qty)} × ${name}` : `${fmtQty(item.qty, item.unit)} ${name}`;
+}
+
+export function comboItemsSummary(items: ComboItemLabelInput[]): string {
+  return items.map(comboItemLabel).join(", ");
+}
 
 /** Estado derivado del combo: el guardado (`status`) más la vigencia. */
 export type ComboState = ProductStatus | "scheduled" | "expired";

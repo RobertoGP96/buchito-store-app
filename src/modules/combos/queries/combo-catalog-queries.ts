@@ -5,6 +5,7 @@ import { BaseCurrencyNotConfiguredError, getBaseCurrencyCached, getRatesToBaseCa
 import { roundToCurrency } from "@/lib/currency-math";
 import type { CurrencyInfo } from "@/lib/format";
 import { decimalToNumber } from "@/lib/money";
+import type { SaleUnit } from "@/modules/products/lib/units";
 import { comboAvailability, comboRegularPrice, comboSavingsPct } from "../lib/combo-pricing";
 
 /** Componente de un combo tal como lo ve la tienda: precio YA en base. */
@@ -15,7 +16,9 @@ export interface CatalogComboItem {
   productName: string;
   variantName: string | null;
   sku: string;
+  /** Cantidad del componente por combo, en `unit`. */
   qty: number;
+  unit: SaleUnit;
   imageUrl: string | null;
   unitPrice: number;
   stock: number;
@@ -99,10 +102,11 @@ function toCatalogCombo(row: ComboRow, ctx: RateContext): CatalogCombo | null {
       productName: v.product.name,
       variantName: v.name,
       sku: v.sku,
-      qty: item.qty,
+      qty: decimalToNumber(item.qty),
+      unit: v.unit,
       imageUrl: v.imageUrl ?? v.product.images[0]?.url ?? null,
       unitPrice: roundToCurrency(decimalToNumber(v.price) * vRate.rate, ctx.base.decimalPlaces),
-      stock: v.stock,
+      stock: decimalToNumber(v.stock),
     });
   }
   if (items.length === 0) return null;

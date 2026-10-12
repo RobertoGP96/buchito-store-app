@@ -142,7 +142,9 @@ export async function applyOrderTransition(
 /** Devuelve al inventario lo que el pedido había descontado al crearse. */
 async function restockLines(
   tx: Prisma.TransactionClient,
-  order: { orderId: number; orderNo: string; lines: { variantId: number; qty: number }[] },
+  // `qty` llega como Decimal de la DB (cantidades con decimales): Prisma lo
+  // acepta tal cual en el incremento y en el movimiento.
+  order: { orderId: number; orderNo: string; lines: { variantId: number; qty: Prisma.Decimal | number }[] },
   userId: number | null
 ): Promise<void> {
   // Mismo orden de bloqueo que el descuento de stock en createOrder: evita

@@ -11,6 +11,7 @@ import { QtyStepper } from "@/components/qty-stepper";
 import { StockLabel } from "@/components/stock-label";
 import { fmtDate } from "@/lib/format";
 import { useCart } from "@/modules/cart/store";
+import { fmtQty, perUnitSuffix } from "@/modules/products/lib/units";
 import type { CatalogCombo } from "../queries/combo-catalog-queries";
 import { cartComboFor } from "./combo-card";
 
@@ -99,11 +100,11 @@ export function ComboDetail({ combo }: { combo: CatalogCombo }) {
                     </Link>
                     <p className="text-[12.5px] text-slate-400">
                       {item.variantName ? `${item.variantName} · ` : ""}
-                      <Money value={item.unitPrice} /> c/u
+                      <Money value={item.unitPrice} /> {perUnitSuffix(item.unit) ?? "c/u"}
                     </p>
                   </div>
                   <span className="tabular flex-none rounded-full bg-tint px-2.5 py-1 text-[12.5px] font-semibold text-navy-700">
-                    × {item.qty}
+                    × {fmtQty(item.qty, item.unit)}
                   </span>
                 </li>
               ))}

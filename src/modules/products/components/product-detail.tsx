@@ -14,15 +14,18 @@ import { cartLineFor } from "@/components/product-card";
 import { discountPct } from "@/lib/format";
 import { useCart } from "@/modules/cart/store";
 import { useCurrency } from "@/modules/currency/store/currency-provider";
+import { fmtQty, maxSellable, perUnitSuffix, roundQty } from "../lib/units";
 import type { CatalogProduct } from "../queries/catalog-queries";
 
 export function ProductDetail({ product }: { product: CatalogProduct }) {
   const { addToCart } = useCart();
   const { base } = useCurrency();
   const [variantId, setVariantId] = useState(product.defaultVariant.variantId);
-  const [qty, setQty] = useState(1);
+  const [qty, setQty] = useState(product.defaultVariant.qtyStep);
   const variant = product.variants.find((v) => v.variantId === variantId) ?? product.defaultVariant;
-  const soldOut = variant.stock <= 0;
+  const maxQty = maxSellable(variant.stock, variant.qtyStep);
+  const soldOut = maxQty <= 0;
+  const unitSuffix = perUnitSuffix(variant.unit);
   const pct = discountPct(variant.price, variant.compareAtPrice);
   const imageUrl = variant.imageUrl ?? product.imageUrl;
 
@@ -46,8 +49,8 @@ export function ProductDetail({ product }: { product: CatalogProduct }) {
       return;
     }
     addToCart(cartLineFor(product, variant), qty);
-    toast.success(`${product.name}${variant.name ? ` · ${variant.name}` : ""} añadido a la bolsa`);
-    setQty(1);
+    toast.success(`${fmtQty(qty, variant.unit)} de ${product.name}${variant.name ? ` · ${variant.name}` : ""} en la bolsa`);
+    setQty(variant.qtyStep);
   };
 
   return (
@@ -93,6 +96,7 @@ export function ProductDetail({ product }: { product: CatalogProduct }) {
           <div className="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1" aria-live="polite">
             <p className="font-display text-[26px] leading-none text-navy-900">
               <Money value={variant.price} />
+              {unitSuffix && <span className="ml-1.5 text-[14px] font-medium text-slate-400">{unitSuffix}</span>}
             </p>
             {variant.compareAtPrice != null && variant.compareAtPrice > variant.price && (
               <p className="text-[14px] font-medium text-slate-400 line-through">
@@ -105,8 +109,13 @@ export function ProductDetail({ product }: { product: CatalogProduct }) {
               </p>
             )}
           </div>
-          <div className="mt-2">
-            <StockLabel stock={variant.stock} />
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+            <StockLabel stock={variant.stock} unit={variant.unit} />
+            {variant.unit !== "unit" && (
+              <span className="text-[12px] leading-none text-slate-400">
+                Se vende en pasos de {fmtQty(variant.qtyStep, variant.unit)}
+              </span>
+            )}
           </div>
 
           {product.variants.length > 1 && (
@@ -118,8 +127,9 @@ export function ProductDetail({ product }: { product: CatalogProduct }) {
                 options={variantOptions}
                 value={String(variant.variantId)}
                 onChange={(value) => {
+                  const next = product.variants.find((v) => v.variantId === Number(value));
                   setVariantId(Number(value));
-                  setQty(1);
+                  setQty(next?.qtyStep ?? 1);
                 }}
                 labelledBy="variant-label"
               />
@@ -129,9 +139,11 @@ export function ProductDetail({ product }: { product: CatalogProduct }) {
           <div className="mt-6 flex flex-wrap items-center gap-3">
             <QtyStepper
               qty={qty}
-              onInc={() => setQty((q) => Math.min(q + 1, Math.max(1, variant.stock)))}
-              onDec={() => setQty((q) => Math.max(1, q - 1))}
-              max={variant.stock}
+              onInc={() => setQty((q) => Math.min(roundQty(q + variant.qtyStep), Math.max(variant.qtyStep, maxQty)))}
+              onDec={() => setQty((q) => Math.max(variant.qtyStep, roundQty(q - variant.qtyStep)))}
+              max={maxQty}
+              step={variant.qtyStep}
+              unit={variant.unit}
               size="lg"
             />
             <Button

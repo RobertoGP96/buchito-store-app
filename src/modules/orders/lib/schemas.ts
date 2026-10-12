@@ -39,7 +39,8 @@ export const createOrderSchema = z
       .array(
         z.object({
           variantId: z.number().int().positive(),
-          qty: z.number().int().positive().max(99),
+          // En la unidad de la variante; el servidor comprueba el paso.
+          qty: z.number().positive().max(9999),
         })
       )
       .default([]),
@@ -47,7 +48,7 @@ export const createOrderSchema = z
       .array(
         z.object({
           comboId: z.number().int().positive(),
-          qty: z.number().int().positive().max(99),
+          qty: z.number().int().positive().max(999),
         })
       )
       .default([]),

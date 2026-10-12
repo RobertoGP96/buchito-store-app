@@ -14,6 +14,7 @@ import type { CurrencyInfo } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { variantDisplayName } from "../lib/attribute-schema";
 import { PRODUCT_STATUS_META } from "../lib/labels";
+import { fmtQtyNumber } from "../lib/units";
 import type { AdminProductRow, AdminVariantSummary } from "../queries/product-queries";
 import { VariantChips, VariantPriceCell, VariantStockCell } from "./variant-list";
 
@@ -45,7 +46,7 @@ function StockCell({ row, threshold }: { row: AdminProductRow; threshold: number
   const low = row.totalStock <= threshold;
   return (
     <span className={low ? "tabular font-semibold text-warn" : "tabular"}>
-      {row.totalStock}
+      {fmtQtyNumber(row.totalStock)}
     </span>
   );
 }

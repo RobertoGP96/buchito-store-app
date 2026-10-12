@@ -8,6 +8,7 @@ import { PromptDialog } from "@/components/prompt-dialog";
 import { StatusChip } from "@/components/status-chip";
 import { fmtDateTime } from "@/lib/format";
 import { PAYMENT_STATUS_META, type PaymentStatus } from "@/modules/payments/lib/labels";
+import { fmtQty } from "@/modules/products/lib/units";
 import { transitionDelivery } from "../actions/delivery-actions";
 import { DELIVERY_STATUS_META, DELIVERY_TRANSITION_LABELS, type DeliveryStatus } from "../lib/labels";
 import { nextDeliveryStates, type DeliveryActor } from "../lib/state-machine";
@@ -122,7 +123,7 @@ export function DeliveryDetail({ delivery, actor, isAssignedCourier }: DeliveryD
                 {line.productName}
                 {line.variantName && <span className="text-slate-400"> · {line.variantName}</span>}
               </span>
-              <span className="tabular font-semibold text-navy-900">× {line.qty}</span>
+              <span className="tabular font-semibold text-navy-900">× {fmtQty(line.qty, line.unit)}</span>
             </li>
           ))}
         </ul>
