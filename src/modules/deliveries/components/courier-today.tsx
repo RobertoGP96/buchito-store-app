@@ -29,11 +29,11 @@ export function CourierToday({ rows }: { rows: DeliveryRow[] }) {
                 <p className="font-semibold text-ink">{d.orderNo}</p>
                 <StatusChip {...DELIVERY_STATUS_META[d.status]} />
               </div>
-              <p className="mt-1.5 text-[14px] text-ink">{d.customerName}</p>
+              <p className="mt-1.5 text-[14px] text-ink">{d.recipientName}</p>
               <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12.5px] text-slate-500">
                 <span className="inline-flex items-center gap-1">
                   <Phone className="h-3.5 w-3.5" strokeWidth={1.9} />
-                  <span className="tabular">{d.customerPhone}</span>
+                  <span className="tabular">{d.recipientPhone}</span>
                 </span>
                 {d.zoneName && (
                   <span className="inline-flex items-center gap-1">

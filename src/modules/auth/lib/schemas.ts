@@ -19,6 +19,7 @@ export const registerSchema = z
       .refine(isValidPhone, "Escribe un teléfono válido (7 a 15 dígitos)"),
     password: z.string().min(8, "Mínimo 8 caracteres"),
     confirmPassword: z.string(),
+    callbackUrl: z.string().optional(),
   })
   .refine((v) => v.password === v.confirmPassword, {
     message: "Las contraseñas no coinciden",
@@ -41,6 +42,12 @@ export function safeCallbackUrl(value: string | undefined, fallback: string): st
   }
   if (!value.startsWith("/") || value.startsWith("//")) return fallback;
   return value;
+}
+
+/** Enlace entre login y registro conservando a dónde volver (p. ej. al
+ *  checkout) cuando hay un callbackUrl. */
+export function withCallbackUrl(path: string, callbackUrl?: string): string {
+  return callbackUrl ? `${path}?callbackUrl=${encodeURIComponent(callbackUrl)}` : path;
 }
 
 export const verifyLoginCodeSchema = z.object({

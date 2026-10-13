@@ -9,6 +9,7 @@ import {
   Inbox,
   LayoutDashboard,
   LogOut,
+  MapPin,
   Package,
   PackageSearch,
   Truck,
@@ -40,6 +41,7 @@ function linksFor(user: NavUser): MenuLink[] {
   return [
     { id: "profile", href: "/perfil", label: "Mi perfil", icon: UserRound },
     { id: "orders", href: "/perfil/pedidos", label: "Mis pedidos", icon: Package },
+    { id: "recipients", href: "/perfil/destinatarios", label: "Mis destinatarios", icon: MapPin },
   ];
 }
 

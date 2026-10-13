@@ -82,15 +82,20 @@ export function DeliveryDetail({ delivery, actor, isAssignedCourier }: DeliveryD
 
   return (
     <div className="flex flex-col gap-4">
-      <Section title="Cliente">
-        <p className="text-[16px] font-semibold text-ink">{delivery.customerName}</p>
+      <Section title="Destinatario">
+        <p className="text-[16px] font-semibold text-ink">{delivery.recipientName}</p>
         <a
-          href={`tel:${delivery.customerPhone.replace(/\s+/g, "")}`}
+          href={`tel:${delivery.recipientPhone.replace(/\s+/g, "")}`}
           className="mt-2 inline-flex items-center gap-2 rounded-full bg-tint px-4 py-2 text-[14px] font-semibold text-navy-900"
         >
           <Phone className="h-4 w-4" strokeWidth={2} />
-          <span className="tabular">{delivery.customerPhone}</span>
+          <span className="tabular">{delivery.recipientPhone}</span>
         </a>
+        {(delivery.customerName !== delivery.recipientName || delivery.customerPhone !== delivery.recipientPhone) && (
+          <p className="mt-3 text-[12.5px] text-slate-500">
+            Pedido de {delivery.customerName} · <span className="tabular">{delivery.customerPhone}</span>
+          </p>
+        )}
       </Section>
 
       <Section title="Dirección">

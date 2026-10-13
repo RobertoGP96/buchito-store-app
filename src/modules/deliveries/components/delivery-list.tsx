@@ -111,7 +111,7 @@ export function DeliveryList({ rows, couriers, activeStatus }: DeliveryListProps
             {r.orderNo}
           </Link>
           <p className="text-[12px] text-slate-400">
-            {r.customerName} · <span className="tabular">{r.customerPhone}</span>
+            {r.recipientName} · <span className="tabular">{r.recipientPhone}</span>
           </p>
         </div>
       ),
@@ -155,11 +155,11 @@ export function DeliveryList({ rows, couriers, activeStatus }: DeliveryListProps
         }
         renderCard={(r) => (
           <ListCard
-            title={`${r.orderNo} · ${r.customerName}`}
+            title={`${r.orderNo} · ${r.recipientName}`}
             subtitle={`${r.zoneName ?? "Sin zona"} · ${fmtDateTime(r.createdAt)}`}
             badge={<StatusChip {...DELIVERY_STATUS_META[r.status]} />}
             rows={[
-              { label: "Teléfono", value: <span className="tabular">{r.customerPhone}</span> },
+              { label: "Teléfono", value: <span className="tabular">{r.recipientPhone}</span> },
               { label: "Tarifa", value: <Money value={r.fee} /> },
               ...(r.failedReason ? [{ label: "Motivo", value: r.failedReason }] : []),
             ]}

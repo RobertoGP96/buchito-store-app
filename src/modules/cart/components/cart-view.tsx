@@ -17,7 +17,12 @@ import { CartSummary } from "./cart-summary";
 interface CartViewProps {
   defaultShippingFee: number;
   freeShippingThreshold: number | null;
+  isLoggedIn: boolean;
 }
+
+/** Comprar exige cuenta. Sin sesión el CTA va directo al login (como la barra
+ *  inferior) y vuelve al checkout: evita el salto en blanco del middleware. */
+const CHECKOUT_LOGIN_HREF = "/login?callbackUrl=%2Fcheckout";
 
 const REMOVE_BUTTON =
   "-mt-1 -mr-1 flex h-8 w-8 flex-none items-center justify-center rounded-full text-slate-400 transition-colors duration-150 hover:bg-danger-soft hover:text-danger";
@@ -127,7 +132,7 @@ function ComboItem({ combo }: { combo: CartCombo }) {
   );
 }
 
-export function CartView({ defaultShippingFee, freeShippingThreshold }: CartViewProps) {
+export function CartView({ defaultShippingFee, freeShippingThreshold, isLoggedIn }: CartViewProps) {
   const { state } = useCart();
   const { base } = useCurrency();
 
@@ -166,9 +171,20 @@ export function CartView({ defaultShippingFee, freeShippingThreshold }: CartView
       </ul>
 
       <CartSummary totals={totals}>
-        <ButtonLink href="/checkout" variant="solid" size="lg" className="w-full">
-          Finalizar compra
-        </ButtonLink>
+        {isLoggedIn ? (
+          <ButtonLink href="/checkout" variant="solid" size="lg" className="w-full">
+            Finalizar compra
+          </ButtonLink>
+        ) : (
+          <>
+            <ButtonLink href={CHECKOUT_LOGIN_HREF} variant="solid" size="lg" className="w-full">
+              Inicia sesión para comprar
+            </ButtonLink>
+            <p className="mt-3 text-center text-[12px] leading-[1.6] text-slate-400">
+              Entra o crea tu cuenta para finalizar la compra. El carrito te espera.
+            </p>
+          </>
+        )}
         <ButtonLink href="/catalogo" variant="ghost" size="sm" className="mt-3 w-full">
           Seguir comprando
         </ButtonLink>

@@ -16,6 +16,7 @@ import {
   registerSchema,
   safeCallbackUrl,
   verifyLoginCodeSchema,
+  withCallbackUrl,
   type LoginInput,
   type RegisterInput,
   type VerifyLoginCodeInput,
@@ -199,7 +200,7 @@ export async function registerCustomer(input: RegisterInput): Promise<ActionResu
       error: parsed.error.issues[0]?.message ?? "Revisa los datos del formulario",
     };
   }
-  const { fullName, email, phone, password } = parsed.data;
+  const { fullName, email, phone, password, callbackUrl } = parsed.data;
 
   let userId: number;
   try {
@@ -243,10 +244,12 @@ export async function registerCustomer(input: RegisterInput): Promise<ActionResu
     return { success: false, error: "No se pudo crear la cuenta. Inténtalo de nuevo." };
   }
 
-  // Con éxito `completeLogin` redirige; si no pudo crear la sesión, la cuenta
-  // ya existe y el usuario entra a mano.
-  const result = await completeLogin(userId, "/");
-  if (!result.success) redirect("/login");
+  // Con éxito `completeLogin` redirige, al checkout si venía de ahí
+  // (callbackUrl); si no pudo crear la sesión, la cuenta ya existe y el
+  // usuario entra a mano conservando el destino.
+  const target = safeCallbackUrl(callbackUrl, "/");
+  const result = await completeLogin(userId, target);
+  if (!result.success) redirect(withCallbackUrl("/login", callbackUrl ? target : undefined));
   return result;
 }
 

@@ -42,11 +42,11 @@ function Field({ control, name, label, type = "text", autoComplete, placeholder 
   );
 }
 
-export function RegisterForm() {
+export function RegisterForm({ callbackUrl }: { callbackUrl?: string }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { control, handleSubmit } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { fullName: "", email: "", phone: "", password: "", confirmPassword: "" },
+    defaultValues: { fullName: "", email: "", phone: "", password: "", confirmPassword: "", callbackUrl },
   });
 
   const onSubmit = async (values: RegisterInput) => {

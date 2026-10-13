@@ -247,6 +247,22 @@ export function OrderDetail({ order, actions, paymentActions, deliveryHref, prof
         >
           {order.fulfillment === "delivery" && order.deliveryAddress ? (
             <address className="text-[13.5px] not-italic leading-[1.6] text-ink">
+              {order.deliveryAddress.recipientName && (
+                <span className="mb-1 block">
+                  <span className="font-semibold">{order.deliveryAddress.recipientName}</span>
+                  {order.deliveryAddress.recipientPhone && (
+                    <>
+                      {" · "}
+                      <a
+                        href={`tel:${order.deliveryAddress.recipientPhone.replace(/\s+/g, "")}`}
+                        className="tabular text-slate-500 hover:text-navy-700"
+                      >
+                        {order.deliveryAddress.recipientPhone}
+                      </a>
+                    </>
+                  )}
+                </span>
+              )}
               {order.deliveryAddress.line1}
               {order.deliveryAddress.line2 && <>, {order.deliveryAddress.line2}</>}
               <br />
