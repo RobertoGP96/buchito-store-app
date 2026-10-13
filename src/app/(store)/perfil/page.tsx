@@ -6,6 +6,8 @@ import { ROLE_LABELS, isRole } from "@/lib/roles";
 import { ButtonLink } from "@/components/button-link";
 import { ScreenHeader } from "@/components/screen-header";
 import { LogoutButton } from "@/modules/auth/components/logout-button";
+import { TwoFactorCard } from "@/modules/auth/components/two-factor-card";
+import { getTwoFactorStatus } from "@/modules/auth/queries/two-factor-queries";
 import { ProfileEditButton } from "@/modules/customers/components/profile-edit-button";
 
 export const metadata: Metadata = { title: "Mi perfil" };
@@ -15,6 +17,7 @@ export default async function ProfilePage() {
   const [session, customer] = await Promise.all([auth(), getSessionCustomer()]);
   const user = session!.user;
   const roleLabel = isRole(user.role) ? ROLE_LABELS[user.role] : user.role;
+  const twoFactor = await getTwoFactorStatus(user.userId);
 
   return (
     <>
@@ -80,6 +83,7 @@ export default async function ProfilePage() {
             Ver destinatarios
           </ButtonLink>
         </section>
+        <TwoFactorCard status={twoFactor} />
       </div>
     </>
   );

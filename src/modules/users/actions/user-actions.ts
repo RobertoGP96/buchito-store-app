@@ -135,6 +135,13 @@ export async function updateUser(userId: number, input: UserInput): Promise<Acti
           data: { active: data.isActive, version: { increment: 1 } },
         });
       }
+      // Un código 2FA enviado al buzón antiguo no debe seguir valiendo.
+      if (data.email !== current.email) {
+        await tx.userTwoFactor.updateMany({
+          where: { userId },
+          data: { emailCodeHash: null, emailCodeExpiresAt: null },
+        });
+      }
       await createAuditLog(tx, {
         action: "update",
         entityType: "User",
@@ -218,5 +225,41 @@ export async function deleteUser(userId: number): Promise<ActionResult<void>> {
   } catch (error) {
     if (isForeignKeyViolation(error)) return { success: false, error: IN_USE_MESSAGE };
     return failAction("deleteUser", error, "No se pudo eliminar el usuario");
+  }
+}
+
+/** Quita el segundo factor de una cuenta (teléfono perdido y sin códigos de
+ *  respaldo). El usuario vuelve a entrar solo con su contraseña y puede
+ *  activarlo de nuevo desde su perfil. Queda auditado. */
+export async function resetUserTwoFactor(userId: number): Promise<ActionResult<void>> {
+  if (!isValidId(userId)) return { success: false, error: "Usuario no válido" };
+
+  try {
+    const actorId = await assertRole("admin");
+    const current = await db.userTwoFactor.findUnique({
+      where: { userId },
+      select: { method: true, enabledAt: true },
+    });
+    if (!current?.enabledAt) {
+      return { success: false, error: "Este usuario no tiene activada la verificación en dos pasos" };
+    }
+
+    await db.$transaction(async (tx) => {
+      await tx.userTwoFactor.delete({ where: { userId } });
+      await createAuditLog(tx, {
+        action: "two_factor.reset",
+        entityType: "User",
+        entityId: userId,
+        module: "users",
+        userId: actorId,
+        oldValues: { method: current.method, enabledAt: current.enabledAt },
+      });
+    });
+
+    revalidateUserPaths();
+    revalidatePath("/perfil");
+    return { success: true, data: undefined };
+  } catch (error) {
+    return failAction("resetUserTwoFactor", error, "No se pudo quitar la verificación en dos pasos");
   }
 }

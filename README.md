@@ -24,6 +24,8 @@ Copia `.env.example` a `.env` y rellena `DATABASE_URL` (Neon) y `AUTH_SECRET` (`
 
 > Aviso: `neon.ts` declara `auth: true` (Neon Auth), así que `neon env pull` / `neon deploy` también escriben `AUTH_URL` y `AUTH_SECRET` en `.env`. La app usa **next-auth**, que lee esas mismas variables: `AUTH_URL` apuntando al host de Neon Auth rompe el login (cookie `__Secure-…` y redirección a otro host). Tras cada pull, borra la línea `AUTH_URL` (o quita `auth: true` de `neon.ts` si no vas a usar Neon Auth).
 
+**Verificación en dos pasos (2FA).** Cualquier usuario la activa desde «Mi perfil» con una app de autenticación (TOTP) o con un código por correo; al activarla recibe 8 códigos de respaldo de un solo uso y un admin puede quitarla desde Usuarios. Variables: `TWO_FACTOR_KEY` (opcional; si falta se usa `AUTH_SECRET`; fíjala antes del primer alta y no la cambies, invalidaría todas las apps vinculadas) y, para el método correo, `RESEND_API_KEY` + `MAIL_FROM` (Resend). Sin proveedor de correo, en desarrollo el código se imprime en la consola del servidor y en producción el método correo queda deshabilitado. El provider de next-auth ya no acepta correo y contraseña: solo un ticket que acuñan las actions de login tras validar ambos factores.
+
 ```bash
 pnpm db:push          # crea/actualiza las tablas desde prisma/schema.prisma
 pnpm db:constraints   # CHECKs e índices parciales que db push no gestiona

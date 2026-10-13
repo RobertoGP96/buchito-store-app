@@ -9,9 +9,11 @@ import { EmptyState } from "@/components/empty-state";
 import { ListCard, ResponsiveList, type ListColumn } from "@/components/responsive-list";
 import { StatusChip } from "@/components/status-chip";
 import { fmtDateTime } from "@/lib/format";
+import { TWO_FACTOR_METHOD_LABELS } from "@/modules/auth/lib/two-factor-labels";
 import { deleteUser } from "../actions/user-actions";
 import { USER_ROLE_LABELS, USER_ROLE_TONE } from "../lib/labels";
 import type { UserRow } from "../queries/user-queries";
+import { ResetTwoFactorButton } from "./reset-two-factor-button";
 
 const UserForm = lazyDialog(() => import("./user-form").then((m) => m.UserForm));
 
@@ -40,6 +42,15 @@ function DeleteUserButton({ row, currentUserId, appearance }: { row: UserRow; cu
       {row.role === "customer" && <p>Su ficha de cliente y sus pedidos se conservan como invitado.</p>}
       {row.role === "admin" && <p>La tienda debe conservar al menos un administrador activo.</p>}
     </DeleteButton>
+  );
+}
+
+function TwoFactorChip({ row }: { row: UserRow }) {
+  return (
+    <StatusChip
+      label={row.twoFactorMethod ? TWO_FACTOR_METHOD_LABELS[row.twoFactorMethod] : "No"}
+      tone={row.twoFactorMethod ? "success" : "neutral"}
+    />
   );
 }
 
@@ -74,6 +85,7 @@ export function UserList({ rows, currentUserId }: UserListProps) {
       header: "Estado",
       cell: (r) => <StatusChip label={r.isActive ? "Activo" : "Inactivo"} tone={r.isActive ? "success" : "neutral"} />,
     },
+    { id: "twoFactor", header: "2FA", cell: (r) => <TwoFactorChip row={r} /> },
     {
       id: "lastLogin",
       header: "Último acceso",
@@ -89,6 +101,7 @@ export function UserList({ rows, currentUserId }: UserListProps) {
           <Button variant="ghost" size="sm" isIconOnly aria-label={`Editar ${r.fullName}`} onPress={() => openEdit(r)}>
             <Pencil className="h-4 w-4" strokeWidth={1.9} />
           </Button>
+          {r.twoFactorMethod && <ResetTwoFactorButton row={r} appearance="icon" />}
           <DeleteUserButton row={r} currentUserId={currentUserId} appearance="icon" />
         </div>
       ),
@@ -121,6 +134,7 @@ export function UserList({ rows, currentUserId }: UserListProps) {
             badge={<StatusChip label={USER_ROLE_LABELS[r.role]} tone={USER_ROLE_TONE[r.role]} />}
             rows={[
               { label: "Estado", value: <StatusChip label={r.isActive ? "Activo" : "Inactivo"} tone={r.isActive ? "success" : "neutral"} /> },
+              { label: "2FA", value: <TwoFactorChip row={r} /> },
               { label: "Último acceso", value: r.lastLoginAt ? fmtDateTime(r.lastLoginAt) : "Nunca" },
               { label: "Alta", value: fmtDateTime(r.createdAt) },
             ]}
@@ -130,6 +144,7 @@ export function UserList({ rows, currentUserId }: UserListProps) {
                   <Pencil className="h-3.5 w-3.5" strokeWidth={1.9} />
                   Editar
                 </Button>
+                {r.twoFactorMethod && <ResetTwoFactorButton row={r} appearance="button" />}
                 <DeleteUserButton row={r} currentUserId={currentUserId} appearance="button" />
               </>
             }
