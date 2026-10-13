@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BrandLogo } from "@/components/brand-logo";
 import { STORE_NAME } from "@/lib/config";
+import { BOTTOM_NAV_CLEARANCE, isBottomNavVisible } from "@/lib/store-nav";
+import { cn } from "@/lib/utils";
 
 interface FooterColumn {
   title: string;
@@ -48,10 +50,13 @@ export interface FooterContact {
 export function SiteFooter({ contact }: { contact: FooterContact }) {
   const pathname = usePathname();
   const isHome = pathname === "/";
+  // En móvil la barra inferior flota sobre el footer: el hueco que necesita
+  // lo pone el propio footer, así el navy llega hasta el borde de la pantalla.
+  const navVisible = isBottomNavVisible(pathname);
   const hasContact = Boolean(contact.phone || contact.email || contact.address);
 
   return (
-    <footer className="mt-auto bg-footer text-footer-fg">
+    <footer className={cn("mt-auto bg-footer text-footer-fg", navVisible && BOTTOM_NAV_CLEARANCE)}>
       <div className="mx-auto w-full max-w-[1120px] px-5 md:px-6">
         {isHome && (
           <div className="grid gap-9 pt-12 pb-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
