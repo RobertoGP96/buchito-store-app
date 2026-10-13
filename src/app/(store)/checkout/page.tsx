@@ -5,6 +5,7 @@ import { ScreenHeader } from "@/components/screen-header";
 import { CheckoutForm } from "@/modules/cart/components/checkout-form";
 import { getActiveZones } from "@/modules/deliveries/queries/zone-queries";
 import { getActivePaymentMethods } from "@/modules/payments/queries/payment-queries";
+import { getRecipientsForUser, type RecipientRow } from "@/modules/recipients/queries/recipient-queries";
 import { getStoreSettings } from "@/modules/settings/queries/settings-queries";
 
 export const metadata: Metadata = { title: "Finalizar compra" };
@@ -19,11 +20,16 @@ export default async function CheckoutPage() {
   ]);
 
   let prefill: { name: string; phone: string; email: string } | null = null;
+  let recipients: RecipientRow[] = [];
   if (session?.user) {
-    const customer = await db.customer.findUnique({
-      where: { userId: session.user.userId },
-      select: { name: true, phone: true, email: true },
-    });
+    const [customer, saved] = await Promise.all([
+      db.customer.findUnique({
+        where: { userId: session.user.userId },
+        select: { name: true, phone: true, email: true },
+      }),
+      getRecipientsForUser(session.user.userId),
+    ]);
+    recipients = saved;
     prefill = {
       name: customer?.name ?? session.user.fullName,
       phone: customer?.phone ?? "",
@@ -42,6 +48,8 @@ export default async function CheckoutPage() {
           freeShippingThreshold={settings.freeShippingThreshold}
           allowPickup={settings.allowPickup}
           prefill={prefill}
+          recipients={recipients}
+          isSignedIn={Boolean(session?.user)}
         />
       </div>
     </>

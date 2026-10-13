@@ -17,6 +17,7 @@ import { prorateComboLines } from "@/modules/combos/lib/combo-pricing";
 import { getOrderCombos } from "@/modules/combos/queries/order-combo-queries";
 import { fmtQty, isValidQty, roundQty } from "@/modules/products/lib/units";
 import { resolveCustomer } from "@/modules/customers/lib/resolve-customer";
+import { createRecipientInTx } from "@/modules/recipients/lib/save-recipient";
 import { validateCoupon } from "../lib/coupon";
 import {
   createOrderSchema,
@@ -275,6 +276,21 @@ export async function createOrder(
           throw new CheckoutError(`No hay stock suficiente de ${label}`);
         }
         stockAfter.set(variantId, decimalToNumber(taken[0].stock));
+      }
+
+      // Solo con sesión: un invitado no tiene dónde guardar destinatarios.
+      if (data.saveRecipient && userId != null && data.fulfillment === "delivery" && data.address) {
+        await createRecipientInTx(tx, customer.customerId, {
+          label: null,
+          name: data.address.recipientName,
+          phone: data.address.recipientPhone,
+          line1: data.address.line1,
+          line2: data.address.line2,
+          neighborhood: data.address.neighborhood,
+          reference: data.address.reference,
+          zoneId: zone?.zoneId ?? null,
+          isDefault: false,
+        });
       }
 
       const orderNo = await nextFolio(tx, DOC_TYPES.ORDER, settings.orderPrefix);

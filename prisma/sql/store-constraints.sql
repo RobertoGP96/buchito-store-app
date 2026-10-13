@@ -34,8 +34,9 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_category_root_name
 
 -- ===================== CUSTOMERS =====================
 
-CREATE UNIQUE INDEX IF NOT EXISTS uq_address_default_per_customer
-  ON customer_addresses (customer_id) WHERE is_default;
+DROP INDEX IF EXISTS uq_address_default_per_customer;
+CREATE UNIQUE INDEX IF NOT EXISTS uq_recipient_default_per_customer
+  ON recipients (customer_id) WHERE is_default;
 
 -- Un teléfono = una cuenta; los invitados pueden repetir teléfono.
 CREATE UNIQUE INDEX IF NOT EXISTS uq_customer_phone_with_account

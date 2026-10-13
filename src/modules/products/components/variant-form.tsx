@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@heroui/react";
 import { FormFooter } from "@/components/form/form-footer";
@@ -28,6 +28,11 @@ interface VariantFormProps {
 }
 
 const FORM_ID = "variant-form";
+
+function decimalStep(currencies: CurrencyInfo[], currencyId: number): string {
+  const decimals = currencies.find((c) => c.currencyId === currencyId)?.decimalPlaces ?? 2;
+  return decimals === 0 ? "1" : `0.${"0".repeat(decimals - 1)}1`;
+}
 
 const UNIT_OPTIONS: SelectOption[] = SALE_UNITS.map((unit) => ({
   value: unit,
@@ -79,6 +84,13 @@ export function VariantForm({
       initialStock: 0,
     },
   });
+
+  // El paso del campo sigue los decimales de la moneda elegida: 0 decimales
+  // en CUP no admite centavos; 2 en USD sí.
+  const priceCurrencyId = useWatch({ control, name: "priceCurrencyId" });
+  const costCurrencyId = useWatch({ control, name: "costCurrencyId" });
+  const priceStep = decimalStep(currencies, Number(priceCurrencyId));
+  const costStep = decimalStep(currencies, costCurrencyId === "" || costCurrencyId == null ? Number(priceCurrencyId) : Number(costCurrencyId));
 
   const onSubmit = async (values: VariantValues) => {
     setIsSubmitting(true);
@@ -156,7 +168,7 @@ export function VariantForm({
             name="price"
             label="Precio"
             type="number"
-            step="0.01"
+            step={priceStep}
             min={0}
             description="Por 1 unidad de venta (por kg, por litro, por pieza)."
             isRequired
@@ -167,7 +179,7 @@ export function VariantForm({
             name="compareAtPrice"
             label="Precio anterior"
             type="number"
-            step="0.01"
+            step={priceStep}
             min={0}
             description="Opcional; se muestra tachado para marcar la rebaja."
           />
@@ -176,7 +188,7 @@ export function VariantForm({
             name="cost"
             label="Costo de compra"
             type="number"
-            step="0.01"
+            step={costStep}
             min={0}
             description="Por unidad. Sirve para calcular la ganancia; se actualiza con cada entrada de stock."
           />

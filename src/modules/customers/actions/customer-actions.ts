@@ -50,7 +50,7 @@ export async function updateCustomerNotes(
   }
 }
 
-/** Borra una ficha de cliente sin pedidos, con sus direcciones. Si tiene
+/** Borra una ficha de cliente sin pedidos, con sus destinatarios. Si tiene
  *  cuenta de cliente, la cuenta se va con ella (sin ficha no tiene sentido);
  *  una cuenta con otro rol solo se desenlaza. */
 export async function deleteCustomer(customerId: number): Promise<ActionResult<void>> {
@@ -62,7 +62,7 @@ export async function deleteCustomer(customerId: number): Promise<ActionResult<v
       where: { customerId },
       include: {
         user: { select: { userId: true, role: true, email: true } },
-        _count: { select: { orders: true, addresses: true } },
+        _count: { select: { orders: true, recipients: true } },
       },
     });
     if (!current) return { success: false, error: "Cliente no encontrado" };
@@ -91,7 +91,7 @@ export async function deleteCustomer(customerId: number): Promise<ActionResult<v
           email: current.email,
           userId: current.user?.userId ?? null,
           accountDeleted: deleteAccount,
-          addresses: current._count.addresses,
+          recipients: current._count.recipients,
         },
       });
     });

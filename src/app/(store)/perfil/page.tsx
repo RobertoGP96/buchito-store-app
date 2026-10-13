@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Package, UserRound } from "lucide-react";
+import { MapPin, Package, UserRound } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { ROLE_LABELS, isRole } from "@/lib/roles";
 import { ButtonLink } from "@/components/button-link";
@@ -47,6 +47,20 @@ export default async function ProfilePage() {
           </p>
           <ButtonLink href="/perfil/pedidos" variant="soft" className="mt-auto self-start pt-3">
             Ver pedidos
+          </ButtonLink>
+        </section>
+        <section className="flex flex-col rounded-card bg-canvas p-5 shadow-card md:p-6">
+          <div className="flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-tint text-navy-700">
+              <MapPin className="h-5 w-5" strokeWidth={1.9} />
+            </span>
+            <p className="text-[15px] font-semibold text-ink">Mis destinatarios</p>
+          </div>
+          <p className="mt-3 text-[13px] leading-[1.6] text-slate-500">
+            Guarda a quién y dónde entregamos tus pedidos para elegirlo con un toque al finalizar la compra.
+          </p>
+          <ButtonLink href="/perfil/destinatarios" variant="soft" className="mt-auto self-start pt-3">
+            Gestionar destinatarios
           </ButtonLink>
         </section>
       </div>

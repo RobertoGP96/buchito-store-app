@@ -93,16 +93,27 @@ export function DeliveryDetail({ delivery, actor, isAssignedCourier }: DeliveryD
         </a>
       </Section>
 
-      <Section title="Dirección">
+      <Section title="Entrega">
+        {delivery.address?.recipientName && (
+          <div className="mb-3">
+            <p className="text-[12.5px] text-slate-500">Recibe</p>
+            <p className="text-[16px] font-semibold text-ink">{delivery.address.recipientName}</p>
+            <a
+              href={`tel:${delivery.address.recipientPhone.replace(/\s+/g, "")}`}
+              className="mt-2 inline-flex items-center gap-2 rounded-full bg-tint px-4 py-2 text-[14px] font-semibold text-navy-900"
+            >
+              <Phone className="h-4 w-4" strokeWidth={2} />
+              <span className="tabular">{delivery.address.recipientPhone}</span>
+            </a>
+          </div>
+        )}
         {delivery.address ? (
           <address className="flex items-start gap-2 text-[14.5px] not-italic leading-[1.6] text-ink">
             <MapPin className="mt-1 h-4 w-4 flex-none text-navy-700" strokeWidth={2} />
             <span>
               {delivery.address.line1}
               {delivery.address.line2 && <>, {delivery.address.line2}</>}
-              <br />
-              {delivery.address.neighborhood && <>{delivery.address.neighborhood}, </>}
-              {delivery.address.city}
+              {delivery.address.neighborhood && <>, {delivery.address.neighborhood}</>}
               {delivery.zoneName && <span className="block text-slate-500">Zona: {delivery.zoneName}</span>}
               {delivery.address.reference && <span className="block text-slate-500">Ref.: {delivery.address.reference}</span>}
             </span>

@@ -4,6 +4,7 @@ import { DISPLAY_CURRENCY_COOKIE } from "@/lib/preferences";
 import { CartProvider } from "@/modules/cart/store";
 import { CurrencyProvider } from "@/modules/currency/store/currency-provider";
 import { getCurrencyContext } from "@/modules/currency/queries/currency-queries";
+import { ProductDrawerProvider } from "@/modules/products/components/product-drawer-provider";
 import { getStoreSettingsSafe } from "@/modules/settings/queries/settings-queries";
 import { BottomNav } from "@/components/layout/store/bottom-nav";
 import { SiteFooter } from "@/components/layout/store/site-footer";
@@ -31,20 +32,24 @@ export default async function StoreLayout({
   return (
     <CurrencyProvider data={currency} initialDisplayCode={cookieStore.get(DISPLAY_CURRENCY_COOKIE)?.value}>
       <CartProvider>
-        <div className="flex min-h-dvh flex-col">
-          <TopNav user={user} />
-          {/* El hueco para la BottomNav flotante lo reserva el propio
-              componente con un espaciador al final del documento. */}
-          <main className="flex flex-1 flex-col">{children}</main>
-          <SiteFooter
-            contact={{
-              phone: settings?.phone ?? null,
-              email: settings?.email ?? null,
-              address: settings?.address ?? null,
-            }}
-          />
-          <BottomNav isLoggedIn={user !== null} />
-        </div>
+        {/* Ficha rápida de producto que abren las cards: vive en el layout
+            para sobrevivir a las navegaciones y usar carrito y moneda. */}
+        <ProductDrawerProvider>
+          <div className="flex min-h-dvh flex-col">
+            <TopNav user={user} />
+            {/* El hueco para la BottomNav flotante lo reserva el propio
+                componente con un espaciador al final del documento. */}
+            <main className="flex flex-1 flex-col">{children}</main>
+            <SiteFooter
+              contact={{
+                phone: settings?.phone ?? null,
+                email: settings?.email ?? null,
+                address: settings?.address ?? null,
+              }}
+            />
+            <BottomNav isLoggedIn={user !== null} />
+          </div>
+        </ProductDrawerProvider>
       </CartProvider>
     </CurrencyProvider>
   );

@@ -8,19 +8,19 @@ interface DeleteCustomerButtonProps {
   customerId: number;
   name: string;
   orderCount: number;
-  addressCount: number;
+  recipientCount: number;
   /** Cuenta vinculada con rol cliente: se elimina con la ficha. */
   deletesAccount: boolean;
 }
 
 /** "Eliminar cliente" en la cabecera de la ficha; al borrar vuelve al listado. */
-export function DeleteCustomerButton({ customerId, name, orderCount, addressCount, deletesAccount }: DeleteCustomerButtonProps) {
+export function DeleteCustomerButton({ customerId, name, orderCount, recipientCount, deletesAccount }: DeleteCustomerButtonProps) {
   const router = useRouter();
   return (
     <DeleteButton
       appearance="button"
       itemLabel={name}
-      description={`Se eliminará la ficha de ${name}${addressCount > 0 ? ` y sus ${addressCount} ${addressCount === 1 ? "dirección" : "direcciones"}` : ""}.`}
+      description={`Se eliminará la ficha de ${name}${recipientCount > 0 ? ` y sus ${recipientCount} ${recipientCount === 1 ? "destinatario" : "destinatarios"}` : ""}.`}
       blockedReason={
         orderCount > 0
           ? `Tiene ${orderCount} ${orderCount === 1 ? "pedido registrado" : "pedidos registrados"}: su ficha forma parte del historial.`

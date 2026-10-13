@@ -10,8 +10,10 @@ import { ProductImage } from "@/components/product-image";
 import { StockLabel } from "@/components/stock-label";
 import { discountPct } from "@/lib/format";
 import { useCartActions } from "@/modules/cart/store";
+import { useProductDrawer } from "@/modules/products/components/product-drawer-provider";
+import { cartLineFor } from "@/modules/products/lib/cart-line";
 import { perUnitSuffix } from "@/modules/products/lib/units";
-import type { CatalogProduct, CatalogVariant } from "@/modules/products/queries/catalog-queries";
+import type { CatalogProduct } from "@/modules/products/queries/catalog-queries";
 import { cn } from "@/lib/utils";
 
 interface ProductCardProps {
@@ -20,31 +22,24 @@ interface ProductCardProps {
   priority?: boolean;
 }
 
-export function cartLineFor(product: CatalogProduct, variant: CatalogVariant) {
-  return {
-    variantId: variant.variantId,
-    productId: product.productId,
-    slug: product.slug,
-    name: product.name,
-    variantName: variant.name,
-    sku: variant.sku,
-    imageUrl: variant.imageUrl ?? product.imageUrl,
-    unitPrice: variant.price,
-    compareAtPrice: variant.compareAtPrice,
-    unit: variant.unit,
-    qtyStep: variant.qtyStep,
-    stock: variant.stock,
-  };
-}
-
 export function ProductCard({ product, priority = false }: ProductCardProps) {
   const { addToCart } = useCartActions();
+  const { openProduct } = useProductDrawer();
   const variant = product.defaultVariant;
   const soldOut = product.totalStock <= 0;
   const hasVariants = product.variants.length > 1;
   const pct = useMemo(() => discountPct(variant.price, variant.compareAtPrice), [variant]);
   const [adding, setAdding] = useState(false);
   const href = `/producto/${encodeURIComponent(product.slug)}`;
+
+  // La ficha se abre en el drawer sin salir de la retícula; el enlace real
+  // queda para abrir en pestaña nueva (clic con modificador o botón central),
+  // los rastreadores y quien navega sin JavaScript.
+  const handleOpen = (e: MouseEvent<HTMLAnchorElement>) => {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    openProduct(product);
+  };
 
   // Con varias variantes el cliente elige en el detalle; la card no debe meter
   // una línea de la variante por defecto que quizá no quiere.
@@ -66,9 +61,17 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
         "group relative flex h-full flex-col gap-3.5 rounded-card bg-canvas p-3 pb-4 shadow-card transition-[box-shadow,transform] duration-200 hover:shadow-float motion-safe:hover:-translate-y-0.5 sm:p-4 sm:pb-5"
       )}
     >
-      {/* El enlace cubre la celda entera para que toda la card navegue; va por
-          encima de foto y texto (z-[1]) y debajo de los controles (z-10). */}
-      <Link href={href} className="absolute inset-0 z-[1] rounded-card" aria-label={product.name} />
+      {/* El enlace cubre la celda entera para que toda la card abra la ficha;
+          va por encima de foto y texto (z-[1]) y debajo de los controles
+          (z-10). Sin prefetch: la ficha completa solo se visita desde el
+          drawer, y las cards de una retícula precargaban su loading en bloque. */}
+      <Link
+        href={href}
+        prefetch={false}
+        onClick={handleOpen}
+        className="absolute inset-0 z-[1] rounded-card"
+        aria-label={product.name}
+      />
 
       <div className="relative aspect-square w-full overflow-hidden rounded-field bg-cream">
         <span className="absolute inset-0 flex items-center justify-center">
@@ -125,6 +128,8 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
         {hasVariants ? (
           <Link
             href={href}
+            prefetch={false}
+            onClick={handleOpen}
             className="relative z-10 flex h-9 flex-none items-center justify-center rounded-full bg-tint px-4 text-[12.5px] font-semibold text-navy-900 transition-colors duration-150 hover:bg-tint-strong"
           >
             Elegir

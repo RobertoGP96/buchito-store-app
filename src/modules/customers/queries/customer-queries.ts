@@ -25,15 +25,14 @@ export type CustomerOrderRow = Pick<
   "orderId" | "orderNo" | "status" | "paymentStatus" | "total" | "createdAt"
 >;
 
-export interface CustomerAddressRow {
-  addressId: number;
+export interface CustomerRecipientRow {
+  recipientId: number;
   label: string | null;
-  recipientName: string | null;
-  phone: string | null;
+  name: string;
+  phone: string;
   line1: string;
   line2: string | null;
   neighborhood: string | null;
-  city: string;
   reference: string | null;
   zoneName: string | null;
   isDefault: boolean;
@@ -49,7 +48,7 @@ export interface CustomerDetailData {
   hasAccount: boolean;
   createdAt: string;
   user: { email: string; role: Role; isActive: boolean } | null;
-  addresses: CustomerAddressRow[];
+  recipients: CustomerRecipientRow[];
   orders: CustomerOrderRow[];
   orderCount: number;
   totalSpent: number;
@@ -120,9 +119,9 @@ export async function getCustomerById(customerId: number): Promise<CustomerDetai
     where: { customerId },
     include: {
       user: { select: { email: true, role: true, isActive: true } },
-      addresses: {
+      recipients: {
         include: { zone: { select: { name: true } } },
-        orderBy: [{ isDefault: "desc" }, { addressId: "asc" }],
+        orderBy: [{ isDefault: "desc" }, { recipientId: "asc" }],
       },
       orders: {
         select: {
@@ -158,15 +157,14 @@ export async function getCustomerById(customerId: number): Promise<CustomerDetai
     hasAccount: row.userId != null,
     createdAt: row.createdAt.toISOString(),
     user: row.user ? { email: row.user.email, role: row.user.role, isActive: row.user.isActive } : null,
-    addresses: row.addresses.map((a) => ({
-      addressId: a.addressId,
+    recipients: row.recipients.map((a) => ({
+      recipientId: a.recipientId,
       label: a.label,
-      recipientName: a.recipientName,
+      name: a.name,
       phone: a.phone,
       line1: a.line1,
       line2: a.line2,
       neighborhood: a.neighborhood,
-      city: a.city,
       reference: a.reference,
       zoneName: a.zone?.name ?? null,
       isDefault: a.isDefault,

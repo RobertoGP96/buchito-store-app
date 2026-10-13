@@ -28,11 +28,11 @@ function DeleteZoneButton({ row, appearance }: { row: ZoneRow; appearance: "icon
       successMessage={`Zona ${row.name} eliminada`}
       onConfirm={() => deleteZone(row.zoneId)}
     >
-      {row.addressCount > 0 && (
+      {row.recipientCount > 0 && (
         <p>
-          {row.addressCount === 1
-            ? "1 dirección de cliente quedará sin zona"
-            : `${row.addressCount} direcciones de clientes quedarán sin zona`}{" "}
+          {row.recipientCount === 1
+            ? "1 destinatario de cliente quedará sin zona"
+            : `${row.recipientCount} destinatarios de clientes quedarán sin zona`}{" "}
           hasta que el cliente la vuelva a elegir.
         </p>
       )}

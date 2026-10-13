@@ -17,22 +17,18 @@ export const DEFAULT_CURRENCY: CurrencyInfo = {
 };
 
 // Miles con espacio + código (ej. "4 750 CUP"): evita el ambiguo "$" solo.
-// Los decimales reales siempre se muestran ("250.50 CUP") aunque la moneda
-// declare 0 decimales; se omiten solo cuando son todo ceros ("250 CUP",
-// nunca "250.00 CUP").
+// Los decimales son exactamente los configurados en la moneda: "250.50 USD"
+// con 2 decimales, "251 CUP" con 0 (el monto se redondea a esa precisión).
 export function fmt(
   n: number,
   currency: Pick<CurrencyInfo, "code" | "decimalPlaces"> = DEFAULT_CURRENCY
 ): string {
-  const decimals = Math.max(2, currency.decimalPlaces);
+  const decimals = Math.max(0, Math.min(8, Math.trunc(currency.decimalPlaces)));
   const [intPart, decimalPart] = n.toFixed(decimals).split(".");
   const sign = intPart.startsWith("-") ? "−" : "";
   const digits = intPart.replace("-", "");
   const withThousands = digits.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-  const amount =
-    decimalPart && Number(decimalPart) !== 0
-      ? `${withThousands}.${decimalPart}`
-      : withThousands;
+  const amount = decimalPart ? `${withThousands}.${decimalPart}` : withThousands;
   return `${sign}${amount} ${currency.code}`;
 }
 

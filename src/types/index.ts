@@ -6,7 +6,7 @@ export type {
   User,
   UserRole,
   Customer,
-  CustomerAddress,
+  Recipient,
   Currency,
   ExchangeRate,
   PaymentMethod,

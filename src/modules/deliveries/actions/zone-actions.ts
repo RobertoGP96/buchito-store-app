@@ -82,8 +82,8 @@ export async function updateZone(zoneId: number, input: ZoneInput): Promise<Acti
   }
 }
 
-/** Borra una zona sin pedidos ni entregas. Las direcciones de clientes que la
- *  tenían asignada quedan sin zona (la DB las desenlaza sola). */
+/** Borra una zona sin pedidos ni entregas. Los destinatarios de clientes que
+ *  la tenían asignada quedan sin zona (la DB los desenlaza sola). */
 export async function deleteZone(zoneId: number): Promise<ActionResult<void>> {
   if (!isValidId(zoneId)) return { success: false, error: "Zona no válida" };
 
@@ -91,7 +91,7 @@ export async function deleteZone(zoneId: number): Promise<ActionResult<void>> {
     const userId = await assertRole("admin");
     const current = await db.deliveryZone.findUnique({
       where: { zoneId },
-      include: { _count: { select: { orders: true, deliveries: true, addresses: true } } },
+      include: { _count: { select: { orders: true, deliveries: true, recipients: true } } },
     });
     if (!current) return { success: false, error: "Zona no encontrada" };
     if (current._count.orders > 0 || current._count.deliveries > 0) {
@@ -111,7 +111,7 @@ export async function deleteZone(zoneId: number): Promise<ActionResult<void>> {
           fee: current.fee.toString(),
           freeShippingThreshold: current.freeShippingThreshold?.toString() ?? null,
           active: current.active,
-          unlinkedAddresses: current._count.addresses,
+          unlinkedRecipients: current._count.recipients,
         },
       });
     });

@@ -1,7 +1,7 @@
 "use client";
 
 import { Drawer, Modal } from "@heroui/react";
-import { useEffect, useState } from "react";
+import { useIsDesktop } from "@/lib/use-is-desktop";
 import { cn } from "@/lib/utils";
 
 interface ResponsiveFormDialogProps {
@@ -14,20 +14,6 @@ interface ResponsiveFormDialogProps {
   footer?: React.ReactNode;
   size?: "sm" | "md" | "lg";
   className?: string;
-}
-
-function useIsDesktop() {
-  // El primer render (servidor) asume móvil: hoja inferior. El diálogo solo
-  // se monta abierto en cliente, así que no hay salto visible.
-  const [desktop, setDesktop] = useState(false);
-  useEffect(() => {
-    const media = window.matchMedia("(min-width: 768px)");
-    const sync = () => setDesktop(media.matches);
-    sync();
-    media.addEventListener("change", sync);
-    return () => media.removeEventListener("change", sync);
-  }, []);
-  return desktop;
 }
 
 /** Hoja inferior en móvil, diálogo centrado en desktop. Para todo formulario

@@ -113,7 +113,7 @@ export function ChoiceChips({
       // la caja del chip): el padding de 4px le da sitio y los márgenes
       // negativos lo compensan para que el layout no cambie.
       className={cn(
-        "no-scrollbar -mx-1 -mb-1 flex snap-x gap-2 overflow-x-auto px-1 py-1",
+        "no-scrollbar -mx-1 -mb-1 flex min-w-0 max-w-full snap-x gap-2 overflow-x-auto px-1 py-1",
         className
       )}
     >

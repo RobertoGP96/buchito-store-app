@@ -313,7 +313,7 @@ model Customer {
   updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
 
   user      User?             @relation(fields: [userId], references: [userId], onDelete: SetNull)
-  addresses CustomerAddress[]
+  recipients Recipient[]
   orders    Order[]
 
   @@index([normalizedPhone])
@@ -321,27 +321,29 @@ model Customer {
   @@map("customers")
 }
 
-model CustomerAddress {
-  addressId     Int      @id @default(autoincrement()) @map("address_id")
-  customerId    Int      @map("customer_id")
-  label         String?
-  recipientName String?  @map("recipient_name")
-  phone         String?
-  line1         String
-  line2         String?
-  neighborhood  String?
-  city          String
-  reference     String?
-  zoneId        Int?     @map("zone_id")
-  isDefault     Boolean  @default(false) @map("is_default")
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
+// Destinatario: a quién va dirigida la entrega (nombre, teléfono y dirección)
+// guardado por el cliente para reutilizarlo en el checkout. La zona ya
+// identifica la ciudad, por eso no se guarda aparte.
+model Recipient {
+  recipientId  Int      @id @default(autoincrement()) @map("recipient_id")
+  customerId   Int      @map("customer_id")
+  label        String?
+  name         String
+  phone        String
+  line1        String
+  line2        String?
+  neighborhood String?
+  reference    String?
+  zoneId       Int?     @map("zone_id")
+  isDefault    Boolean  @default(false) @map("is_default")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at")
 
   customer Customer      @relation(fields: [customerId], references: [customerId], onDelete: Cascade)
   zone     DeliveryZone? @relation(fields: [zoneId], references: [zoneId], onDelete: SetNull)
 
   @@index([customerId, isDefault])
-  @@map("customer_addresses")
+  @@map("recipients")
 }
 
 // =============================================
@@ -684,7 +686,7 @@ model DeliveryZone {
   createdAt             DateTime @default(now()) @map("created_at")
   updatedAt             DateTime @default(now()) @updatedAt @map("updated_at")
 
-  addresses  CustomerAddress[]
+  recipients Recipient[]
   orders     Order[]
   deliveries Delivery[]
 

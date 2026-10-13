@@ -8,11 +8,14 @@ const optionalText = z
   .transform((v) => (v === "" ? null : v))
   .nullable();
 
+/** Snapshot de la entrega en el pedido: quién recibe y dónde. La ciudad no
+ *  se guarda: la zona de entrega (siempre obligatoria) ya la determina. */
 export const deliveryAddressSchema = z.object({
+  recipientName: z.string().trim().min(2, "Escribe quién recibe el pedido"),
+  recipientPhone: z.string().trim().refine(isValidPhone, "Escribe un teléfono válido para quien recibe"),
   line1: z.string().trim().min(3, "Escribe la dirección"),
   line2: optionalText,
   neighborhood: optionalText,
-  city: z.string().trim().min(2, "Escribe la ciudad"),
   reference: optionalText,
 });
 
@@ -31,6 +34,8 @@ export const createOrderSchema = z
       .transform((v) => (v === "" ? null : v))
       .nullable(),
     address: deliveryAddressSchema.nullable(),
+    /** Con sesión: guarda el destinatario del pedido para próximas compras. */
+    saveRecipient: z.boolean().default(false),
     paymentMethodId: z.coerce.number().int().positive("Elige cómo vas a pagar"),
     paymentReference: optionalText,
     couponCode: optionalText,

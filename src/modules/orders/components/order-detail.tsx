@@ -247,11 +247,15 @@ export function OrderDetail({ order, actions, paymentActions, deliveryHref, prof
         >
           {order.fulfillment === "delivery" && order.deliveryAddress ? (
             <address className="text-[13.5px] not-italic leading-[1.6] text-ink">
+              {order.deliveryAddress.recipientName && (
+                <span className="block">
+                  <span className="font-semibold">Recibe: {order.deliveryAddress.recipientName}</span>
+                  <span className="tabular text-slate-500"> · {order.deliveryAddress.recipientPhone}</span>
+                </span>
+              )}
               {order.deliveryAddress.line1}
               {order.deliveryAddress.line2 && <>, {order.deliveryAddress.line2}</>}
-              <br />
-              {order.deliveryAddress.neighborhood && <>{order.deliveryAddress.neighborhood}, </>}
-              {order.deliveryAddress.city}
+              {order.deliveryAddress.neighborhood && <>, {order.deliveryAddress.neighborhood}</>}
               {order.zoneName && <span className="block text-slate-500">Zona: {order.zoneName}</span>}
               {order.deliveryAddress.reference && (
                 <span className="block text-slate-500">Ref.: {order.deliveryAddress.reference}</span>

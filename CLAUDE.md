@@ -30,7 +30,7 @@ src/lib                    db, auth, auth-guard (requireRole/assertRole/getSessi
 src/modules/<modulo>/      actions/ ("use server") · queries/ (server-only) · components/ · lib/ (schemas, labels, máquinas de estado)
 ```
 
-Módulos: `auth`, `settings`, `currency`, `payments`, `products`, `cart`, `orders`, `deliveries`. Patrón de referencia para CRUD: `src/modules/currency/` (actions + list + form) y `src/modules/deliveries/` (zonas, mensajeros).
+Módulos: `auth`, `settings`, `currency`, `payments`, `products`, `cart`, `orders`, `deliveries`, `customers`, `recipients` (destinatarios: a quién se entrega; el pedido snapshotea `recipientName/recipientPhone` dentro de `deliveryAddress`, sin ciudad porque la zona la determina). Patrón de referencia para CRUD: `src/modules/currency/` (actions + list + form) y `src/modules/deliveries/` (zonas, mensajeros).
 
 ## Reglas de dominio
 
@@ -74,6 +74,8 @@ export async function createX(input: XInput): Promise<ActionResult<{ id: number 
 ## UI
 
 Mobile-first (probar 375px). Listas: `ResponsiveList` (cards <md, tabla ≥md). Formularios: `ResponsiveFormDialog` + `FormFooter` + campos de `components/form/fields.tsx`. Montos siempre con `<Money value={base} />` (`tabular-nums`). Borrado: `DeleteButton` (`components/delete-button.tsx`, confirma o explica `blockedReason`) + action `deleteX(id)` que comprueba las referencias (`_count`) antes de borrar, audita con `action: "delete"` y traduce P2003 con `isForeignKeyViolation` → `IN_USE_MESSAGE`; lo que ya tiene pedidos/cobros/entregas no se borra, se desactiva. Enlaces con aspecto de botón: `ButtonLink`; HeroUI `Button` solo con `onPress`. Sin emojis. Comentarios solo para el "por qué".
+
+Ficha de producto: las cards abren `ProductDrawer` (`modules/products/components/product-drawer-provider.tsx`, montado en el layout de la tienda; cada apertura empuja una entrada de historial para que «atrás» lo cierre) y `/producto/[slug]` sigue siendo la ficha completa; ambas comparten `product-detail-parts.tsx` (hook `useProductSelection`) y `ImageCarousel` (`components/image-carousel.tsx`, scroll-snap nativo; las fotos salen de `buildProductGallery`: galería del producto + fotos propias de variantes, sin duplicar).
 
 Navegación: cada ruta hoja sin `searchParams` lleva `loading.tsx` con las siluetas de `components/skeletons.tsx`; las que filtran por URL no lo llevan (conservan la lista y el chip pulsado muestra `LinkPending`, con `scroll={false}`). Los enlaces de navegación (aside, navbar, tabs) no muestran loader ni skeleton: el único indicador de carga es el `loading.tsx` de la vista. Transición de ruta: `RouteTransition` en el `template.tsx` de cada grupo (animación CSS `route-enter` al montar, solo opacity; sin View Transitions API ni `experimental.viewTransition`: ese flag hace que el App Router corra sobre un React experimental distinto al de node_modules). La barra inferior de la tienda nunca se desmonta ni se esconde por scroll: solo `is-hidden` + `inert` en checkout y confirmación. Formularios en diálogo se importan en las listas con `lazyDialog(() => import("./x-form").then((m) => m.XForm))`, nunca con import estático.
 
