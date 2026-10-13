@@ -423,6 +423,55 @@
   }
 }
 
+
+/* Barras de scroll del sitio con la paleta del tema (página y cualquier
+   contenedor desplazable, drawers y modales incluidos): pulgar redondeado del
+   color de las reglas, que se oscurece al pasar, sobre pista transparente;
+   8px con 2px de aire para que parezca flotar y no toque las esquinas
+   redondeadas. En Chromium hay que dejar `scrollbar-width`/`scrollbar-color`
+   en `auto` (HeroUI pone `thin` en sus cuerpos), si no ignora los
+   pseudoelementos `::-webkit-scrollbar`; Firefox no los soporta y se lleva la
+   versión estándar. `.no-scrollbar` sigue ocultándola donde toca. */
+*,
+.drawer__body,
+.modal__body {
+  scrollbar-width: auto;
+  scrollbar-color: auto;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 9999px;
+  background: var(--c-rule);
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--c-slate-300);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  *,
+  .drawer__body,
+  .modal__body {
+    scrollbar-width: thin;
+    scrollbar-color: var(--c-rule) transparent;
+  }
+}
+
 .no-scrollbar {
   scrollbar-width: none;
 }

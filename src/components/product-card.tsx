@@ -10,6 +10,7 @@ import { ProductImage } from "@/components/product-image";
 import { StockLabel } from "@/components/stock-label";
 import { discountPct } from "@/lib/format";
 import { useCartActions } from "@/modules/cart/store";
+import { useCurrency } from "@/modules/currency/store/currency-provider";
 import { useProductDrawer } from "@/modules/products/components/product-drawer-provider";
 import { cartLineFor } from "@/modules/products/lib/cart-line";
 import { perUnitSuffix } from "@/modules/products/lib/units";
@@ -25,10 +26,12 @@ interface ProductCardProps {
 export function ProductCard({ product, priority = false }: ProductCardProps) {
   const { addToCart } = useCartActions();
   const { openProduct } = useProductDrawer();
+  const { formatBase } = useCurrency();
   const variant = product.defaultVariant;
   const soldOut = product.totalStock <= 0;
   const hasVariants = product.variants.length > 1;
   const pct = useMemo(() => discountPct(variant.price, variant.compareAtPrice), [variant]);
+  const priceText = formatBase(variant.price);
   const [adding, setAdding] = useState(false);
   const href = `/producto/${encodeURIComponent(product.slug)}`;
 
@@ -110,18 +113,29 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
         <StockLabel stock={product.totalStock} unit={hasVariants ? "unit" : variant.unit} />
       </div>
 
-      <div className="mt-auto flex items-end justify-between gap-2.5 border-t border-line pt-3">
-        <div className="min-w-0">
-          <div className="text-[15px] leading-tight font-bold text-navy-900 sm:text-[16px]">
-            {hasVariants && <span className="mr-1 text-[11px] font-medium text-slate-400">desde</span>}
-            <Money value={variant.price} />
+      {/* Pie estable: en la card de dos columnas (<sm) no caben precio y botón
+          en la misma fila con importes largos («≈ 12 345,00 CUP»), así que el
+          precio va en su línea y el botón a todo el ancho debajo; el alto de
+          la card no depende del importe. Desde sm van lado a lado y el precio
+          ocupa solo el sobrante (basis-0 + min-w-0), bajando un punto de
+          cuerpo con importes largos para no partir las cifras. */}
+      <div className="mt-auto flex flex-col gap-2.5 border-t border-line pt-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0 sm:flex-1 sm:basis-0">
+          <div
+            className={cn(
+              "flex flex-wrap items-baseline gap-x-1 leading-tight font-bold text-navy-900",
+              priceSizeClass(priceText)
+            )}
+          >
+            {hasVariants && <span className="text-[11px] font-medium text-slate-400">desde</span>}
+            <Money value={variant.price} className="whitespace-normal break-words" />
             {perUnitSuffix(variant.unit) && (
-              <span className="ml-1 text-[11px] font-medium text-slate-400">{perUnitSuffix(variant.unit)}</span>
+              <span className="text-[11px] font-medium text-slate-400">{perUnitSuffix(variant.unit)}</span>
             )}
           </div>
           {variant.compareAtPrice != null && variant.compareAtPrice > variant.price && (
             <div className="mt-0.5 text-[11px] font-medium text-slate-400 line-through">
-              <Money value={variant.compareAtPrice} />
+              <Money value={variant.compareAtPrice} className="whitespace-normal break-words" />
             </div>
           )}
         </div>
@@ -130,7 +144,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
             href={href}
             prefetch={false}
             onClick={handleOpen}
-            className="relative z-10 flex h-9 flex-none items-center justify-center rounded-full bg-tint px-4 text-[12.5px] font-semibold text-navy-900 transition-colors duration-150 hover:bg-tint-strong"
+            className="relative z-10 flex h-9 flex-none items-center justify-center rounded-full bg-tint px-4 text-[12.5px] font-semibold text-navy-900 transition-colors duration-150 hover:bg-tint-strong sm:w-auto"
           >
             Elegir
           </Link>
@@ -140,19 +154,27 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
             onClick={handleAdd}
             aria-disabled={soldOut}
             className={cn(
-              "relative z-10 flex h-9 w-9 flex-none items-center justify-center rounded-full font-semibold transition-[background-color,transform] duration-150 motion-safe:active:scale-95 sm:h-auto sm:w-auto sm:px-4 sm:py-[9px] sm:text-[12.5px]",
+              "relative z-10 flex h-9 flex-none items-center justify-center gap-1.5 rounded-full px-4 text-[12.5px] font-semibold transition-[background-color,transform] duration-150 motion-safe:active:scale-95 sm:w-auto",
               soldOut
                 ? "cursor-not-allowed bg-cream text-disabled"
                 : "bg-navy-700 text-on-brand hover:bg-navy-600",
               adding && "scale-95"
             )}
           >
-            <Plus className="h-4 w-4 sm:hidden" strokeWidth={2.4} aria-hidden />
-            <span className="hidden sm:inline">{soldOut ? "Agotado" : "Añadir"}</span>
-            <span className="sr-only sm:hidden">{soldOut ? "Agotado" : "Añadir al carrito"}</span>
+            <Plus className="h-4 w-4" strokeWidth={2.4} aria-hidden />
+            {soldOut ? "Agotado" : "Añadir"}
           </button>
         )}
       </div>
     </article>
   );
+}
+
+/** Cuerpo del precio según lo largo del importe formateado: junto al botón
+ *  (≥sm) un «≈ 12 345,00 CUP» a 16px no cabe y partiría las cifras; a 13px
+ *  cabe en una línea, y en móvil evita que «CUP» salte de línea. */
+function priceSizeClass(text: string): string {
+  if (text.length <= 10) return "text-[15px] sm:text-[16px]";
+  if (text.length <= 14) return "text-[13px] sm:text-[14px]";
+  return "text-[12px] sm:text-[13px]";
 }
