@@ -44,7 +44,7 @@ export default async function AdminCustomerPage({ params }: AdminCustomerPagePro
           customerId={customer.customerId}
           name={customer.name}
           orderCount={customer.orderCount}
-          recipientCount={customer.recipients.length}
+          addressCount={customer.addresses.length}
           deletesAccount={customer.user?.role === "customer"}
         />
         <ButtonLink href="/admin/clientes" variant="ghost" size="sm">

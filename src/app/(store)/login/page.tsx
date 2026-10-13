@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { AuthCard } from "@/modules/auth/components/auth-card";
 import { LoginForm } from "@/modules/auth/components/login-form";
-import { safeCallbackUrl } from "@/modules/auth/lib/schemas";
+import { safeCallbackUrl, withCallbackUrl } from "@/modules/auth/lib/schemas";
 
 export const metadata: Metadata = { title: "Iniciar sesión" };
 
@@ -17,7 +17,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       eyebrow="Tu cuenta"
       title="Iniciar sesión"
       description="Entra para ver tus pedidos y comprar más rápido."
-      footer={{ text: "¿No tienes cuenta?", linkLabel: "Crear cuenta", href: "/registro" }}
+      footer={{ text: "¿No tienes cuenta?", linkLabel: "Crear cuenta", href: withCallbackUrl("/registro", callbackUrl || undefined) }}
     >
       <LoginForm callbackUrl={callbackUrl || undefined} />
     </AuthCard>

@@ -108,28 +108,35 @@ export function CustomerDetail({ customer }: { customer: CustomerDetailData }) {
       </div>
 
       <div className="flex flex-col gap-4 lg:order-1">
-        <Section title="Destinatarios">
-          {customer.recipients.length === 0 ? (
-            <p className="text-[13.5px] text-slate-500">Sin destinatarios guardados.</p>
+        <Section title="Direcciones">
+          {customer.addresses.length === 0 ? (
+            <p className="text-[13.5px] text-slate-500">Sin direcciones guardadas.</p>
           ) : (
             <ul className="flex flex-col gap-3">
-              {customer.recipients.map((r) => (
-                <li key={r.recipientId} className="flex items-start gap-2 text-[13.5px] leading-[1.6] text-ink">
+              {customer.addresses.map((a) => (
+                <li key={a.addressId} className="flex items-start gap-2 text-[13.5px] leading-[1.6] text-ink">
                   <MapPin className="mt-1 h-4 w-4 flex-none text-navy-700" strokeWidth={2} />
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-semibold">{r.name}</span>
-                      {r.label && <span className="text-slate-400">{r.label}</span>}
-                      {r.isDefault && <StatusChip label="Principal" tone="info" />}
+                      {a.label && <span className="font-semibold">{a.label}</span>}
+                      {a.isDefault && <StatusChip label="Principal" tone="info" />}
                     </div>
-                    <p className="tabular text-slate-500">{r.phone}</p>
                     <p>
-                      {r.line1}
-                      {r.line2 && <>, {r.line2}</>}
-                      {r.neighborhood && <>, {r.neighborhood}</>}
+                      {a.line1}
+                      {a.line2 && <>, {a.line2}</>}
+                      <br />
+                      {a.neighborhood && <>{a.neighborhood}, </>}
+                      {a.city}
                     </p>
-                    {r.zoneName && <p className="text-slate-500">Zona: {r.zoneName}</p>}
-                    {r.reference && <p className="text-slate-500">Ref.: {r.reference}</p>}
+                    {a.zoneName && <p className="text-slate-500">Zona: {a.zoneName}</p>}
+                    {a.reference && <p className="text-slate-500">Ref.: {a.reference}</p>}
+                    {(a.recipientName || a.phone) && (
+                      <p className="text-slate-500">
+                        {a.recipientName}
+                        {a.recipientName && a.phone && " · "}
+                        {a.phone && <span className="tabular">{a.phone}</span>}
+                      </p>
+                    )}
                   </div>
                 </li>
               ))}

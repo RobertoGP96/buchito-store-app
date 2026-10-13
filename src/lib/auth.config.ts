@@ -29,7 +29,7 @@ export const authConfig: NextAuthConfig = {
         if (!isLoggedIn) return false;
         return role === "courier" || role === "admin" ? true : toHome();
       }
-      if (pathname.startsWith("/perfil")) {
+      if (pathname.startsWith("/perfil") || pathname.startsWith("/checkout")) {
         return isLoggedIn;
       }
       if ((pathname === "/login" || pathname === "/registro") && isLoggedIn) {
@@ -37,11 +37,17 @@ export const authConfig: NextAuthConfig = {
       }
       return true;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.userId = Number(user.id);
         token.role = (user as { role?: string }).role ?? "customer";
         token.fullName = user.name ?? "";
+      }
+      // `unstable_update({ user: { fullName } })` al editar el perfil: el
+      // nombre viaja en el token y el menú lo mostraría viejo hasta el
+      // próximo login. Solo se acepta ese campo.
+      if (trigger === "update" && typeof session?.user?.fullName === "string") {
+        token.fullName = session.user.fullName;
       }
       return token;
     },

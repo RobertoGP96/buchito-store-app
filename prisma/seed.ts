@@ -153,16 +153,15 @@ async function main() {
     },
     update: {},
   });
-  const hasRecipient = await db.recipient.findFirst({ where: { customerId: customer.customerId } });
-  if (!hasRecipient && zoneRows[0]) {
-    await db.recipient.create({
+  const hasAddress = await db.customerAddress.findFirst({ where: { customerId: customer.customerId } });
+  if (!hasAddress && zoneRows[0]) {
+    await db.customerAddress.create({
       data: {
         customerId: customer.customerId,
         label: "Casa",
-        name: customer.name,
-        phone: customer.phone,
         line1: "Calle 23 #456, apto 3",
         neighborhood: "Vedado",
+        city: "La Habana",
         reference: "Edificio azul, timbre 3",
         zoneId: zoneRows[0].zoneId,
         isDefault: true,

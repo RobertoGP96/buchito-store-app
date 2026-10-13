@@ -37,8 +37,8 @@ export default async function StoreLayout({
         <ProductDrawerProvider>
           <div className="flex min-h-dvh flex-col">
             <TopNav user={user} />
-            {/* El hueco para la BottomNav flotante lo reserva el propio
-                componente con un espaciador al final del documento. */}
+            {/* El hueco para la BottomNav flotante lo reserva el SiteFooter con
+                su padding inferior: así el footer llega hasta el borde. */}
             <main className="flex flex-1 flex-col">{children}</main>
             <SiteFooter
               contact={{

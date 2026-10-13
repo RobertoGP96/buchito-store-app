@@ -1,6 +1,7 @@
 "use client";
 
-import { LogOut } from "lucide-react";
+import Link from "next/link";
+import { LogOut, UserRound } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { logoutUser } from "@/modules/auth/actions/auth-actions";
@@ -23,6 +24,13 @@ export function CourierShell({ userName, children }: CourierShellProps) {
             <p className="hidden max-w-[140px] truncate text-[12.5px] font-semibold text-slate-500 sm:block">
               {userName}
             </p>
+            <Link
+              href="/perfil"
+              aria-label="Mi perfil"
+              className="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 transition-colors duration-150 hover:bg-hover hover:text-ink"
+            >
+              <UserRound className="h-[18px] w-[18px]" strokeWidth={1.9} />
+            </Link>
             <ThemeToggle className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-hover" />
             <button
               type="button"

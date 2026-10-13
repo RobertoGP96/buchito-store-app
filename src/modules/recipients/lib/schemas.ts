@@ -2,18 +2,21 @@ import { z } from "zod";
 import { isValidPhone } from "@/lib/phone";
 
 const optionalText = z
-  .union([z.literal(""), z.null(), z.string().trim().max(200, "Máximo 200 caracteres")])
-  .transform((v) => (v === "" || v == null ? null : v));
+  .string()
+  .trim()
+  .transform((v) => (v === "" ? null : v))
+  .nullable();
 
-/** Destinatario guardado por el cliente: a quién se entrega y dónde. La
- *  ciudad no se pide: la zona de entrega ya la determina. */
+/** Destinatario de una entrega: a quién se le lleva el pedido y dónde. Es
+ *  una fila de `customer_addresses`. Objeto plano, sin `.refine`, para que el
+ *  checkout pueda hacer `.omit` sobre él. */
 export const recipientSchema = z.object({
-  label: optionalText,
-  name: z.string().trim().min(2, "Escribe el nombre de quien recibe"),
+  name: z.string().trim().min(2, "Escribe el nombre del destinatario"),
   phone: z.string().trim().refine(isValidPhone, "Escribe un teléfono válido"),
   line1: z.string().trim().min(3, "Escribe la dirección"),
   line2: optionalText,
   neighborhood: optionalText,
+  city: z.string().trim().min(2, "Escribe la ciudad"),
   reference: optionalText,
   zoneId: z
     .union([z.literal(""), z.null(), z.coerce.number().int().positive()])

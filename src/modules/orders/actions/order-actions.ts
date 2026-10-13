@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { Prisma } from "@/generated/prisma";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
-import { assertRole } from "@/lib/auth-guard";
+import { assertRole, assertSessionCustomer } from "@/lib/auth-guard";
 import { createAuditLog } from "@/lib/audit";
 import { failAction, firstIssueMessage, StaleVersionError } from "@/lib/action-utils";
 import { BaseCurrencyNotConfiguredError } from "@/lib/currency";
@@ -16,13 +16,12 @@ import { computeCartTotals } from "@/modules/cart/cart-totals";
 import { prorateComboLines } from "@/modules/combos/lib/combo-pricing";
 import { getOrderCombos } from "@/modules/combos/queries/order-combo-queries";
 import { fmtQty, isValidQty, roundQty } from "@/modules/products/lib/units";
-import { resolveCustomer } from "@/modules/customers/lib/resolve-customer";
-import { createRecipientInTx } from "@/modules/recipients/lib/save-recipient";
 import { validateCoupon } from "../lib/coupon";
 import {
   createOrderSchema,
   transitionOrderSchema,
   type CreateOrderInput,
+  type DeliveryAddress,
   type TransitionOrderInput,
 } from "../lib/schemas";
 import { applyOrderTransition } from "../lib/transition";
@@ -37,10 +36,6 @@ class CheckoutError extends Error {
   }
 }
 
-function isUniqueViolation(error: unknown): boolean {
-  return error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002";
-}
-
 export async function createOrder(
   input: CreateOrderInput
 ): Promise<ActionResult<{ orderId: number; orderNo: string }>> {
@@ -51,9 +46,10 @@ export async function createOrder(
   const data = parsed.data;
 
   try {
-    // El checkout de invitado está permitido: la sesión solo enlaza el cliente.
-    const session = await auth();
-    const userId = session?.user?.userId ?? null;
+    // Comprar exige cuenta con ficha de cliente: nombre y teléfono salen de
+    // ahí, no del formulario.
+    const customer = await assertSessionCustomer();
+    const userId = customer.userId;
 
     const created = await db.$transaction(async (tx) => {
       const settings = await tx.storeSetting.findUnique({ where: { id: 1 }, include: { baseCurrency: true } });
@@ -181,6 +177,63 @@ export async function createOrder(
           freeShippingThreshold: decimalToNullableNumber(row.freeShippingThreshold),
         };
       }
+      // Destinatario: uno guardado del propio cliente o uno nuevo, que queda
+      // guardado para la próxima vez. El pedido lleva una copia (snapshot):
+      // el cliente puede editarlo o borrarlo después sin tocar el pedido.
+      let deliveryAddress: DeliveryAddress | null = null;
+      let addressId: number | null = null;
+      if (zone) {
+        if (data.recipientId != null) {
+          const saved = await tx.customerAddress.findFirst({
+            where: { addressId: data.recipientId, customerId: customer.customerId },
+          });
+          if (!saved) throw new CheckoutError("El destinatario ya no existe. Elige otro.");
+          // La zona elegida en el checkout manda y se recuerda en el destinatario.
+          if (saved.zoneId !== zone.zoneId) {
+            await tx.customerAddress.update({ where: { addressId: saved.addressId }, data: { zoneId: zone.zoneId } });
+          }
+          addressId = saved.addressId;
+          deliveryAddress = {
+            recipientName: saved.recipientName ?? customer.name,
+            recipientPhone: saved.phone ?? customer.phone,
+            line1: saved.line1,
+            line2: saved.line2,
+            neighborhood: saved.neighborhood,
+            city: saved.city,
+            reference: saved.reference,
+          };
+        } else if (data.newRecipient) {
+          const r = data.newRecipient;
+          const count = await tx.customerAddress.count({ where: { customerId: customer.customerId } });
+          const savedNew = await tx.customerAddress.create({
+            data: {
+              customerId: customer.customerId,
+              recipientName: r.name,
+              phone: r.phone,
+              line1: r.line1,
+              line2: r.line2,
+              neighborhood: r.neighborhood,
+              city: r.city,
+              reference: r.reference,
+              zoneId: zone.zoneId,
+              isDefault: count === 0,
+            },
+          });
+          addressId = savedNew.addressId;
+          deliveryAddress = {
+            recipientName: r.name,
+            recipientPhone: r.phone,
+            line1: r.line1,
+            line2: r.line2,
+            neighborhood: r.neighborhood,
+            city: r.city,
+            reference: r.reference,
+          };
+        }
+        // El schema ya lo exige y la DB también (CHECK chk_order_delivery_address).
+        if (!deliveryAddress) throw new CheckoutError("Elige un destinatario o añade uno nuevo");
+      }
+
       const storeThreshold = decimalToNullableNumber(settings.freeShippingThreshold);
       const shipping = {
         fee: zone ? zone.fee : decimalToNumber(settings.defaultShippingFee),
@@ -249,13 +302,6 @@ export async function createOrder(
         coupon: discount?.ok ? discount.discountKindValue : null,
       });
 
-      const customer = await resolveCustomer(tx, {
-        userId,
-        name: data.customerName,
-        phone: data.customerPhone,
-        email: data.customerEmail,
-      });
-
       // Salida de stock condicionada: nunca un decrement ciego. Una variante
       // puede venir suelta y dentro de combos: se descuenta su total una vez.
       const stockNeeded = new Map<number, number>();
@@ -276,21 +322,6 @@ export async function createOrder(
           throw new CheckoutError(`No hay stock suficiente de ${label}`);
         }
         stockAfter.set(variantId, decimalToNumber(taken[0].stock));
-      }
-
-      // Solo con sesión: un invitado no tiene dónde guardar destinatarios.
-      if (data.saveRecipient && userId != null && data.fulfillment === "delivery" && data.address) {
-        await createRecipientInTx(tx, customer.customerId, {
-          label: null,
-          name: data.address.recipientName,
-          phone: data.address.recipientPhone,
-          line1: data.address.line1,
-          line2: data.address.line2,
-          neighborhood: data.address.neighborhood,
-          reference: data.address.reference,
-          zoneId: zone?.zoneId ?? null,
-          isDefault: false,
-        });
       }
 
       const orderNo = await nextFolio(tx, DOC_TYPES.ORDER, settings.orderPrefix);
@@ -322,12 +353,9 @@ export async function createOrder(
           couponId: coupon?.couponId ?? null,
           couponCode: coupon?.code ?? null,
           zoneId: zone?.zoneId ?? null,
-          customerName: data.customerName,
-          customerPhone: data.customerPhone,
-          deliveryAddress:
-            data.fulfillment === "delivery" && data.address
-              ? (data.address as Prisma.InputJsonValue)
-              : Prisma.DbNull,
+          customerName: customer.name,
+          customerPhone: customer.phone,
+          deliveryAddress: deliveryAddress ? (deliveryAddress as Prisma.InputJsonValue) : Prisma.DbNull,
           notes: notes || null,
           lines: {
             create: lines.map((l) => ({
@@ -388,6 +416,7 @@ export async function createOrder(
           customerId: customer.customerId,
           fulfillment: data.fulfillment,
           zoneId: zone?.zoneId ?? null,
+          addressId,
           paymentMethodId: method.paymentMethodId,
           couponCode: coupon?.code ?? null,
           subtotal: totals.subtotal,
@@ -414,13 +443,12 @@ export async function createOrder(
     revalidatePath("/admin/pedidos");
     revalidatePath("/admin");
     revalidatePath("/perfil/pedidos");
+    // Un destinatario escrito en el checkout aparece también en el perfil.
+    if (data.fulfillment === "delivery" && data.newRecipient) revalidatePath("/perfil/destinatarios");
     return { success: true, data: { orderId: created.orderId, orderNo: created.orderNo } };
   } catch (error) {
     if (error instanceof CheckoutError || error instanceof BaseCurrencyNotConfiguredError) {
       return { success: false, error: error.message };
-    }
-    if (isUniqueViolation(error)) {
-      return { success: false, error: "Este teléfono ya está asociado a otra cuenta. Inicia sesión para continuar." };
     }
     return failAction("createOrder", error, "No se pudo crear el pedido");
   }

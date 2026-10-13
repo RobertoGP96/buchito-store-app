@@ -26,12 +26,12 @@ export function RecipientForm({ open, onOpenChange, recipient, zones }: Recipien
   const { control, handleSubmit } = useForm<RecipientInput, unknown, RecipientValues>({
     resolver: zodResolver(recipientSchema),
     defaultValues: {
-      label: recipient?.label ?? "",
       name: recipient?.name ?? "",
       phone: recipient?.phone ?? "",
       line1: recipient?.line1 ?? "",
       line2: recipient?.line2 ?? "",
       neighborhood: recipient?.neighborhood ?? "",
+      city: recipient?.city ?? "",
       reference: recipient?.reference ?? "",
       zoneId: recipient?.zoneId != null ? String(recipient.zoneId) : "",
       isDefault: recipient?.isDefault ?? false,
@@ -42,7 +42,7 @@ export function RecipientForm({ open, onOpenChange, recipient, zones }: Recipien
     setIsSubmitting(true);
     try {
       const result = recipient
-        ? await updateRecipient(recipient.recipientId, values)
+        ? await updateRecipient(recipient.addressId, values)
         : await createRecipient(values);
       if (!result.success) {
         toast.danger(result.error);
@@ -63,7 +63,7 @@ export function RecipientForm({ open, onOpenChange, recipient, zones }: Recipien
       open={open}
       onOpenChange={onOpenChange}
       title={recipient ? `Editar ${recipient.name}` : "Nuevo destinatario"}
-      description="Quién recibe el pedido y dónde. Lo tendrás listo para elegir al finalizar la compra."
+      description="A quién le entregamos y dónde. Lo eliges al finalizar cada compra."
       footer={
         <FormFooter
           formId={FORM_ID}
@@ -74,27 +74,32 @@ export function RecipientForm({ open, onOpenChange, recipient, zones }: Recipien
       }
     >
       <form id={FORM_ID} onSubmit={handleSubmit(onSubmit)} noValidate className="grid gap-4 sm:grid-cols-2">
-        <FormTextField control={control} name="name" label="Nombre de quien recibe" autoComplete="name" isRequired />
-        <FormTextField control={control} name="phone" label="Teléfono de quien recibe" type="tel" autoComplete="tel" isRequired />
+        <FormTextField control={control} name="name" label="Nombre" placeholder="Ana Pérez" autoComplete="name" isRequired />
+        <FormTextField control={control} name="phone" label="Teléfono" type="tel" placeholder="+53 5 123 4567" autoComplete="tel" isRequired />
         <FormSelect
           control={control}
           name="zoneId"
           label="Zona de entrega"
-          placeholder="Elige la zona"
+          placeholder="Sin zona"
           options={zones.map((z) => ({ value: String(z.zoneId), label: z.name, description: z.etaLabel ?? undefined }))}
           className="sm:col-span-2"
         />
         <FormTextField control={control} name="line1" label="Dirección" placeholder="Calle y número" autoComplete="address-line1" isRequired className="sm:col-span-2" />
         <FormTextField control={control} name="line2" label="Apto / piso (opcional)" autoComplete="address-line2" />
         <FormTextField control={control} name="neighborhood" label="Barrio / reparto (opcional)" />
-        <FormTextField control={control} name="reference" label="Referencia (opcional)" placeholder="Edificio azul, timbre 3" className="sm:col-span-2" />
-        <FormTextField control={control} name="label" label="Etiqueta (opcional)" placeholder="Casa de mamá" />
+        <FormTextField control={control} name="city" label="Ciudad" autoComplete="address-level2" isRequired />
+        <FormTextField control={control} name="reference" label="Referencia (opcional)" placeholder="Edificio azul, timbre 3" />
         <FormSwitch
           control={control}
           name="isDefault"
           label="Destinatario principal"
-          description="Se elige solo al finalizar la compra."
+          description={
+            recipient?.isDefault
+              ? "Para cambiar el principal, márcalo en otro destinatario."
+              : "Viene elegido al finalizar la compra."
+          }
           isDisabled={recipient?.isDefault ?? false}
+          className="sm:col-span-2"
         />
       </form>
     </ResponsiveFormDialog>

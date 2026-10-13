@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { isValidPhone } from "@/lib/phone";
+import { recipientSchema } from "@/modules/recipients/lib/schemas";
 import { ORDER_STATUSES } from "./labels";
 
 const optionalText = z
@@ -8,34 +8,39 @@ const optionalText = z
   .transform((v) => (v === "" ? null : v))
   .nullable();
 
-/** Snapshot de la entrega en el pedido: quién recibe y dónde. La ciudad no
- *  se guarda: la zona de entrega (siempre obligatoria) ya la determina. */
-export const deliveryAddressSchema = z.object({
-  recipientName: z.string().trim().min(2, "Escribe quién recibe el pedido"),
-  recipientPhone: z.string().trim().refine(isValidPhone, "Escribe un teléfono válido para quien recibe"),
-  line1: z.string().trim().min(3, "Escribe la dirección"),
-  line2: optionalText,
-  neighborhood: optionalText,
-  reference: optionalText,
-});
+const idOrEmpty = z
+  .union([z.literal(""), z.null(), z.coerce.number().int().positive()])
+  .transform((v) => (v === "" ? null : v))
+  .nullable();
 
-export type DeliveryAddress = z.output<typeof deliveryAddressSchema>;
+/** Copia del destinatario guardada en `Order.deliveryAddress`: el cliente
+ *  puede editar o borrar el destinatario después y el pedido no cambia. Los
+ *  pedidos anteriores a los destinatarios no traen nombre ni teléfono; quien
+ *  lee cae al cliente del pedido. */
+export type DeliveryAddress = {
+  recipientName?: string | null;
+  recipientPhone?: string | null;
+  line1: string;
+  line2: string | null;
+  neighborhood: string | null;
+  city: string;
+  reference: string | null;
+};
 
-/** Lo que manda el cliente al crear el pedido. Precios y totales NO viajan:
- *  el servidor los recalcula desde DB con las tasas vigentes. */
+/** Destinatario escrito en el propio checkout: su zona es la del pedido y
+ *  nace principal solo si es el primero del cliente. */
+export const newRecipientSchema = recipientSchema.omit({ zoneId: true, isDefault: true });
+
+/** Lo que manda el cliente al crear el pedido. Sus datos (nombre, teléfono)
+ *  no viajan: salen de su ficha. Precios y totales tampoco: el servidor los
+ *  recalcula desde DB con las tasas vigentes. */
 export const createOrderSchema = z
   .object({
-    customerName: z.string().trim().min(2, "Escribe tu nombre"),
-    customerPhone: z.string().trim().refine(isValidPhone, "Escribe un teléfono válido"),
-    customerEmail: optionalText,
     fulfillment: z.enum(["delivery", "pickup"]),
-    zoneId: z
-      .union([z.literal(""), z.null(), z.coerce.number().int().positive()])
-      .transform((v) => (v === "" ? null : v))
-      .nullable(),
-    address: deliveryAddressSchema.nullable(),
-    /** Con sesión: guarda el destinatario del pedido para próximas compras. */
-    saveRecipient: z.boolean().default(false),
+    zoneId: idOrEmpty,
+    /** Destinatario guardado; vacío cuando se escribe uno nuevo. */
+    recipientId: idOrEmpty,
+    newRecipient: newRecipientSchema.nullable(),
     paymentMethodId: z.coerce.number().int().positive("Elige cómo vas a pagar"),
     paymentReference: optionalText,
     couponCode: optionalText,
@@ -59,13 +64,13 @@ export const createOrderSchema = z
       .default([]),
   })
   .refine((v) => v.lines.length + v.combos.length > 0, { message: "El carrito está vacío", path: ["lines"] })
-  .refine((v) => v.fulfillment === "pickup" || v.address != null, {
-    message: "Escribe la dirección de entrega",
-    path: ["address"],
-  })
   .refine((v) => v.fulfillment === "pickup" || v.zoneId != null, {
     message: "Elige la zona de entrega",
     path: ["zoneId"],
+  })
+  .refine((v) => v.fulfillment === "pickup" || (v.recipientId != null) !== (v.newRecipient != null), {
+    message: "Elige un destinatario o añade uno nuevo",
+    path: ["recipientId"],
   });
 
 export type CreateOrderInput = z.input<typeof createOrderSchema>;

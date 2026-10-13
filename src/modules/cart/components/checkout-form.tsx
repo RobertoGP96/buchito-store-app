@@ -1,25 +1,32 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
 import { Controller, useForm, useWatch, type FieldErrors, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button, Description, Label, Switch, toast } from "@heroui/react";
-import { ClipboardList, MapPin } from "lucide-react";
+import { Button, toast } from "@heroui/react";
+import { ClipboardList } from "lucide-react";
 import { ChoiceChips } from "@/components/choice-chips";
 import { EmptyState } from "@/components/empty-state";
-import { FormSelect, FormSwitch, FormTextArea, FormTextField } from "@/components/form/fields";
+import { FormSelect, FormTextArea, FormTextField } from "@/components/form/fields";
 import { useCurrency } from "@/modules/currency/store/currency-provider";
 import type { ZoneRow } from "@/modules/deliveries/queries/zone-queries";
 import { createOrder } from "@/modules/orders/actions/order-actions";
 import { createOrderSchema, type CreateOrderInput, type CreateOrderValues } from "@/modules/orders/lib/schemas";
 import { PaymentMethodPicker } from "@/modules/payments/components/payment-method-picker";
 import type { PaymentMethodRow } from "@/modules/payments/queries/payment-queries";
-import { RecipientAddress } from "@/modules/recipients/components/recipient-address";
+import { RecipientPicker } from "@/modules/recipients/components/recipient-picker";
 import type { RecipientRow } from "@/modules/recipients/queries/recipient-queries";
 import { computeCartTotals } from "../cart-totals";
 import { cartIsEmpty, cartPriceLines, useCart } from "../store";
 import { CartSummary } from "./cart-summary";
+
+export interface CheckoutCustomer {
+  name: string;
+  phone: string;
+  email: string | null;
+}
 
 interface CheckoutFormProps {
   zones: ZoneRow[];
@@ -27,23 +34,30 @@ interface CheckoutFormProps {
   defaultShippingFee: number;
   freeShippingThreshold: number | null;
   allowPickup: boolean;
-  prefill: { name: string; phone: string; email: string } | null;
-  /** Destinatarios guardados del cliente con sesión (principal primero). */
+  /** Datos de la cuenta: se muestran, no se editan aquí. */
+  customer: CheckoutCustomer;
   recipients: RecipientRow[];
-  isSignedIn: boolean;
 }
 
-const EMPTY_ADDRESS: CreateOrderInput["address"] = {
-  recipientName: "",
-  recipientPhone: "",
-  line1: "",
-  line2: "",
-  neighborhood: "",
-  reference: "",
-};
+/** Primer mensaje del árbol de errores de RHF. Algunos (líneas, destinatario,
+ *  refinamientos) no tienen un campo visible donde pintarse y sin aviso el
+ *  botón parece no hacer nada. `ref` apunta al DOM: no se recorre. */
+function firstErrorMessage(errors: unknown, depth = 0): string | null {
+  if (!errors || typeof errors !== "object" || depth > 4) return null;
+  const record = errors as Record<string, unknown>;
+  if (typeof record.message === "string" && record.message) return record.message;
+  for (const [key, value] of Object.entries(record)) {
+    if (key === "ref") continue;
+    const found = firstErrorMessage(value, depth + 1);
+    if (found) return found;
+  }
+  return null;
+}
 
-/** Valor del chip "escribir otro destinatario". */
-const NEW_RECIPIENT = "new";
+/** Valor del select de zona para la zona de un destinatario, si sigue activa. */
+function zoneOptionFor(zoneId: number | null, zones: ZoneRow[]): string | null {
+  return zoneId != null && zones.some((z) => z.zoneId === zoneId) ? String(zoneId) : null;
+}
 
 export function CheckoutForm({
   zones,
@@ -51,65 +65,30 @@ export function CheckoutForm({
   defaultShippingFee,
   freeShippingThreshold,
   allowPickup,
-  prefill,
+  customer,
   recipients,
-  isSignedIn,
 }: CheckoutFormProps) {
   const router = useRouter();
   const { state, clearCart } = useCart();
   const { base, rates } = useCurrency();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // El principal viene primero: con destinatarios guardados se parte de él.
-  const initialRecipient = recipients[0] ?? null;
-  const [selectedRecipientId, setSelectedRecipientId] = useState<number | null>(
-    initialRecipient?.recipientId ?? null
-  );
-  // "Lo recibo yo": el destinatario es el propio comprador y sus datos se
-  // copian de la sección "Tus datos" al validar, sin pedirlos dos veces.
-  const [sameAsCustomer, setSameAsCustomer] = useState(true);
-
-  const zoneValueFor = (recipient: RecipientRow | null) =>
-    recipient?.zoneId != null && zones.some((z) => z.zoneId === recipient.zoneId)
-      ? String(recipient.zoneId)
-      : zones[0]
-        ? String(zones[0].zoneId)
-        : "";
-  const addressFor = (recipient: RecipientRow): NonNullable<CreateOrderInput["address"]> => ({
-    recipientName: recipient.name,
-    recipientPhone: recipient.phone,
-    line1: recipient.line1,
-    line2: recipient.line2 ?? "",
-    neighborhood: recipient.neighborhood ?? "",
-    reference: recipient.reference ?? "",
-  });
-
-  // Las líneas viven en el carrito, no en el formulario, y en recogida la
-  // dirección/zona no aplican: se ajustan antes de validar para que el schema
-  // del servidor sea también el del cliente.
+  // Las líneas viven en el carrito, no en el formulario; en recogida no hay
+  // destinatario ni zona, y con un destinatario guardado los campos del nuevo
+  // no cuentan. Se ajusta antes de validar para que el schema del servidor
+  // sea también el del cliente.
   const cartRef = useRef(state);
   cartRef.current = state;
-  const selectedRef = useRef(selectedRecipientId);
-  selectedRef.current = selectedRecipientId;
-  const sameAsCustomerRef = useRef(sameAsCustomer);
-  sameAsCustomerRef.current = sameAsCustomer;
   const resolver = useMemo<Resolver<CreateOrderInput, unknown, CreateOrderValues>>(() => {
     const base = zodResolver(createOrderSchema);
     return (values, context, options) => {
       const pickup = values.fulfillment === "pickup";
-      const writingNew = selectedRef.current == null;
-      const address =
-        pickup || !values.address
-          ? null
-          : writingNew && sameAsCustomerRef.current
-            ? { ...values.address, recipientName: values.customerName, recipientPhone: values.customerPhone }
-            : values.address;
       return base(
         {
           ...values,
-          address,
           zoneId: pickup ? "" : values.zoneId,
-          saveRecipient: !pickup && writingNew && isSignedIn && Boolean(values.saveRecipient),
+          recipientId: pickup ? "" : values.recipientId,
+          newRecipient: pickup || values.recipientId ? null : values.newRecipient,
           lines: cartRef.current.lines.map((l) => ({ variantId: l.variantId, qty: l.qty })),
           combos: cartRef.current.combos.map((c) => ({ comboId: c.comboId, qty: c.qty })),
         },
@@ -117,18 +96,29 @@ export function CheckoutForm({
         options
       );
     };
-  }, [isSignedIn]);
+  }, []);
+
+  // Con destinatarios guardados el principal viene elegido (y su zona); sin
+  // ellos el primero se escribe aquí mismo partiendo de los datos del cliente.
+  const initialRecipient = recipients.find((r) => r.isDefault) ?? recipients[0] ?? null;
+  const initialZone =
+    zoneOptionFor(initialRecipient?.zoneId ?? null, zones) ?? (zones[0] ? String(zones[0].zoneId) : "");
 
   const { control, handleSubmit, setValue } = useForm<CreateOrderInput, unknown, CreateOrderValues>({
     resolver,
     defaultValues: {
-      customerName: prefill?.name ?? "",
-      customerPhone: prefill?.phone ?? "",
-      customerEmail: prefill?.email ?? "",
       fulfillment: "delivery",
-      zoneId: zoneValueFor(initialRecipient),
-      address: initialRecipient ? addressFor(initialRecipient) : EMPTY_ADDRESS,
-      saveRecipient: false,
+      zoneId: initialZone,
+      recipientId: initialRecipient?.addressId ?? "",
+      newRecipient: {
+        name: initialRecipient ? "" : customer.name,
+        phone: initialRecipient ? "" : customer.phone,
+        line1: "",
+        line2: "",
+        neighborhood: "",
+        city: "",
+        reference: "",
+      },
       paymentMethodId: paymentMethods[0]?.paymentMethodId ?? 0,
       paymentReference: "",
       couponCode: "",
@@ -140,12 +130,13 @@ export function CheckoutForm({
 
   const fulfillment = useWatch({ control, name: "fulfillment" });
   const zoneIdRaw = useWatch({ control, name: "zoneId" });
+  const recipientIdRaw = useWatch({ control, name: "recipientId" });
   const paymentMethodId = useWatch({ control, name: "paymentMethodId" });
 
   const zone = zones.find((z) => String(z.zoneId) === String(zoneIdRaw)) ?? null;
   const method = paymentMethods.find((m) => m.paymentMethodId === Number(paymentMethodId)) ?? null;
   const paymentRate = method ? rates[method.currency.currencyId] : undefined;
-  const selectedRecipient = recipients.find((r) => r.recipientId === selectedRecipientId) ?? null;
+  const writingRecipient = !recipientIdRaw;
 
   const totals = useMemo(
     () =>
@@ -179,19 +170,6 @@ export function CheckoutForm({
     );
   }
 
-  const chooseRecipient = (value: string) => {
-    if (value === NEW_RECIPIENT) {
-      setSelectedRecipientId(null);
-      setValue("address", EMPTY_ADDRESS);
-      return;
-    }
-    const recipient = recipients.find((r) => String(r.recipientId) === value);
-    if (!recipient) return;
-    setSelectedRecipientId(recipient.recipientId);
-    setValue("address", addressFor(recipient));
-    setValue("zoneId", zoneValueFor(recipient));
-  };
-
   const onSubmit = async (values: CreateOrderValues) => {
     setIsSubmitting(true);
     try {
@@ -210,36 +188,37 @@ export function CheckoutForm({
     }
   };
 
-  // Algunos errores (líneas, refinamientos de dirección) no tienen un campo
-  // visible donde pintarse: sin este aviso el botón parece no hacer nada.
   const onInvalid = (errors: FieldErrors<CreateOrderInput>) => {
-    const first = Object.values(errors)[0] as
-      | { message?: string; line1?: { message?: string }; recipientName?: { message?: string } }
-      | undefined;
-    toast.danger(
-      first?.message ?? first?.recipientName?.message ?? first?.line1?.message ?? "Revisa los datos del pedido"
-    );
+    toast.danger(firstErrorMessage(errors) ?? "Revisa los datos del pedido");
   };
 
   const fulfillmentOptions = [
     { value: "delivery", label: "Entrega a domicilio" },
     ...(allowPickup ? [{ value: "pickup", label: "Recojo en tienda" }] : []),
   ];
-  const recipientOptions = [
-    ...recipients.map((r) => ({ value: String(r.recipientId), label: r.label ? `${r.name} · ${r.label}` : r.name })),
-    { value: NEW_RECIPIENT, label: "Otro destinatario" },
-  ];
 
   return (
     <form onSubmit={handleSubmit(onSubmit, onInvalid)} noValidate className="grid gap-6 md:grid-cols-[minmax(0,1fr)_340px] md:items-start">
       <div className="flex flex-col gap-6">
         <section className="rounded-card bg-canvas p-5 shadow-card">
-          <p className="eyebrow">Tus datos</p>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            <FormTextField control={control} name="customerName" label="Nombre" autoComplete="name" isRequired />
-            <FormTextField control={control} name="customerPhone" label="Teléfono" type="tel" autoComplete="tel" isRequired />
-            <FormTextField control={control} name="customerEmail" label="Correo (opcional)" type="email" autoComplete="email" className="sm:col-span-2" />
+          <div className="flex items-start justify-between gap-3">
+            <p className="eyebrow">Tus datos</p>
+            <Link href="/perfil" className="text-[12.5px] font-semibold text-navy-700 hover:underline">
+              Editar en mi perfil
+            </Link>
           </div>
+          <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-[13.5px]">
+            <dt className="text-slate-400">Nombre</dt>
+            <dd className="font-medium text-ink">{customer.name}</dd>
+            <dt className="text-slate-400">Teléfono</dt>
+            <dd className="tabular font-medium text-ink">{customer.phone}</dd>
+            {customer.email && (
+              <>
+                <dt className="text-slate-400">Correo</dt>
+                <dd className="font-medium text-ink">{customer.email}</dd>
+              </>
+            )}
+          </dl>
         </section>
 
         <section className="rounded-card bg-canvas p-5 shadow-card">
@@ -261,79 +240,64 @@ export function CheckoutForm({
             />
           </div>
           {fulfillment !== "pickup" && (
-            <div className="mt-5 flex flex-col gap-4">
+            <>
+              <p id="recipient-label" className="mt-5 text-[13.5px] font-semibold text-ink">
+                ¿A quién se lo entregamos?
+              </p>
               {recipients.length > 0 && (
-                <div>
-                  <p id="recipient-label" className="text-[13px] font-semibold text-ink">
-                    ¿Quién recibe el pedido?
-                  </p>
-                  <ChoiceChips
-                    options={recipientOptions}
-                    value={selectedRecipient ? String(selectedRecipient.recipientId) : NEW_RECIPIENT}
-                    onChange={chooseRecipient}
-                    labelledBy="recipient-label"
-                    size="sm"
-                    className="mt-2"
+                <div className="mt-3">
+                  <Controller
+                    control={control}
+                    name="recipientId"
+                    render={({ field, fieldState }) => (
+                      <>
+                        <RecipientPicker
+                          recipients={recipients}
+                          value={field.value ? Number(field.value) : null}
+                          onChange={(addressId) => {
+                            field.onChange(addressId ?? "");
+                            const picked = addressId == null ? null : (recipients.find((r) => r.addressId === addressId) ?? null);
+                            const zoneOption = zoneOptionFor(picked?.zoneId ?? null, zones);
+                            if (zoneOption) setValue("zoneId", zoneOption);
+                          }}
+                          labelledBy="recipient-label"
+                        />
+                        {fieldState.error && (
+                          <p className="mt-2 text-[12.5px] text-danger">{fieldState.error.message}</p>
+                        )}
+                      </>
+                    )}
                   />
                 </div>
               )}
-
-              <FormSelect
-                control={control}
-                name="zoneId"
-                label="Zona de entrega"
-                options={zones.map((z) => ({
-                  value: String(z.zoneId),
-                  label: z.name,
-                  description: z.etaLabel ?? undefined,
-                }))}
-                isRequired
-              />
-
-              {selectedRecipient ? (
-                <div className="flex items-start gap-3 rounded-field bg-page px-4 py-3 text-[13.5px] leading-[1.6] text-ink">
-                  <MapPin className="mt-1 h-4 w-4 flex-none text-navy-700" strokeWidth={2} />
-                  <div className="min-w-0">
-                    <p className="font-semibold">{selectedRecipient.name}</p>
-                    <p className="tabular text-slate-500">{selectedRecipient.phone}</p>
-                    <RecipientAddress recipient={{ ...selectedRecipient, zoneName: null }} />
-                  </div>
+              {writingRecipient && (
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <FormTextField control={control} name="newRecipient.name" label="Nombre de quien recibe" autoComplete="name" isRequired />
+                  <FormTextField control={control} name="newRecipient.phone" label="Teléfono de quien recibe" type="tel" autoComplete="tel" isRequired />
+                  <FormTextField control={control} name="newRecipient.line1" label="Dirección" placeholder="Calle y número" autoComplete="address-line1" isRequired className="sm:col-span-2" />
+                  <FormTextField control={control} name="newRecipient.line2" label="Apto / piso (opcional)" autoComplete="address-line2" />
+                  <FormTextField control={control} name="newRecipient.neighborhood" label="Barrio / reparto (opcional)" />
+                  <FormTextField control={control} name="newRecipient.city" label="Ciudad" autoComplete="address-level2" isRequired />
+                  <FormTextField control={control} name="newRecipient.reference" label="Referencia (opcional)" placeholder="Edificio azul, timbre 3" />
+                  <p className="text-[12px] leading-[1.6] text-slate-400 sm:col-span-2">
+                    Se guarda en tus destinatarios para la próxima compra.
+                  </p>
                 </div>
-              ) : (
-                <>
-                  <Switch isSelected={sameAsCustomer} onChange={setSameAsCustomer}>
-                    <Switch.Control>
-                      <Switch.Thumb />
-                    </Switch.Control>
-                    <Switch.Content>
-                      <Label>Lo recibo yo</Label>
-                      <Description>Usaremos tu nombre y teléfono para la entrega.</Description>
-                    </Switch.Content>
-                  </Switch>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    {!sameAsCustomer && (
-                      <>
-                        <FormTextField control={control} name="address.recipientName" label="Nombre de quien recibe" autoComplete="off" isRequired />
-                        <FormTextField control={control} name="address.recipientPhone" label="Teléfono de quien recibe" type="tel" autoComplete="off" isRequired />
-                      </>
-                    )}
-                    <FormTextField control={control} name="address.line1" label="Dirección" placeholder="Calle y número" autoComplete="address-line1" isRequired className="sm:col-span-2" />
-                    <FormTextField control={control} name="address.line2" label="Apto / piso (opcional)" autoComplete="address-line2" />
-                    <FormTextField control={control} name="address.neighborhood" label="Barrio / reparto (opcional)" />
-                    <FormTextField control={control} name="address.reference" label="Referencia (opcional)" placeholder="Edificio azul, timbre 3" className="sm:col-span-2" />
-                    {isSignedIn && (
-                      <FormSwitch
-                        control={control}
-                        name="saveRecipient"
-                        label="Guardar este destinatario"
-                        description="Lo tendrás listo en tu próxima compra."
-                        className="sm:col-span-2"
-                      />
-                    )}
-                  </div>
-                </>
               )}
-            </div>
+              <div className="mt-4">
+                <FormSelect
+                  control={control}
+                  name="zoneId"
+                  label="Zona de entrega"
+                  options={zones.map((z) => ({
+                    value: String(z.zoneId),
+                    label: z.name,
+                    description: z.etaLabel ?? undefined,
+                  }))}
+                  isRequired
+                />
+              </div>
+            </>
           )}
         </section>
 

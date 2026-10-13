@@ -2,38 +2,47 @@ import "server-only";
 import { db } from "@/lib/db";
 
 export interface RecipientRow {
-  recipientId: number;
-  label: string | null;
+  addressId: number;
   name: string;
   phone: string;
   line1: string;
   line2: string | null;
   neighborhood: string | null;
+  city: string;
   reference: string | null;
   zoneId: number | null;
   zoneName: string | null;
   isDefault: boolean;
 }
 
-/** Destinatarios de la ficha de cliente del usuario con sesión (vacío si aún
- *  no tiene ficha). Principal primero. */
-export async function getRecipientsForUser(userId: number): Promise<RecipientRow[]> {
-  const rows = await db.recipient.findMany({
-    where: { customer: { userId } },
-    include: { zone: { select: { name: true } } },
-    orderBy: [{ isDefault: "desc" }, { recipientId: "asc" }],
+/** Destinatarios guardados del cliente, el principal primero. Las filas sin
+ *  nombre ni teléfono propios (direcciones anteriores a los destinatarios)
+ *  salen con los del cliente. */
+export async function getRecipientsForCustomer(customerId: number): Promise<RecipientRow[]> {
+  const customer = await db.customer.findUnique({
+    where: { customerId },
+    select: {
+      name: true,
+      phone: true,
+      addresses: {
+        include: { zone: { select: { name: true } } },
+        orderBy: [{ isDefault: "desc" }, { addressId: "asc" }],
+      },
+    },
   });
-  return rows.map((r) => ({
-    recipientId: r.recipientId,
-    label: r.label,
-    name: r.name,
-    phone: r.phone,
-    line1: r.line1,
-    line2: r.line2,
-    neighborhood: r.neighborhood,
-    reference: r.reference,
-    zoneId: r.zoneId,
-    zoneName: r.zone?.name ?? null,
-    isDefault: r.isDefault,
+  if (!customer) return [];
+
+  return customer.addresses.map((a) => ({
+    addressId: a.addressId,
+    name: a.recipientName ?? customer.name,
+    phone: a.phone ?? customer.phone,
+    line1: a.line1,
+    line2: a.line2,
+    neighborhood: a.neighborhood,
+    city: a.city,
+    reference: a.reference,
+    zoneId: a.zoneId,
+    zoneName: a.zone?.name ?? null,
+    isDefault: a.isDefault,
   }));
 }

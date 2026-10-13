@@ -30,7 +30,7 @@ src/lib                    db, auth, auth-guard (requireRole/assertRole/getSessi
 src/modules/<modulo>/      actions/ ("use server") · queries/ (server-only) · components/ · lib/ (schemas, labels, máquinas de estado)
 ```
 
-Módulos: `auth`, `settings`, `currency`, `payments`, `products`, `cart`, `orders`, `deliveries`, `customers`, `recipients` (destinatarios: a quién se entrega; el pedido snapshotea `recipientName/recipientPhone` dentro de `deliveryAddress`, sin ciudad porque la zona la determina). Patrón de referencia para CRUD: `src/modules/currency/` (actions + list + form) y `src/modules/deliveries/` (zonas, mensajeros).
+Módulos: `auth`, `settings`, `currency`, `payments`, `products`, `cart`, `orders`, `deliveries`, `customers`, `recipients` (destinatarios: a quién se entrega, guardados en `CustomerAddress` por cliente; el checkout exige sesión con ficha de cliente y el pedido snapshotea `recipientName/recipientPhone` dentro de `deliveryAddress`). Patrón de referencia para CRUD: `src/modules/currency/` (actions + list + form) y `src/modules/deliveries/` (zonas, mensajeros).
 
 ## Reglas de dominio
 

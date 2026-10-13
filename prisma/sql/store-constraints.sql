@@ -34,9 +34,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_category_root_name
 
 -- ===================== CUSTOMERS =====================
 
-DROP INDEX IF EXISTS uq_address_default_per_customer;
-CREATE UNIQUE INDEX IF NOT EXISTS uq_recipient_default_per_customer
-  ON recipients (customer_id) WHERE is_default;
+CREATE UNIQUE INDEX IF NOT EXISTS uq_address_default_per_customer
+  ON customer_addresses (customer_id) WHERE is_default;
 
 -- Un teléfono = una cuenta; los invitados pueden repetir teléfono.
 CREATE UNIQUE INDEX IF NOT EXISTS uq_customer_phone_with_account
@@ -160,3 +159,17 @@ ALTER TABLE deliveries ADD CONSTRAINT chk_delivery_courier_fee_nonneg CHECK (cou
 ALTER TABLE courier_payments DROP CONSTRAINT IF EXISTS chk_courier_payment_amounts;
 ALTER TABLE courier_payments ADD CONSTRAINT chk_courier_payment_amounts
   CHECK (amount_base > 0 AND fees_base >= 0 AND delivery_count >= 0);
+
+-- ===================== SEGURIDAD =====================
+
+ALTER TABLE user_two_factor DROP CONSTRAINT IF EXISTS chk_two_factor_attempts_nonneg;
+ALTER TABLE user_two_factor ADD CONSTRAINT chk_two_factor_attempts_nonneg CHECK (failed_attempts >= 0);
+
+-- El método app lleva secreto TOTP; el de correo no.
+ALTER TABLE user_two_factor DROP CONSTRAINT IF EXISTS chk_two_factor_secret_by_method;
+ALTER TABLE user_two_factor ADD CONSTRAINT chk_two_factor_secret_by_method
+  CHECK ((method = 'app') = (secret IS NOT NULL));
+
+ALTER TABLE user_two_factor DROP CONSTRAINT IF EXISTS chk_two_factor_email_code_pair;
+ALTER TABLE user_two_factor ADD CONSTRAINT chk_two_factor_email_code_pair
+  CHECK ((email_code_hash IS NULL) = (email_code_expires_at IS NULL));

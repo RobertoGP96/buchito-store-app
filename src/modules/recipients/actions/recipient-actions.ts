@@ -1,188 +1,204 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { Prisma } from "@/generated/prisma";
+import type { Prisma } from "@/generated/prisma";
 import { db } from "@/lib/db";
-import { auth } from "@/lib/auth";
+import { assertSessionCustomer } from "@/lib/auth-guard";
 import { createAuditLog } from "@/lib/audit";
 import { failAction, firstIssueMessage, isValidId } from "@/lib/action-utils";
-import { normalizePhone } from "@/lib/phone";
 import type { ActionResult } from "@/types";
-import { recipientSchema, type RecipientInput } from "../lib/schemas";
-import { createRecipientInTx } from "../lib/save-recipient";
+import { recipientSchema, type RecipientInput, type RecipientValues } from "../lib/schemas";
 
-function revalidateRecipientPaths(customerId: number) {
+const NOT_FOUND = "Destinatario no encontrado";
+const ZONE_UNAVAILABLE = "La zona ya no está disponible. Elige otra.";
+const INVALID_MESSAGE = "Revisa los datos del destinatario";
+
+/** Regla de negocio que se lanza dentro de la tx para revertirla con mensaje. */
+class RecipientError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "RecipientError";
+  }
+}
+
+function revalidateRecipientPaths() {
   revalidatePath("/perfil/destinatarios");
   revalidatePath("/checkout");
-  revalidatePath(`/admin/clientes/${customerId}`);
 }
 
-/** Ficha de cliente del usuario con sesión. Cualquier rol puede comprar en la
- *  tienda, así que si el usuario (p. ej. un admin) aún no tiene ficha se crea
- *  al vuelo con los datos de la cuenta; el teléfono lo completa el checkout. */
-async function getSessionCustomer(tx: Prisma.TransactionClient): Promise<{ customerId: number; userId: number }> {
-  const session = await auth();
-  if (!session?.user) throw new Error("No autenticado");
-  const userId = session.user.userId;
-  const own = await tx.customer.findUnique({ where: { userId }, select: { customerId: true } });
-  if (own) return { customerId: own.customerId, userId };
-  const created = await tx.customer.create({
-    data: {
-      userId,
-      name: session.user.fullName,
-      phone: "",
-      normalizedPhone: normalizePhone(""),
-      email: session.user.email ?? null,
-    },
-    select: { customerId: true },
-  });
-  return { customerId: created.customerId, userId };
+async function zoneIsActive(zoneId: number | null): Promise<boolean> {
+  if (zoneId == null) return true;
+  const zone = await db.deliveryZone.findFirst({ where: { zoneId, active: true }, select: { zoneId: true } });
+  return zone != null;
 }
 
-export async function createRecipient(input: RecipientInput): Promise<ActionResult<{ recipientId: number }>> {
+function toColumns(data: RecipientValues) {
+  return {
+    recipientName: data.name,
+    phone: data.phone,
+    line1: data.line1,
+    line2: data.line2,
+    neighborhood: data.neighborhood,
+    city: data.city,
+    reference: data.reference,
+    zoneId: data.zoneId,
+  };
+}
+
+function auditValues(row: {
+  recipientName: string | null;
+  phone: string | null;
+  line1: string;
+  line2: string | null;
+  neighborhood: string | null;
+  city: string;
+  reference: string | null;
+  zoneId: number | null;
+  isDefault: boolean;
+}) {
+  return {
+    name: row.recipientName,
+    phone: row.phone,
+    line1: row.line1,
+    line2: row.line2,
+    neighborhood: row.neighborhood,
+    city: row.city,
+    reference: row.reference,
+    zoneId: row.zoneId,
+    isDefault: row.isDefault,
+  };
+}
+
+/** El índice parcial `uq_address_default_per_customer` solo admite un
+ *  principal por cliente: se limpia el anterior antes de marcar el nuevo. */
+async function clearDefault(tx: Prisma.TransactionClient, customerId: number) {
+  await tx.customerAddress.updateMany({ where: { customerId, isDefault: true }, data: { isDefault: false } });
+}
+
+export async function createRecipient(input: RecipientInput): Promise<ActionResult<{ addressId: number }>> {
   const parsed = recipientSchema.safeParse(input);
   if (!parsed.success) {
-    return { success: false, error: firstIssueMessage(parsed.error, "Revisa los datos del destinatario") };
+    return { success: false, error: firstIssueMessage(parsed.error, INVALID_MESSAGE) };
   }
   const data = parsed.data;
 
   try {
-    const result = await db.$transaction(async (tx) => {
-      const { customerId, userId } = await getSessionCustomer(tx);
-      const row = await createRecipientInTx(tx, customerId, data);
+    const customer = await assertSessionCustomer();
+    if (!(await zoneIsActive(data.zoneId))) return { success: false, error: ZONE_UNAVAILABLE };
+
+    const row = await db.$transaction(async (tx) => {
+      const count = await tx.customerAddress.count({ where: { customerId: customer.customerId } });
+      // El primero del cliente nace principal: el checkout siempre tiene uno elegido.
+      const isDefault = data.isDefault || count === 0;
+      if (isDefault) await clearDefault(tx, customer.customerId);
+      const created = await tx.customerAddress.create({
+        data: { customerId: customer.customerId, isDefault, ...toColumns(data) },
+      });
       await createAuditLog(tx, {
         action: "create",
-        entityType: "Recipient",
-        entityId: row.recipientId,
+        entityType: "CustomerAddress",
+        entityId: created.addressId,
         module: "recipients",
-        userId,
-        newValues: { ...data, customerId },
+        userId: customer.userId,
+        newValues: auditValues(created),
       });
-      return { ...row, customerId };
+      return created;
     });
 
-    revalidateRecipientPaths(result.customerId);
-    return { success: true, data: { recipientId: result.recipientId } };
+    revalidateRecipientPaths();
+    return { success: true, data: { addressId: row.addressId } };
   } catch (error) {
     return failAction("createRecipient", error, "No se pudo guardar el destinatario");
   }
 }
 
-export async function updateRecipient(recipientId: number, input: RecipientInput): Promise<ActionResult<void>> {
-  if (!isValidId(recipientId)) return { success: false, error: "Destinatario no válido" };
+export async function updateRecipient(addressId: number, input: RecipientInput): Promise<ActionResult<void>> {
+  if (!isValidId(addressId)) return { success: false, error: NOT_FOUND };
   const parsed = recipientSchema.safeParse(input);
   if (!parsed.success) {
-    return { success: false, error: firstIssueMessage(parsed.error, "Revisa los datos del destinatario") };
+    return { success: false, error: firstIssueMessage(parsed.error, INVALID_MESSAGE) };
   }
   const data = parsed.data;
 
   try {
-    const customerId = await db.$transaction(async (tx) => {
-      const { customerId, userId } = await getSessionCustomer(tx);
-      // El where incluye al cliente: nadie edita destinatarios ajenos.
-      const current = await tx.recipient.findFirst({ where: { recipientId, customerId } });
-      if (!current) throw new NotFoundError();
+    const customer = await assertSessionCustomer();
+    // La propiedad se comprueba por `customerId`: un id ajeno es "no encontrado".
+    const current = await db.customerAddress.findFirst({
+      where: { addressId, customerId: customer.customerId },
+    });
+    if (!current) return { success: false, error: NOT_FOUND };
+    if (!(await zoneIsActive(data.zoneId))) return { success: false, error: ZONE_UNAVAILABLE };
 
-      // No se puede quitar el "principal" sin elegir otro: siempre hay uno.
-      const isDefault = current.isDefault || data.isDefault;
-      if (isDefault && !current.isDefault) {
-        await tx.recipient.updateMany({ where: { customerId, isDefault: true }, data: { isDefault: false } });
-      }
-      await tx.recipient.update({ where: { recipientId }, data: { ...data, isDefault } });
+    // El principal no se "desmarca": se marca otro en su lugar.
+    const isDefault = current.isDefault || data.isDefault;
+    await db.$transaction(async (tx) => {
+      if (isDefault && !current.isDefault) await clearDefault(tx, customer.customerId);
+      const updated = await tx.customerAddress.updateMany({
+        where: { addressId, customerId: customer.customerId },
+        data: { ...toColumns(data), isDefault },
+      });
+      if (updated.count !== 1) throw new RecipientError(NOT_FOUND);
       await createAuditLog(tx, {
         action: "update",
-        entityType: "Recipient",
-        entityId: recipientId,
+        entityType: "CustomerAddress",
+        entityId: addressId,
         module: "recipients",
-        userId,
-        oldValues: current,
-        newValues: { ...data, isDefault },
+        userId: customer.userId,
+        oldValues: auditValues(current),
+        newValues: auditValues({ ...toColumns(data), isDefault }),
       });
-      return customerId;
     });
 
-    revalidateRecipientPaths(customerId);
+    revalidateRecipientPaths();
     return { success: true, data: undefined };
   } catch (error) {
-    if (error instanceof NotFoundError) return { success: false, error: error.message };
-    return failAction("updateRecipient", error, "No se pudo actualizar el destinatario");
+    if (error instanceof RecipientError) return { success: false, error: error.message };
+    return failAction("updateRecipient", error, "No se pudo guardar el destinatario");
   }
 }
 
-export async function setDefaultRecipient(recipientId: number): Promise<ActionResult<void>> {
-  if (!isValidId(recipientId)) return { success: false, error: "Destinatario no válido" };
+/** Borrar es seguro: los pedidos guardan una copia del destinatario, no un
+ *  enlace a esta fila. */
+export async function deleteRecipient(addressId: number): Promise<ActionResult<void>> {
+  if (!isValidId(addressId)) return { success: false, error: NOT_FOUND };
 
   try {
-    const customerId = await db.$transaction(async (tx) => {
-      const { customerId, userId } = await getSessionCustomer(tx);
-      const current = await tx.recipient.findFirst({ where: { recipientId, customerId }, select: { isDefault: true } });
-      if (!current) throw new NotFoundError();
-      if (!current.isDefault) {
-        await tx.recipient.updateMany({ where: { customerId, isDefault: true }, data: { isDefault: false } });
-        await tx.recipient.update({ where: { recipientId }, data: { isDefault: true } });
-        await createAuditLog(tx, {
-          action: "update",
-          entityType: "Recipient",
-          entityId: recipientId,
-          module: "recipients",
-          userId,
-          oldValues: { isDefault: false },
-          newValues: { isDefault: true },
-        });
-      }
-      return customerId;
+    const customer = await assertSessionCustomer();
+    const current = await db.customerAddress.findFirst({
+      where: { addressId, customerId: customer.customerId },
     });
+    if (!current) return { success: false, error: NOT_FOUND };
 
-    revalidateRecipientPaths(customerId);
-    return { success: true, data: undefined };
-  } catch (error) {
-    if (error instanceof NotFoundError) return { success: false, error: error.message };
-    return failAction("setDefaultRecipient", error, "No se pudo cambiar el destinatario principal");
-  }
-}
-
-/** Los pedidos guardan su propio snapshot del destinatario, así que borrar
- *  uno nunca toca el historial. Si era el principal, hereda el más antiguo. */
-export async function deleteRecipient(recipientId: number): Promise<ActionResult<void>> {
-  if (!isValidId(recipientId)) return { success: false, error: "Destinatario no válido" };
-
-  try {
-    const customerId = await db.$transaction(async (tx) => {
-      const { customerId, userId } = await getSessionCustomer(tx);
-      const current = await tx.recipient.findFirst({ where: { recipientId, customerId } });
-      if (!current) throw new NotFoundError();
-
-      await tx.recipient.delete({ where: { recipientId } });
+    await db.$transaction(async (tx) => {
+      const deleted = await tx.customerAddress.deleteMany({
+        where: { addressId, customerId: customer.customerId },
+      });
+      if (deleted.count !== 1) throw new RecipientError(NOT_FOUND);
+      // Si se va el principal, el siguiente ocupa su lugar.
       if (current.isDefault) {
-        const next = await tx.recipient.findFirst({
-          where: { customerId },
-          orderBy: { recipientId: "asc" },
-          select: { recipientId: true },
+        const next = await tx.customerAddress.findFirst({
+          where: { customerId: customer.customerId },
+          orderBy: { addressId: "asc" },
+          select: { addressId: true },
         });
-        if (next) await tx.recipient.update({ where: { recipientId: next.recipientId }, data: { isDefault: true } });
+        if (next) {
+          await tx.customerAddress.update({ where: { addressId: next.addressId }, data: { isDefault: true } });
+        }
       }
       await createAuditLog(tx, {
         action: "delete",
-        entityType: "Recipient",
-        entityId: recipientId,
+        entityType: "CustomerAddress",
+        entityId: addressId,
         module: "recipients",
-        userId,
-        oldValues: current,
+        userId: customer.userId,
+        oldValues: auditValues(current),
       });
-      return customerId;
     });
 
-    revalidateRecipientPaths(customerId);
+    revalidateRecipientPaths();
     return { success: true, data: undefined };
   } catch (error) {
-    if (error instanceof NotFoundError) return { success: false, error: error.message };
+    if (error instanceof RecipientError) return { success: false, error: error.message };
     return failAction("deleteRecipient", error, "No se pudo eliminar el destinatario");
-  }
-}
-
-class NotFoundError extends Error {
-  constructor() {
-    super("Destinatario no encontrado");
-    this.name = "NotFoundError";
   }
 }
