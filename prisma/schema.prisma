@@ -17,6 +17,11 @@ enum UserRole {
   customer
 }
 
+enum TwoFactorMethod {
+  app
+  email
+}
+
 enum ProductStatus {
   draft
   active
@@ -110,6 +115,7 @@ model User {
 
   customer         Customer?
   courier          Courier?
+  twoFactor        UserTwoFactor?
   auditLogs        AuditLog[]
   stockMovements   StockMovement[]
   deliveryEvents   DeliveryEvent[]
@@ -120,6 +126,29 @@ model User {
 
   @@index([role, isActive])
   @@map("users")
+}
+
+// Segundo factor de la cuenta. `enabledAt` null = alta a medias: no cuenta al
+// iniciar sesión. Nada en claro: el secreto TOTP va cifrado (AES-256-GCM) y los
+// códigos de correo y de respaldo como HMAC con clave del servidor.
+model UserTwoFactor {
+  userId             Int             @id @map("user_id")
+  method             TwoFactorMethod
+  secret             String?
+  enabledAt          DateTime?       @map("enabled_at")
+  recoveryCodes      String[]        @default([]) @map("recovery_codes")
+  lastCounter        Int?            @map("last_counter")
+  emailCodeHash      String?         @map("email_code_hash")
+  emailCodeExpiresAt DateTime?       @map("email_code_expires_at")
+  emailCodeSentAt    DateTime?       @map("email_code_sent_at")
+  failedAttempts     Int             @default(0) @map("failed_attempts")
+  lockedUntil        DateTime?       @map("locked_until")
+  createdAt          DateTime        @default(now()) @map("created_at")
+  updatedAt          DateTime        @default(now()) @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@map("user_two_factor")
 }
 
 model AuditLog {

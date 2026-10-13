@@ -42,3 +42,29 @@ export function safeCallbackUrl(value: string | undefined, fallback: string): st
   if (!value.startsWith("/") || value.startsWith("//")) return fallback;
   return value;
 }
+
+export const verifyLoginCodeSchema = z.object({
+  kind: z.enum(["otp", "recovery"]),
+  code: z.string().trim().min(1, "Escribe el código"),
+  callbackUrl: z.string().optional(),
+});
+
+export type VerifyLoginCodeInput = z.infer<typeof verifyLoginCodeSchema>;
+
+export const twoFactorMethodSchema = z.object({
+  method: z.enum(["app", "email"]),
+});
+
+export type TwoFactorMethodInput = z.infer<typeof twoFactorMethodSchema>;
+
+export const confirmTwoFactorSchema = z.object({
+  code: z.string().trim().regex(/^\d{6}$/, "Escribe los 6 dígitos del código"),
+});
+
+export type ConfirmTwoFactorInput = z.infer<typeof confirmTwoFactorSchema>;
+
+export const disableTwoFactorSchema = z.object({
+  password: z.string().min(1, "Escribe tu contraseña"),
+});
+
+export type DisableTwoFactorInput = z.infer<typeof disableTwoFactorSchema>;
