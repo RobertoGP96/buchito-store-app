@@ -110,7 +110,7 @@ export function UserMenu({ user }: { user: NavUser | null }) {
             {user ? user.email : "Inicia sesión o crea tu cuenta"}
           </p>
           {!user && (
-            <div className="mt-3 grid grid-cols-2 gap-2">
+            <div className="mt-3 flex flex-col gap-2">
               <Link
                 href={loginHref}
                 onClick={() => setIsOpen(false)}
