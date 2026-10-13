@@ -11,13 +11,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cartCount, useCart } from "@/modules/cart/store";
-import { isCatalogPath } from "@/lib/store-nav";
+import { isBottomNavVisible, isCatalogPath } from "@/lib/store-nav";
 import { cn } from "@/lib/utils";
-
-/** La barra nunca se desmonta: en el flujo lineal de pago solo se esconde con
- *  la clase `is-hidden` (misma transición al entrar y al salir). Desmontarla
- *  la hacía desaparecer de golpe y volver animada al regresar. */
-const HIDDEN_PREFIXES = ["/checkout", "/pedido-confirmado"];
 
 /** Sin sesión, "Perfil" apunta directo al login: evita el viaje al middleware
  *  (prefetch desperdiciado y un segundo en blanco hasta el redirect). */
@@ -55,7 +50,10 @@ const EASE = "cubic-bezier(.16,1,.3,1)";
 export function BottomNav({ isLoggedIn }: { isLoggedIn: boolean }) {
   const pathname = usePathname();
   const { state } = useCart();
-  const visible = !HIDDEN_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+  // La barra nunca se desmonta: en el flujo lineal de pago solo se esconde con
+  // la clase `is-hidden` (misma transición al entrar y al salir). Desmontarla
+  // la hacía desaparecer de golpe y volver animada al regresar.
+  const visible = isBottomNavVisible(pathname);
   const count = state.hydrated ? cartCount(state) : 0;
   const activeIndex = ITEMS.findIndex((item) => item.isActive(pathname));
   // La píldora viaja en el mismo evento del toque y React la revierte sola
@@ -66,9 +64,9 @@ export function BottomNav({ isLoggedIn }: { isLoggedIn: boolean }) {
 
   return (
     <>
-      {/* La barra es fija y flota sobre el contenido: el hueco lo reserva este
-          espaciador al final del documento, solo mientras la barra se ve. */}
-      {visible && <div className="h-[82px] md:hidden" aria-hidden />}
+      {/* La barra es fija y flota sobre el contenido: el hueco bajo ella lo
+          reserva el SiteFooter con su padding inferior, no un espaciador, para
+          que el footer llegue hasta el borde y no asome el fondo de la página. */}
       <nav
         aria-label="Navegación principal"
         inert={!visible}
