@@ -4,7 +4,7 @@ Tienda web de distintos tipos de productos con panel de gestión y entregas a do
 
 | Zona | Ruta | Quién entra |
 |---|---|---|
-| Tienda pública | `/` | cualquiera (compra como invitado o con cuenta) |
+| Tienda pública | `/` | cualquiera; comprar requiere una cuenta de cliente |
 | Panel de gestión | `/admin` | rol `admin` |
 | App del mensajero | `/mensajero` | rol `courier` (y `admin`) |
 

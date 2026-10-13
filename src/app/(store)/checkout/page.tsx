@@ -1,49 +1,59 @@
 import type { Metadata } from "next";
-import { auth } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { UserRound } from "lucide-react";
+import { getSessionCustomer, NO_CUSTOMER_MESSAGE, type SessionCustomer } from "@/lib/auth-guard";
+import { EmptyState } from "@/components/empty-state";
 import { ScreenHeader } from "@/components/screen-header";
 import { CheckoutForm } from "@/modules/cart/components/checkout-form";
 import { getActiveZones } from "@/modules/deliveries/queries/zone-queries";
 import { getActivePaymentMethods } from "@/modules/payments/queries/payment-queries";
+import { getRecipientsForCustomer } from "@/modules/recipients/queries/recipient-queries";
 import { getStoreSettings } from "@/modules/settings/queries/settings-queries";
 
 export const metadata: Metadata = { title: "Finalizar compra" };
 export const dynamic = "force-dynamic";
 
 export default async function CheckoutPage() {
-  const [session, settings, zones, paymentMethods] = await Promise.all([
-    auth(),
-    getStoreSettings(),
-    getActiveZones(),
-    getActivePaymentMethods(),
-  ]);
-
-  let prefill: { name: string; phone: string; email: string } | null = null;
-  if (session?.user) {
-    const customer = await db.customer.findUnique({
-      where: { userId: session.user.userId },
-      select: { name: true, phone: true, email: true },
-    });
-    prefill = {
-      name: customer?.name ?? session.user.fullName,
-      phone: customer?.phone ?? "",
-      email: customer?.email ?? session.user.email ?? "",
-    };
-  }
+  // La sesión la exige el layout; comprar necesita además ficha de cliente
+  // (admin y mensajero no la tienen).
+  const customer = await getSessionCustomer();
 
   return (
     <>
       <ScreenHeader eyebrow="Tu compra" title="Finalizar compra" backHref="/carrito" />
       <div className="mx-auto flex w-full max-w-[1120px] flex-1 flex-col px-5 pb-10 md:px-6">
-        <CheckoutForm
-          zones={zones}
-          paymentMethods={paymentMethods}
-          defaultShippingFee={settings.defaultShippingFee}
-          freeShippingThreshold={settings.freeShippingThreshold}
-          allowPickup={settings.allowPickup}
-          prefill={prefill}
-        />
+        {customer ? (
+          <CheckoutContent customer={customer} />
+        ) : (
+          <EmptyState
+            icon={UserRound}
+            title="Esta cuenta no puede hacer pedidos"
+            description={NO_CUSTOMER_MESSAGE}
+            ctaLabel="Ir al catálogo"
+            ctaHref="/catalogo"
+          />
+        )}
       </div>
     </>
+  );
+}
+
+async function CheckoutContent({ customer }: { customer: SessionCustomer }) {
+  const [settings, zones, paymentMethods, recipients] = await Promise.all([
+    getStoreSettings(),
+    getActiveZones(),
+    getActivePaymentMethods(),
+    getRecipientsForCustomer(customer.customerId),
+  ]);
+
+  return (
+    <CheckoutForm
+      zones={zones}
+      paymentMethods={paymentMethods}
+      defaultShippingFee={settings.defaultShippingFee}
+      freeShippingThreshold={settings.freeShippingThreshold}
+      allowPickup={settings.allowPickup}
+      customer={{ name: customer.name, phone: customer.phone, email: customer.email }}
+      recipients={recipients}
+    />
   );
 }

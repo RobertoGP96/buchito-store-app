@@ -44,3 +44,9 @@ export function isValidId(id: unknown): id is number {
 }
 
 export const IN_USE_MESSAGE = "No se puede eliminar: otros registros lo utilizan. Desactívalo en su lugar.";
+
+/** Violación de unicidad (Prisma P2002): la action traduce el índice que
+ *  conoce (teléfono de cliente con cuenta, etc.) a un mensaje concreto. */
+export function isUniqueViolation(error: unknown): boolean {
+  return error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002";
+}

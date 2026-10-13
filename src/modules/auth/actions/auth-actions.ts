@@ -13,6 +13,7 @@ import {
   loginSchema,
   registerSchema,
   safeCallbackUrl,
+  withCallbackUrl,
   type LoginInput,
   type RegisterInput,
 } from "../lib/schemas";
@@ -53,7 +54,7 @@ export async function registerCustomer(input: RegisterInput): Promise<ActionResu
       error: parsed.error.issues[0]?.message ?? "Revisa los datos del formulario",
     };
   }
-  const { fullName, email, phone, password } = parsed.data;
+  const { fullName, email, phone, password, callbackUrl } = parsed.data;
 
   try {
     const existing = await db.user.findUnique({ where: { email }, select: { userId: true } });
@@ -102,8 +103,10 @@ export async function registerCustomer(input: RegisterInput): Promise<ActionResu
     console.error("registerCustomer signIn:", error);
     signedIn = false;
   }
-  // `redirect` lanza: fuera del try para que el catch no la trague.
-  redirect(signedIn ? "/" : "/login");
+  // `redirect` lanza: fuera del try para que el catch no la trague. Con
+  // callbackUrl (p. ej. venía del checkout) se vuelve allí tras crear la cuenta.
+  const target = safeCallbackUrl(callbackUrl, "/");
+  redirect(signedIn ? target : withCallbackUrl("/login", callbackUrl ? target : undefined));
 }
 
 export async function logoutUser(): Promise<void> {

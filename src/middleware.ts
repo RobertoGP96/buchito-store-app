@@ -6,5 +6,5 @@ export const { auth: middleware } = NextAuth(authConfig);
 // Solo las rutas que dependen de la sesión: la tienda pública no paga el
 // middleware de next-auth en cada navegación ni en cada prefetch.
 export const config = {
-  matcher: ["/admin/:path*", "/mensajero/:path*", "/perfil/:path*", "/login", "/registro"],
+  matcher: ["/admin/:path*", "/mensajero/:path*", "/perfil/:path*", "/checkout", "/login", "/registro"],
 };

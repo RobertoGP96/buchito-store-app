@@ -15,6 +15,9 @@ export interface DeliveryRow {
   orderNo: string;
   customerName: string;
   customerPhone: string;
+  /** Quien recibe (destinatario del pedido); en pedidos antiguos, el cliente. */
+  recipientName: string;
+  recipientPhone: string;
   zoneName: string | null;
   courierId: number | null;
   courierName: string | null;
@@ -42,7 +45,7 @@ export interface DeliveryDetailData extends DeliveryRow {
 }
 
 const ROW_INCLUDE = {
-  order: { select: { orderId: true, orderNo: true, customerName: true, customerPhone: true } },
+  order: { select: { orderId: true, orderNo: true, customerName: true, customerPhone: true, deliveryAddress: true } },
   zone: { select: { name: true } },
   courier: { select: { courierId: true, user: { select: { fullName: true } } } },
 } satisfies Prisma.DeliveryInclude;
@@ -50,6 +53,7 @@ const ROW_INCLUDE = {
 type Row = Prisma.DeliveryGetPayload<{ include: typeof ROW_INCLUDE }>;
 
 function toRow(row: Row): DeliveryRow {
+  const address = (row.order.deliveryAddress as DeliveryAddress | null) ?? null;
   return {
     deliveryId: row.deliveryId,
     version: row.version,
@@ -58,6 +62,8 @@ function toRow(row: Row): DeliveryRow {
     orderNo: row.order.orderNo,
     customerName: row.order.customerName,
     customerPhone: row.order.customerPhone,
+    recipientName: address?.recipientName ?? row.order.customerName,
+    recipientPhone: address?.recipientPhone ?? row.order.customerPhone,
     zoneName: row.zone?.name ?? null,
     courierId: row.courier?.courierId ?? null,
     courierName: row.courier?.user.fullName ?? null,
