@@ -216,11 +216,6 @@ function toDetail(row: DetailRow): DeliveryDetailData {
   };
 }
 
-export async function getDeliveryById(deliveryId: number): Promise<DeliveryDetailData | null> {
-  const row = await db.delivery.findUnique({ where: { deliveryId }, include: DETAIL_INCLUDE });
-  return row ? toDetail(row) : null;
-}
-
 /** Solo la entrega asignada a ese mensajero: una ajena es un 404, no un 403. */
 export async function getDeliveryForCourier(deliveryId: number, courierId: number): Promise<DeliveryDetailData | null> {
   const row = await db.delivery.findFirst({ where: { deliveryId, courierId }, include: DETAIL_INCLUDE });

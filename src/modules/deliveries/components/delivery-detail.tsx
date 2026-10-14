@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Button, toast } from "@heroui/react";
 import { Camera, ImageOff, MapPin, Navigation, Phone } from "lucide-react";
-import { ButtonLink } from "@/components/button-link";
 import { Money } from "@/components/money";
 import { PromptDialog } from "@/components/prompt-dialog";
 import { StatusChip } from "@/components/status-chip";
@@ -21,7 +20,6 @@ import { DeliveryProofDialog, type DeliveryProofResult } from "./delivery-proof-
 
 interface DeliveryDetailProps {
   delivery: DeliveryDetailData;
-  actor: DeliveryActor;
   isAssignedCourier: boolean;
 }
 
@@ -60,10 +58,11 @@ const STEP_HINT: Partial<Record<DeliveryStatus, string>> = {
   cancelled: "El pedido fue cancelado.",
 };
 
-/** Ficha de entrega para el mensajero (y el admin). Primero el siguiente
+/** Ficha de entrega para el mensajero. Primero el siguiente
  *  paso, después a quién y dónde, los artículos, el cobro, la foto de prueba
  *  y el historial. Los botones salen de la máquina de estados. */
-export function DeliveryDetail({ delivery, actor, isAssignedCourier }: DeliveryDetailProps) {
+export function DeliveryDetail({ delivery, isAssignedCourier }: DeliveryDetailProps) {
+  const actor: DeliveryActor = "courier";
   const [pending, setPending] = useState<DeliveryStatus | "proof" | null>(null);
   const [asking, setAsking] = useState<Asking>(null);
   const [viewingProof, setViewingProof] = useState(false);
@@ -72,7 +71,7 @@ export function DeliveryDetail({ delivery, actor, isAssignedCourier }: DeliveryD
     (to) => to !== "assigned" && to !== "pending"
   );
   const mustCollect = delivery.paymentStatus !== "paid" && delivery.amountToCollect > 0;
-  const canEditProof = delivery.status === "delivered" && (actor === "admin" || isAssignedCourier);
+  const canEditProof = delivery.status === "delivered" && isAssignedCourier;
   const proofSrc = imageSrc(delivery.proofPhotoUrl);
   const mapsQuery = delivery.address
     ? [delivery.address.line1, delivery.address.line2, delivery.address.neighborhood, delivery.zoneName].filter(Boolean).join(", ")
@@ -309,14 +308,6 @@ export function DeliveryDetail({ delivery, actor, isAssignedCourier }: DeliveryD
             ))}
           </ol>
         </Section>
-      )}
-
-      {actor === "admin" && (
-        <div className="flex justify-end">
-          <ButtonLink href={`/admin/pedidos/${delivery.orderId}`} variant="ghost" size="sm">
-            Ver pedido en el panel
-          </ButtonLink>
-        </div>
       )}
 
       <DeliveryProofDialog

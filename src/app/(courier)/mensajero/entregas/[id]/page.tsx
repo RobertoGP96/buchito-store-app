@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Truck } from "lucide-react";
-import { auth } from "@/lib/auth";
 import { getSessionCourierId } from "@/lib/auth-guard";
 import { ButtonLink } from "@/components/button-link";
 import { PageHeader } from "@/components/page-header";
 import { DeliveryDetail } from "@/modules/deliveries/components/delivery-detail";
-import { getDeliveryById, getDeliveryForCourier } from "@/modules/deliveries/queries/delivery-queries";
+import { getDeliveryForCourier } from "@/modules/deliveries/queries/delivery-queries";
 
 export const dynamic = "force-dynamic";
 
@@ -24,23 +23,13 @@ export default async function CourierDeliveryPage({ params }: CourierDeliveryPag
   const deliveryId = Number(id);
   if (!Number.isInteger(deliveryId)) notFound();
 
-  const [session, courierId] = await Promise.all([auth(), getSessionCourierId()]);
-  const isAdmin = session?.user.role === "admin";
-
-  // El admin puede ver cualquier entrega desde aquí; el mensajero solo la suya.
-  const delivery = isAdmin
-    ? await getDeliveryById(deliveryId)
-    : courierId != null
-      ? await getDeliveryForCourier(deliveryId, courierId)
-      : null;
+  const courierId = await getSessionCourierId();
+  // El mensajero solo ve las entregas suyas.
+  const delivery = courierId != null ? await getDeliveryForCourier(deliveryId, courierId) : null;
   if (!delivery) notFound();
 
   const isOpen = delivery.status === "assigned" || delivery.status === "in_transit";
-  const back = isAdmin
-    ? { href: "/admin/entregas", label: "Entregas" }
-    : isOpen
-      ? { href: "/mensajero", label: "Mis entregas" }
-      : { href: "/mensajero/historial", label: "Historial" };
+  const back = isOpen ? { href: "/mensajero", label: "Mis entregas" } : { href: "/mensajero/historial", label: "Historial" };
 
   return (
     <>
@@ -55,8 +44,7 @@ export default async function CourierDeliveryPage({ params }: CourierDeliveryPag
       </PageHeader>
       <DeliveryDetail
         delivery={delivery}
-        actor={isAdmin ? "admin" : "courier"}
-        isAssignedCourier={courierId != null && delivery.courierId === courierId}
+        isAssignedCourier={delivery.courierId === courierId}
       />
     </>
   );

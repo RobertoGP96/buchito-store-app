@@ -27,7 +27,9 @@ export const authConfig: NextAuthConfig = {
       }
       if (pathname.startsWith("/mensajero")) {
         if (!isLoggedIn) return false;
-        return role === "courier" || role === "admin" ? true : toHome();
+        // Solo el mensajero: la app no tiene vuelta al panel, así que el admin
+        // tampoco entra (supervisa las entregas desde /admin/entregas).
+        return role === "courier" ? true : toHome();
       }
       if (pathname.startsWith("/perfil") || pathname.startsWith("/checkout")) {
         if (!isLoggedIn) return false;
