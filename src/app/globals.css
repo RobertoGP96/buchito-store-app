@@ -60,6 +60,14 @@
   --c-footer-muted: #d8c7b7;
   --c-footer-line: rgba(255, 255, 255, 0.12);
 
+  /* Barra superior de la tienda: el café principal como fondo sólido y los
+     controles en claro. Fijos en ambos temas, igual que el footer. */
+  --c-nav: #6b3f24;
+  --c-nav-fg: #ffffff;
+  --c-nav-muted: #e4d3c3;
+  --c-nav-hover: rgba(255, 255, 255, 0.12);
+  --c-nav-active: rgba(255, 255, 255, 0.2);
+
   --sh-card: 0 2px 10px rgba(59, 36, 21, 0.07);
   --sh-float: 0 8px 24px rgba(59, 36, 21, 0.14);
   --sh-pop: 0 12px 32px rgba(59, 36, 21, 0.18);
@@ -110,6 +118,12 @@
   --c-footer-fg: #efe3d7;
   --c-footer-muted: #b89d88;
   --c-footer-line: rgba(255, 255, 255, 0.1);
+
+  --c-nav: #4e2d19;
+  --c-nav-fg: #ffffff;
+  --c-nav-muted: #d8c7b7;
+  --c-nav-hover: rgba(255, 255, 255, 0.1);
+  --c-nav-active: rgba(255, 255, 255, 0.18);
 
   --sh-card: 0 2px 10px rgba(0, 0, 0, 0.45);
   --sh-float: 0 8px 24px rgba(0, 0, 0, 0.6);
@@ -235,6 +249,12 @@
   --color-footer-muted: var(--c-footer-muted);
   --color-footer-line: var(--c-footer-line);
 
+  --color-nav: var(--c-nav);
+  --color-nav-fg: var(--c-nav-fg);
+  --color-nav-muted: var(--c-nav-muted);
+  --color-nav-hover: var(--c-nav-hover);
+  --color-nav-active: var(--c-nav-active);
+
   --shadow-card: var(--sh-card);
   --shadow-float: var(--sh-float);
   --shadow-pop: var(--sh-pop);
@@ -255,6 +275,11 @@
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
   outline: 2px solid var(--c-navy-700);
   outline-offset: 2px;
+}
+
+/* Sobre fondo café el anillo café desaparece: dentro de la barra el foco es claro. */
+.on-brand :where(a, button, [tabindex]):focus-visible {
+  outline-color: var(--c-nav-fg);
 }
 
 /* Campos con borde propio: el foco lo marca el borde más un halo tenue, sin

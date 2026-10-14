@@ -32,16 +32,22 @@ const LINKS: NavLink[] = [
   { href: "/ofertas", label: "Ofertas", icon: BadgePercent, isActive: (p) => p === "/ofertas" },
 ];
 
-/** Acción de icono del header: círculo de 36px que se tiñe al hover. */
-export const ICON_ACTION =
-  "relative inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-500 transition-colors duration-150 hover:bg-hover hover:text-navy-700";
+/** Controles de la barra sobre el fondo café: texto claro que se aviva al hover. */
+export const NAV_CONTROL =
+  "text-nav-muted transition-colors duration-150 hover:bg-nav-hover hover:text-nav-fg data-[pressed]:bg-nav-active data-[pressed]:text-nav-fg";
 
-/** El contador se ancla al icono, no al flujo: en píldora sólida con un anillo
- *  del color del fondo se lee como marca sobre el icono y no desplaza la fila. */
+/** Acción de icono del header: círculo de 36px que se tiñe al hover. */
+export const ICON_ACTION = cn(
+  "relative inline-flex h-9 w-9 items-center justify-center rounded-full",
+  NAV_CONTROL
+);
+
+/** El contador se ancla al icono, no al flujo: en píldora caramelo con un anillo
+ *  del color de la barra se lee como marca sobre el icono y no desplaza la fila. */
 export function CountBadge({ count }: { count: number }) {
   if (count <= 0) return null;
   return (
-    <span className="pop-in tabular absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-navy-700 px-1 text-[9.5px] leading-none font-bold text-on-brand ring-2 ring-canvas">
+    <span className="pop-in tabular absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-gold-500 px-1 text-[9.5px] leading-none font-bold text-navy-950 ring-2 ring-nav">
       {count > 99 ? "99+" : count}
     </span>
   );
@@ -52,10 +58,12 @@ export function TopNav({ user }: { user: NavUser | null }) {
   const { state } = useCart();
   const count = state.hydrated ? cartCount(state) : 0;
 
+  // Barra en el café principal con las esquinas inferiores redondeadas: la
+  // página asoma por debajo en los rincones, así que no lleva borde ni blur.
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-canvas/95 md:bg-canvas/90 md:backdrop-blur-md">
+    <header className="on-brand sticky top-0 z-40 rounded-b-[22px] bg-nav text-nav-fg shadow-float md:rounded-b-[26px]">
       <div className="mx-auto flex h-16 w-full max-w-[1200px] items-center gap-5 px-5 md:h-[68px] md:gap-7 md:px-6">
-        <BrandLogo />
+        <BrandLogo tone="on-brand" />
 
         <nav className="hidden items-center gap-6 md:flex">
           {LINKS.map((link) => {
@@ -69,8 +77,8 @@ export function TopNav({ user }: { user: NavUser | null }) {
                 className={cn(
                   "nav-label inline-flex items-center gap-1.5 border-b-2 pt-1 pb-1 transition-colors duration-150",
                   active
-                    ? "border-navy-700 font-bold text-navy-700"
-                    : "border-transparent font-medium text-slate-500 hover:text-navy-700"
+                    ? "border-gold-500 font-bold text-nav-fg"
+                    : "border-transparent font-medium text-nav-muted hover:text-nav-fg"
                 )}
               >
                 <Icon className="h-[15px] w-[15px] flex-none" strokeWidth={1.9} />
@@ -81,19 +89,19 @@ export function TopNav({ user }: { user: NavUser | null }) {
         </nav>
 
         <div className="ml-auto flex items-center gap-1 md:gap-2">
-          <CurrencySwitcher className="hidden md:inline-flex" />
+          <CurrencySwitcher className={cn("hidden md:inline-flex", NAV_CONTROL)} />
           <ThemeToggle className={ICON_ACTION} />
 
           <Link
             href="/carrito"
             aria-label={`Carrito de compra${count > 0 ? ` (${count} artículos)` : " vacío"}`}
-            className={cn(ICON_ACTION, "text-navy-700 hover:bg-tint")}
+            className={cn(ICON_ACTION, "text-nav-fg")}
           >
             <ShoppingCart className="h-[18px] w-[18px]" strokeWidth={1.9} />
             <CountBadge count={count} />
           </Link>
 
-          <UserMenu user={user} />
+          <UserMenu user={user} triggerClassName={NAV_CONTROL} />
         </div>
       </div>
     </header>

@@ -4,8 +4,10 @@ import { STORE_NAME } from "@/lib/config";
 import { cn } from "@/lib/utils";
 
 interface BrandLogoProps {
-  /** `inverse` para fondos navy (footer, sidebar admin): la palabra pasa a blanco. */
-  tone?: "default" | "inverse";
+  /** `inverse` para fondos oscuros (footer, sidebar admin): la palabra pasa a
+   *  blanco. `on-brand` para la barra café: la tesela es del mismo color que el
+   *  fondo, así que pasa a un velo claro para no desaparecer. */
+  tone?: "default" | "inverse" | "on-brand";
   size?: "sm" | "md";
   /** Sin enlace en lugares donde ya se está en la home o dentro de otro <a>. */
   asLink?: boolean;
@@ -33,7 +35,8 @@ export function BrandLogo({
         className={cn(
           "flex flex-none items-center justify-center bg-brand-tile text-brand-tile-fg shadow-card",
           size === "sm" ? "h-8 w-8 rounded-[9px]" : "h-9 w-9 rounded-[10px]",
-          tone === "inverse" && "ring-1 ring-white/15"
+          tone === "inverse" && "ring-1 ring-white/15",
+          tone === "on-brand" && "bg-white/15 text-white shadow-none ring-1 ring-white/20"
         )}
       >
         <Store
@@ -45,7 +48,7 @@ export function BrandLogo({
         className={cn(
           "font-display leading-none tracking-[.06em]",
           size === "sm" ? "text-[17px]" : "text-[20px]",
-          tone === "inverse" ? "text-white" : "text-navy-700"
+          tone === "default" ? "text-navy-700" : "text-white"
         )}
       >
         {STORE_NAME}

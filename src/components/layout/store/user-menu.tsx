@@ -64,7 +64,13 @@ function manageLinksFor(user: NavUser): MenuLink[] {
 
 const ITEM = "flex items-center gap-3 text-[13px] font-medium";
 
-export function UserMenu({ user }: { user: NavUser | null }) {
+interface UserMenuProps {
+  user: NavUser | null;
+  /** Colores del disparador según el fondo de la barra que lo aloja. */
+  triggerClassName?: string;
+}
+
+export function UserMenu({ user, triggerClassName }: UserMenuProps) {
   const router = useRouter();
   const pathname = usePathname();
   // Controlado para poder cerrar el menú al pulsar los enlaces de invitado:
@@ -92,7 +98,8 @@ export function UserMenu({ user }: { user: NavUser | null }) {
         aria-label={user ? `Cuenta de ${user.fullName}` : "Tu cuenta"}
         className={cn(
           "nav-label inline-flex h-9 min-w-9 items-center justify-center gap-1.5 rounded-full px-2 text-slate-500 transition-colors duration-150 hover:bg-hover hover:text-navy-700 data-[pressed]:bg-tint data-[pressed]:text-navy-700",
-          firstName && "lg:px-3"
+          firstName && "lg:px-3",
+          triggerClassName
         )}
       >
         <UserRound className="h-[18px] w-[18px] flex-none" strokeWidth={1.9} />
