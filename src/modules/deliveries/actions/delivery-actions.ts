@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { assertRole, ForbiddenError, getSessionCourierId } from "@/lib/auth-guard";
 import { createAuditLog } from "@/lib/audit";
 import { failAction, firstIssueMessage, StaleVersionError } from "@/lib/action-utils";
+import { deleteObjectIfOurs } from "@/lib/storage";
 import type { ActionResult } from "@/types";
 import { isPaymentRuleError } from "@/modules/payments/lib/record-payment";
 import {
@@ -16,8 +17,10 @@ import {
 } from "../lib/delivery-effects";
 import {
   assignCourierSchema,
+  deliveryProofSchema,
   transitionDeliverySchema,
   type AssignCourierInput,
+  type DeliveryProofInput,
   type TransitionDeliveryInput,
 } from "../lib/schemas";
 import { canTransitionDelivery } from "../lib/state-machine";
@@ -220,5 +223,73 @@ export async function transitionDelivery(input: TransitionDeliveryInput): Promis
   } catch (error) {
     if (isRuleError(error)) return { success: false, error: error.message };
     return failAction("transitionDelivery", error, "No se pudo actualizar la entrega");
+  }
+}
+
+/** Añade o sustituye la foto de prueba de una entrega ya completada: para
+ *  cuando la subida falló al entregar o el mensajero la olvidó. La hace el
+ *  admin o el mensajero asignado. */
+export async function attachDeliveryProof(input: DeliveryProofInput): Promise<ActionResult<void>> {
+  const parsed = deliveryProofSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, error: firstIssueMessage(parsed.error, "Revisa los datos") };
+  }
+  const { deliveryId, version, proofPhotoUrl } = parsed.data;
+
+  try {
+    const session = await auth();
+    if (!session?.user) throw new Error("No autenticado");
+    const userId = session.user.userId;
+    const isAdmin = session.user.role === "admin";
+    if (!isAdmin && session.user.role !== "courier") throw new ForbiddenError();
+
+    let sessionCourierId: number | null = null;
+    if (!isAdmin) {
+      sessionCourierId = await getSessionCourierId();
+      if (sessionCourierId == null) {
+        return { success: false, error: "Tu cuenta de mensajero no está activa" };
+      }
+    }
+
+    const result = await db.$transaction(async (tx) => {
+      const delivery = await tx.delivery.findUnique({
+        where: { deliveryId },
+        select: { deliveryId: true, orderId: true, status: true, courierId: true, proofPhotoUrl: true },
+      });
+      if (!delivery) throw new DeliveryRuleError("Entrega no encontrada");
+      if (!isAdmin && delivery.courierId !== sessionCourierId) {
+        throw new DeliveryRuleError("Esta entrega no está asignada a ti");
+      }
+      if (delivery.status !== "delivered") {
+        throw new DeliveryRuleError("La foto de prueba se guarda al marcar la entrega como entregada");
+      }
+
+      const updated = await tx.delivery.updateMany({
+        where: { deliveryId, version },
+        data: { proofPhotoUrl, version: { increment: 1 } },
+      });
+      if (updated.count !== 1) throw new StaleVersionError();
+
+      await createAuditLog(tx, {
+        action: "proof",
+        entityType: "Delivery",
+        entityId: deliveryId,
+        module: "deliveries",
+        userId,
+        oldValues: { proofPhotoUrl: delivery.proofPhotoUrl },
+        newValues: { proofPhotoUrl, actor: isAdmin ? "admin" : "courier" },
+      });
+      return { orderId: delivery.orderId, previousUrl: delivery.proofPhotoUrl };
+    });
+
+    // La foto anterior ya no la referencia nadie: se borra tras confirmar la tx.
+    if (result.previousUrl && result.previousUrl !== proofPhotoUrl) {
+      await deleteObjectIfOurs(result.previousUrl);
+    }
+    revalidateDeliveryPaths(result.orderId, deliveryId);
+    return { success: true, data: undefined };
+  } catch (error) {
+    if (isRuleError(error)) return { success: false, error: error.message };
+    return failAction("attachDeliveryProof", error, "No se pudo guardar la foto");
   }
 }

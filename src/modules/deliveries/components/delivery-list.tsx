@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Button, ListBox, Select, toast } from "@heroui/react";
-import { Truck } from "lucide-react";
+import { Camera, Truck } from "lucide-react";
 import { CHIP_BASE, CHIP_OFF, CHIP_ON } from "@/components/choice-chips";
 import { EmptyState } from "@/components/empty-state";
 import { Money } from "@/components/money";
@@ -16,6 +16,19 @@ import { DELIVERY_STATUS_META, DELIVERY_STATUSES, VEHICLE_LABELS, type DeliveryS
 import type { CourierRow } from "../queries/courier-queries";
 import type { DeliveryRow } from "../queries/delivery-queries";
 import { cn } from "@/lib/utils";
+
+/** La ficha del mensajero ya pinta la foto de prueba: el admin la abre desde ahí. */
+function ProofLink({ deliveryId }: { deliveryId: number }) {
+  return (
+    <Link
+      href={`/mensajero/entregas/${deliveryId}`}
+      className="mt-1 inline-flex items-center gap-1 text-[12px] font-semibold text-navy-700 hover:underline"
+    >
+      <Camera className="h-3.5 w-3.5" strokeWidth={1.9} />
+      Ver foto de entrega
+    </Link>
+  );
+}
 
 interface DeliveryListProps {
   rows: DeliveryRow[];
@@ -113,6 +126,7 @@ export function DeliveryList({ rows, couriers, activeStatus }: DeliveryListProps
           <p className="text-[12px] text-slate-400">
             {r.recipientName} · <span className="tabular">{r.recipientPhone}</span>
           </p>
+          {r.proofPhotoUrl && <ProofLink deliveryId={r.deliveryId} />}
         </div>
       ),
     },
@@ -162,6 +176,7 @@ export function DeliveryList({ rows, couriers, activeStatus }: DeliveryListProps
               { label: "Teléfono", value: <span className="tabular">{r.recipientPhone}</span> },
               { label: "Tarifa", value: <Money value={r.fee} /> },
               ...(r.failedReason ? [{ label: "Motivo", value: r.failedReason }] : []),
+              ...(r.proofPhotoUrl ? [{ label: "Prueba", value: <ProofLink deliveryId={r.deliveryId} /> }] : []),
             ]}
             actions={<AssignControl delivery={r} couriers={couriers} />}
           />

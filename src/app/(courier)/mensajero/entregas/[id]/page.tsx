@@ -35,11 +35,22 @@ export default async function CourierDeliveryPage({ params }: CourierDeliveryPag
       : null;
   if (!delivery) notFound();
 
+  const isOpen = delivery.status === "assigned" || delivery.status === "in_transit";
+  const back = isAdmin
+    ? { href: "/admin/entregas", label: "Entregas" }
+    : isOpen
+      ? { href: "/mensajero", label: "Mis entregas" }
+      : { href: "/mensajero/historial", label: "Historial" };
+
   return (
     <>
-      <PageHeader icon={Truck} title={delivery.orderNo} description={delivery.zoneName ?? undefined}>
-        <ButtonLink href="/mensajero" variant="ghost" size="sm">
-          Mis entregas
+      <PageHeader
+        icon={Truck}
+        title={delivery.orderNo}
+        description={[delivery.recipientName, delivery.zoneName].filter(Boolean).join(" · ")}
+      >
+        <ButtonLink href={back.href} variant="ghost" size="sm">
+          {back.label}
         </ButtonLink>
       </PageHeader>
       <DeliveryDetail

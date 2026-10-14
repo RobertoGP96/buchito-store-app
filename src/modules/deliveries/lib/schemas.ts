@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { mediaKeyFromUrl } from "@/lib/image-url";
 import { isValidPhone } from "@/lib/phone";
 import { DELIVERY_STATUSES, VEHICLE_TYPES } from "./labels";
 
@@ -7,6 +8,12 @@ const optionalText = z
   .trim()
   .transform((v) => (v === "" ? null : v))
   .nullable();
+
+const PROOF_URL_MESSAGE = "La foto de prueba debe subirse desde la app";
+
+/** Solo se aceptan fotos subidas a nuestro bucket (`/media/<clave>`): así
+ *  nadie guarda una URL ajena como prueba de entrega. */
+const proofPhotoUrl = optionalText.refine((v) => v == null || mediaKeyFromUrl(v) !== null, PROOF_URL_MESSAGE);
 
 export const zoneSchema = z.object({
   name: z.string().trim().min(2, "Escribe el nombre"),
@@ -64,7 +71,7 @@ export const transitionDeliverySchema = z.object({
   version: z.coerce.number().int().min(0),
   to: z.enum(DELIVERY_STATUSES),
   failedReason: optionalText,
-  proofPhotoUrl: optionalText,
+  proofPhotoUrl,
   /** Cobro contra entrega: monto en la moneda del método de pago del pedido. */
   amountCollected: z
     .union([z.literal(""), z.null(), z.coerce.number().min(0)])
@@ -75,3 +82,26 @@ export const transitionDeliverySchema = z.object({
 });
 
 export type TransitionDeliveryInput = z.input<typeof transitionDeliverySchema>;
+
+/** Añadir o sustituir la foto de prueba de una entrega ya completada. */
+export const deliveryProofSchema = z.object({
+  deliveryId: z.coerce.number().int().positive(),
+  version: z.coerce.number().int().min(0),
+  proofPhotoUrl: z
+    .string()
+    .trim()
+    .min(1, "Elige una foto")
+    .refine((v) => mediaKeyFromUrl(v) !== null, PROOF_URL_MESSAGE),
+});
+
+export type DeliveryProofInput = z.input<typeof deliveryProofSchema>;
+
+/** Datos que el mensajero edita de su propia cuenta. El vehículo y la tarifa
+ *  los fija el administrador. */
+export const courierProfileSchema = z.object({
+  fullName: z.string().trim().min(2, "Escribe tu nombre"),
+  phone: z.string().trim().refine(isValidPhone, "Escribe un teléfono válido (7 a 15 dígitos)"),
+});
+
+export type CourierProfileInput = z.input<typeof courierProfileSchema>;
+export type CourierProfileValues = z.output<typeof courierProfileSchema>;

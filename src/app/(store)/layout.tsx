@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { DISPLAY_CURRENCY_COOKIE } from "@/lib/preferences";
 import { CartProvider } from "@/modules/cart/store";
@@ -20,6 +21,11 @@ export default async function StoreLayout({
     getStoreSettingsSafe(),
     cookies(),
   ]);
+
+  // El mensajero solo trabaja con sus entregas: cualquier ruta de la tienda
+  // lo lleva a su app. Se decide aquí y no en el middleware para que la tienda
+  // pública siga sin pagar next-auth en cada navegación.
+  if (session?.user.role === "courier") redirect("/mensajero");
 
   const user: NavUser | null = session?.user
     ? {

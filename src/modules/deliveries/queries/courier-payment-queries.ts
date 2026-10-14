@@ -86,6 +86,33 @@ export async function getCourierPayments(filter: { from?: Date } = {}): Promise<
   return { rows: mapped, totalBase };
 }
 
+export interface CourierOwnPayment {
+  courierPaymentId: number;
+  amountBase: number;
+  feesBase: number;
+  deliveryCount: number;
+  notes: string | null;
+  paidAt: string;
+}
+
+/** Liquidaciones recibidas por un mensajero, para su app. */
+export async function getCourierPaymentsFor(courierId: number): Promise<CourierOwnPayment[]> {
+  const rows = await db.courierPayment.findMany({
+    where: { courierId },
+    orderBy: [{ paidAt: "desc" }, { courierPaymentId: "desc" }],
+    take: 100,
+    select: { courierPaymentId: true, amountBase: true, feesBase: true, deliveryCount: true, notes: true, paidAt: true },
+  });
+  return rows.map((p) => ({
+    courierPaymentId: p.courierPaymentId,
+    amountBase: decimalToNumber(p.amountBase),
+    feesBase: decimalToNumber(p.feesBase),
+    deliveryCount: p.deliveryCount,
+    notes: p.notes,
+    paidAt: p.paidAt.toISOString(),
+  }));
+}
+
 /** Lo que ve el mensajero en su app: entregas completadas y lo que se le debe. */
 export interface CourierEarnings {
   deliveredCount: number;

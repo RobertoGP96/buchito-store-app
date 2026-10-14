@@ -2,12 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
+import { unstable_update } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { assertRole } from "@/lib/auth-guard";
 import { createAuditLog } from "@/lib/audit";
 import { failAction, firstIssueMessage, IN_USE_MESSAGE, isForeignKeyViolation, isValidId, StaleVersionError } from "@/lib/action-utils";
 import type { ActionResult } from "@/types";
-import { courierSchema, type CourierInput } from "../lib/schemas";
+import { courierProfileSchema, courierSchema, type CourierInput, type CourierProfileInput } from "../lib/schemas";
 
 function revalidateCourierPaths() {
   revalidatePath("/admin/mensajeros");
@@ -179,5 +180,46 @@ export async function deleteCourier(courierId: number): Promise<ActionResult<voi
   } catch (error) {
     if (isForeignKeyViolation(error)) return { success: false, error: IN_USE_MESSAGE };
     return failAction("deleteCourier", error, "No se pudo eliminar el mensajero");
+  }
+}
+
+/** El mensajero edita su nombre y teléfono desde su app. Vehículo, tarifa y
+ *  correo los gestiona el administrador. */
+export async function updateMyCourierProfile(input: CourierProfileInput): Promise<ActionResult<void>> {
+  const parsed = courierProfileSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, error: firstIssueMessage(parsed.error, "Revisa tus datos") };
+  }
+  const { fullName, phone } = parsed.data;
+
+  try {
+    const userId = await assertRole("courier");
+    const courier = await db.courier.findUnique({
+      where: { userId },
+      select: { courierId: true, phone: true, user: { select: { fullName: true } } },
+    });
+    if (!courier) return { success: false, error: "Tu cuenta no tiene perfil de mensajero" };
+
+    await db.$transaction(async (tx) => {
+      await tx.courier.update({ where: { courierId: courier.courierId }, data: { phone, version: { increment: 1 } } });
+      await tx.user.update({ where: { userId }, data: { fullName } });
+      await createAuditLog(tx, {
+        action: "update",
+        entityType: "Courier",
+        entityId: courier.courierId,
+        module: "deliveries",
+        userId,
+        oldValues: { fullName: courier.user.fullName, phone: courier.phone },
+        newValues: { fullName, phone },
+      });
+    });
+
+    // El nombre viaja en el token: se reescribe la cookie y el formulario hace
+    // un único `router.refresh()` (sin revalidatePath, que leería la cookie vieja).
+    await unstable_update({ user: { fullName } });
+    revalidateCourierPaths();
+    return { success: true, data: undefined };
+  } catch (error) {
+    return failAction("updateMyCourierProfile", error, "No se pudieron guardar tus datos");
   }
 }

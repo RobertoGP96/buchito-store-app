@@ -52,6 +52,40 @@ export async function getCouriers(): Promise<CourierRow[]> {
   }));
 }
 
+export interface CourierProfile {
+  courierId: number;
+  userId: number;
+  fullName: string;
+  email: string;
+  phone: string;
+  vehicle: VehicleType;
+  /** Pago por entrega completada, en base. */
+  deliveryFee: number;
+  active: boolean;
+  createdAt: string;
+}
+
+/** Ficha del mensajero de la sesión, para su página de perfil. null si la
+ *  cuenta no tiene perfil de mensajero (p. ej. un admin visitando la app). */
+export async function getCourierProfile(userId: number): Promise<CourierProfile | null> {
+  const row = await db.courier.findUnique({
+    where: { userId },
+    include: { user: { select: { fullName: true, email: true } } },
+  });
+  if (!row) return null;
+  return {
+    courierId: row.courierId,
+    userId: row.userId,
+    fullName: row.user.fullName,
+    email: row.user.email,
+    phone: row.phone,
+    vehicle: row.vehicle,
+    deliveryFee: decimalToNumber(row.deliveryFee),
+    active: row.active,
+    createdAt: row.createdAt.toISOString(),
+  };
+}
+
 export async function getActiveCouriers(): Promise<Pick<CourierRow, "courierId" | "fullName" | "vehicle" | "openDeliveries">[]> {
   const rows = await getCouriers();
   return rows.filter((r) => r.active);

@@ -18,17 +18,30 @@ export interface DeliveryRow {
   /** Quien recibe (destinatario del pedido); en pedidos antiguos, el cliente. */
   recipientName: string;
   recipientPhone: string;
+  /** Dirección en una línea para la lista; null en pedidos sin dirección. */
+  addressLine: string | null;
   zoneName: string | null;
   courierId: number | null;
   courierName: string | null;
   /** En base. */
   fee: number;
+  /** Servicio del mensajero fijado al entregar, en base. */
+  courierFee: number;
+  /** Ya liquidada al mensajero. */
+  isPaidToCourier: boolean;
   attempts: number;
   assignedAt: string | null;
   pickedUpAt: string | null;
   deliveredAt: string | null;
+  failedAt: string | null;
   failedReason: string | null;
+  proofPhotoUrl: string | null;
   createdAt: string;
+}
+
+function addressLineOf(address: DeliveryAddress | null): string | null {
+  if (!address) return null;
+  return [address.line1, address.line2, address.neighborhood].filter(Boolean).join(", ") || null;
 }
 
 export interface DeliveryDetailData extends DeliveryRow {
@@ -64,15 +77,20 @@ function toRow(row: Row): DeliveryRow {
     customerPhone: row.order.customerPhone,
     recipientName: address?.recipientName ?? row.order.customerName,
     recipientPhone: address?.recipientPhone ?? row.order.customerPhone,
+    addressLine: addressLineOf(address),
     zoneName: row.zone?.name ?? null,
     courierId: row.courier?.courierId ?? null,
     courierName: row.courier?.user.fullName ?? null,
     fee: decimalToNumber(row.fee),
+    courierFee: decimalToNumber(row.courierFee),
+    isPaidToCourier: row.courierPaymentId != null,
     attempts: row.attempts,
     assignedAt: row.assignedAt?.toISOString() ?? null,
     pickedUpAt: row.pickedUpAt?.toISOString() ?? null,
     deliveredAt: row.deliveredAt?.toISOString() ?? null,
+    failedAt: row.failedAt?.toISOString() ?? null,
     failedReason: row.failedReason,
+    proofPhotoUrl: row.proofPhotoUrl,
     createdAt: row.createdAt.toISOString(),
   };
 }
@@ -95,6 +113,49 @@ export async function getCourierOpenDeliveries(courierId: number): Promise<Deliv
     orderBy: [{ assignedAt: "asc" }],
   });
   return rows.map(toRow);
+}
+
+/** Estados que el mensajero ve en su historial. Una fallida reasignada a
+ *  otro mensajero ya no aparece: `courierId` apunta al nuevo. */
+export type CourierHistoryStatus = Extract<DeliveryStatus, "delivered" | "failed" | "cancelled">;
+export const COURIER_HISTORY_STATUSES: readonly CourierHistoryStatus[] = ["delivered", "failed", "cancelled"];
+
+/** Entregas cerradas del mensajero, las más recientes primero. */
+export async function getCourierDeliveryHistory(
+  courierId: number,
+  filters: { status?: CourierHistoryStatus } = {}
+): Promise<DeliveryRow[]> {
+  const rows = await db.delivery.findMany({
+    where: { courierId, status: filters.status ?? { in: [...COURIER_HISTORY_STATUSES] } },
+    include: ROW_INCLUDE,
+    orderBy: [{ updatedAt: "desc" }],
+    take: 100,
+  });
+  return rows.map(toRow);
+}
+
+export interface CourierUnpaidDelivery {
+  deliveryId: number;
+  orderNo: string;
+  deliveredAt: string | null;
+  /** En base. */
+  courierFee: number;
+}
+
+/** Entregas completadas que aún no se le han liquidado al mensajero. */
+export async function getCourierUnpaidDeliveries(courierId: number): Promise<CourierUnpaidDelivery[]> {
+  const rows = await db.delivery.findMany({
+    where: { courierId, status: "delivered", courierPaymentId: null },
+    select: { deliveryId: true, deliveredAt: true, courierFee: true, order: { select: { orderNo: true } } },
+    orderBy: [{ deliveredAt: "desc" }],
+    take: 100,
+  });
+  return rows.map((row) => ({
+    deliveryId: row.deliveryId,
+    orderNo: row.order.orderNo,
+    deliveredAt: row.deliveredAt?.toISOString() ?? null,
+    courierFee: decimalToNumber(row.courierFee),
+  }));
 }
 
 const DETAIL_INCLUDE = {

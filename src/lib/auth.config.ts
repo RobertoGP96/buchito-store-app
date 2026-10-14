@@ -30,7 +30,10 @@ export const authConfig: NextAuthConfig = {
         return role === "courier" || role === "admin" ? true : toHome();
       }
       if (pathname.startsWith("/perfil") || pathname.startsWith("/checkout")) {
-        return isLoggedIn;
+        if (!isLoggedIn) return false;
+        // El mensajero no compra ni tiene perfil de cliente: su cuenta vive
+        // en /mensajero (el resto de la tienda lo redirige su layout).
+        return role === "courier" ? toHome() : true;
       }
       if ((pathname === "/login" || pathname === "/registro") && isLoggedIn) {
         return toHome();
