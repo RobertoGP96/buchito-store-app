@@ -8,6 +8,7 @@ import { Money } from "@/components/money";
 import { PromptDialog } from "@/components/prompt-dialog";
 import { StatusChip } from "@/components/status-chip";
 import { fmtDateTime } from "@/lib/format";
+import { PhotoLightbox } from "@/components/photo-lightbox";
 import { imageSrc } from "@/lib/image-url";
 import { cn } from "@/lib/utils";
 import { PAYMENT_STATUS_META, type PaymentStatus } from "@/modules/payments/lib/labels";
@@ -65,6 +66,7 @@ const STEP_HINT: Partial<Record<DeliveryStatus, string>> = {
 export function DeliveryDetail({ delivery, actor, isAssignedCourier }: DeliveryDetailProps) {
   const [pending, setPending] = useState<DeliveryStatus | "proof" | null>(null);
   const [asking, setAsking] = useState<Asking>(null);
+  const [viewingProof, setViewingProof] = useState(false);
   const targets = nextDeliveryStates(delivery.status, actor, { isAssignedCourier }).filter(
     // Asignar/desasignar se hacen desde la lista del admin, no desde la ficha.
     (to) => to !== "assigned" && to !== "pending"
@@ -271,10 +273,15 @@ export function DeliveryDetail({ delivery, actor, isAssignedCourier }: DeliveryD
           }
         >
           {proofSrc ? (
-            <a href={proofSrc} target="_blank" rel="noopener noreferrer" className="block overflow-hidden rounded-field bg-page">
+            <button
+              type="button"
+              onClick={() => setViewingProof(true)}
+              className="block w-full overflow-hidden rounded-field bg-page"
+              aria-label="Ver la foto de prueba en grande"
+            >
               {/* eslint-disable-next-line @next/next/no-img-element -- foto del bucket servida por /media, sin optimizar */}
               <img src={proofSrc} alt={`Prueba de entrega de ${delivery.orderNo}`} className="max-h-[360px] w-full object-cover" loading="lazy" />
-            </a>
+            </button>
           ) : (
             <p className="flex items-center gap-2 text-[13.5px] text-slate-500">
               <ImageOff className="h-4 w-4 text-slate-400" strokeWidth={1.9} />
@@ -334,6 +341,16 @@ export function DeliveryDetail({ delivery, actor, isAssignedCourier }: DeliveryD
         isPending={pending === "proof"}
         onConfirm={saveProof}
       />
+      {proofSrc && (
+        <PhotoLightbox
+          open={viewingProof}
+          onOpenChange={setViewingProof}
+          src={proofSrc}
+          alt={`Prueba de entrega de ${delivery.orderNo}`}
+          title={`Prueba de entrega · ${delivery.orderNo}`}
+          caption={delivery.deliveredAt ? `Entregada ${fmtDateTime(delivery.deliveredAt)}` : undefined}
+        />
+      )}
       <PromptDialog
         key={`failed-${delivery.version}`}
         open={asking === "failed"}
