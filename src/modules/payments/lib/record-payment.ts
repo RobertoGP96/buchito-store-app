@@ -11,6 +11,8 @@ import {
 } from "@/lib/currency";
 import { roundToCurrency } from "@/lib/currency-math";
 import { decimalToNumber } from "@/lib/money";
+import { notify } from "@/modules/notifications/lib/notify";
+import { orderPaymentTargets } from "@/modules/notifications/lib/targets";
 import type { PaymentStatus } from "./labels";
 import { derivePaymentStatus } from "./payment-status";
 
@@ -23,6 +25,12 @@ export interface RecordOrderPaymentInput {
   notes?: string | null;
   receivedById: number | null;
   paidAt?: Date;
+  /** Quién cobra: decide si se avisa a los admins (solo cobros de mensajeros).
+   *  Obligatorio para que ningún llamador nuevo lo olvide. */
+  actorRole: "admin" | "courier";
+  origin: "manual" | "cash_on_delivery";
+  /** Nombre de quien cobra, para el texto del aviso a los admins. */
+  actorName?: string | null;
 }
 
 export interface RecordOrderPaymentResult {
@@ -86,6 +94,8 @@ export async function recordOrderPayment(
     where: { orderId: input.orderId },
     select: {
       orderId: true,
+      orderNo: true,
+      customer: { select: { userId: true } },
       status: true,
       version: true,
       total: true,
@@ -195,6 +205,24 @@ export async function recordOrderPayment(
       paidAt,
     },
   });
+
+
+  await notify(
+    tx,
+    input.receivedById,
+    orderPaymentTargets({
+      actorRole: input.actorRole,
+      origin: input.origin,
+      actorName: input.actorName ?? null,
+      orderId: order.orderId,
+      orderNo: order.orderNo,
+      customerUserId: order.customer.userId,
+      amount: { amount: amountTendered, currency: method.currency },
+      outstanding: { amount: Math.max(0, roundToCurrency(total - paidBase, base.decimalPlaces)), currency: base },
+      paymentMethodName: method.name,
+      paymentStatus,
+    })
+  );
 
   return { paymentId: payment.paymentId, amountBase, paidBase, paymentStatus };
 }

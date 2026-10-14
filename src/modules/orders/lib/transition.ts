@@ -2,6 +2,8 @@ import "server-only";
 import type { Prisma } from "@/generated/prisma";
 import { StaleVersionError } from "@/lib/action-utils";
 import { createAuditLog } from "@/lib/audit";
+import { notify } from "@/modules/notifications/lib/notify";
+import { orderTransitionTargets } from "@/modules/notifications/lib/targets";
 import type { FulfillmentType, OrderStatus } from "./labels";
 import { canTransitionOrder, type OrderActor } from "./state-machine";
 
@@ -46,7 +48,14 @@ export async function applyOrderTransition(
   const order = await tx.order.findUnique({
     where: { orderId: input.orderId },
     include: {
-      delivery: { select: { deliveryId: true, status: true } },
+      customer: { select: { userId: true } },
+      delivery: {
+        select: {
+          deliveryId: true,
+          status: true,
+          courier: { select: { userId: true, user: { select: { fullName: true } } } },
+        },
+      },
       lines: { select: { variantId: true, qty: true } },
     },
   });
@@ -125,6 +134,34 @@ export async function applyOrderTransition(
     oldValues: { status: from },
     newValues: { status: to, reason },
   });
+
+  // `order.delivery.status` es el estado previo: el bloque de cancelación
+  // escribe en la DB, no en este objeto.
+  await notify(
+    tx,
+    input.userId,
+    orderTransitionTargets({
+      from,
+      to,
+      actor: input.actor,
+      reason,
+      order: {
+        orderId: order.orderId,
+        orderNo: order.orderNo,
+        fulfillment: order.fulfillment,
+        customerUserId: order.customer.userId,
+        customerName: order.customerName,
+      },
+      delivery: order.delivery
+        ? {
+            deliveryId: order.delivery.deliveryId,
+            status: order.delivery.status,
+            courierUserId: order.delivery.courier?.userId ?? null,
+            courierName: order.delivery.courier?.user.fullName ?? null,
+          }
+        : null,
+    })
+  );
 
   return {
     ok: true,

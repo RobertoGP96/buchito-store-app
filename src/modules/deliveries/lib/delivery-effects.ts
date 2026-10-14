@@ -2,6 +2,8 @@ import "server-only";
 import type { Prisma } from "@/generated/prisma";
 import { StaleVersionError } from "@/lib/action-utils";
 import { createAuditLog } from "@/lib/audit";
+import { notify } from "@/modules/notifications/lib/notify";
+import { deliveryTransitionTargets } from "@/modules/notifications/lib/targets";
 import { applyOrderTransition } from "@/modules/orders/lib/transition";
 import { recordOrderPayment } from "@/modules/payments/lib/record-payment";
 import type { DeliveryStatus } from "./labels";
@@ -64,6 +66,7 @@ export async function applyDeliveryTransition(
       courierId: true,
       attempts: true,
       failedReason: true,
+      courier: { select: { deliveryFee: true, user: { select: { fullName: true } } } },
       order: { select: { orderNo: true, paymentMethodId: true } },
     },
   });
@@ -88,10 +91,7 @@ export async function applyDeliveryTransition(
     if (input.proofPhotoUrl) data.proofPhotoUrl = input.proofPhotoUrl;
     // Servicio del mensajero: se fija con su tarifa vigente al completar la
     // entrega, para que un cambio de tarifa posterior no altere lo devengado.
-    const courier = delivery.courierId
-      ? await tx.courier.findUnique({ where: { courierId: delivery.courierId }, select: { deliveryFee: true } })
-      : null;
-    data.courierFee = courier?.deliveryFee ?? 0;
+    data.courierFee = delivery.courier?.deliveryFee ?? 0;
   }
   if (to === "failed") {
     data.failedAt = now;
@@ -139,6 +139,9 @@ export async function applyDeliveryTransition(
       amountTendered: amountCollected,
       receivedById: input.userId,
       notes: "Cobro contra entrega",
+      actorRole: input.actor,
+      origin: "cash_on_delivery",
+      actorName: input.actor === "courier" ? (delivery.courier?.user.fullName ?? null) : null,
     });
   }
 
@@ -160,6 +163,21 @@ export async function applyDeliveryTransition(
       note: note || null,
     },
   });
+
+  // Los admins se enteran de cada paso que marca el mensajero; al cliente le
+  // avisa la transición del pedido y el cobro, no la entrega.
+  await notify(
+    tx,
+    input.userId,
+    deliveryTransitionTargets({
+      actor: input.actor,
+      to,
+      orderId: delivery.orderId,
+      orderNo: delivery.order.orderNo,
+      courierName: delivery.courier?.user.fullName ?? null,
+      failedReason,
+    })
+  );
 
   return { deliveryId: delivery.deliveryId, orderId: delivery.orderId, orderNo: delivery.order.orderNo };
 }

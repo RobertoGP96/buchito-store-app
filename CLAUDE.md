@@ -30,7 +30,7 @@ src/lib                    db, auth, auth-guard (requireRole/assertRole/getSessi
 src/modules/<modulo>/      actions/ ("use server") · queries/ (server-only) · components/ · lib/ (schemas, labels, máquinas de estado)
 ```
 
-Módulos: `auth`, `settings`, `currency`, `payments`, `products`, `cart`, `orders`, `deliveries`, `customers`, `recipients` (destinatarios: a quién se entrega, guardados en `CustomerAddress` por cliente; el checkout exige sesión con ficha de cliente y el pedido snapshotea `recipientName/recipientPhone` dentro de `deliveryAddress`). Patrón de referencia para CRUD: `src/modules/currency/` (actions + list + form) y `src/modules/deliveries/` (zonas, mensajeros).
+Módulos: `auth`, `settings`, `currency`, `payments`, `products`, `cart`, `orders`, `deliveries`, `customers`, `recipients` (destinatarios: a quién se entrega, guardados en `CustomerAddress` por cliente; el checkout exige sesión con ficha de cliente y el pedido snapshotea `recipientName/recipientPhone` dentro de `deliveryAddress`), `notifications` (bandeja en la app: ver regla abajo). Patrón de referencia para CRUD: `src/modules/currency/` (actions + list + form) y `src/modules/deliveries/` (zonas, mensajeros).
 
 ## Reglas de dominio
 
@@ -42,6 +42,7 @@ Módulos: `auth`, `settings`, `currency`, `payments`, `products`, `cart`, `order
 - **Máquinas de estado** puras: `src/modules/orders/lib/state-machine.ts` (`canTransitionOrder`, actor `admin|customer|system`) y `src/modules/deliveries/lib/state-machine.ts` (`canTransitionDelivery`, `orderEffectFor`). Las transiciones de reparto sobre el pedido las ejecuta SOLO el sistema desde la máquina de entregas. Una entrega fallida se re-asigna, no se duplica.
 - **Stock**: nunca `decrement` ciego. Salidas con `updateMany({ where: { variantId, stock: { gte: qty } } })` + verificar `count === 1`; cada cambio escribe `StockMovement` (`quantity > 0`, `stockAfter`, `referenceType/Id`). Se descuenta al crear el pedido y se repone al cancelar.
 - **Concurrencia** (Neon no soporta `SELECT FOR UPDATE` fiable): optimistic locking con `version` + `updateMany where { id, version }` y `StaleVersionError` (`src/lib/action-utils.ts`).
+- **Notificaciones**: se escriben con `notify(tx, actorUserId, targets)` (`src/modules/notifications/lib/notify.ts`) dentro de la tx, tras `createAuditLog`; quién recibe qué lo decide `lib/targets.ts` (puro, con tests). Un «Entregado» recorre entrega, pedido y cobro en la misma tx: el cliente solo se avisa desde el pedido y el cobro, los admins desde la entrega (si la marca un mensajero) y el cobro (si lo registra un mensajero). Nunca al actor; lo silenciado (`NotificationPreference`) no se escribe. `recordOrderPayment` exige `actorRole` y `origin`.
 - **Atributos dinámicos**: `ProductType.attributeSchema` (`AttributeDef[]`, scope `product|variant`); validar SIEMPRE con `validateAttributes(schema, values, scope)` (`src/modules/products/lib/attribute-schema.ts`).
 
 ## Server actions (patrón obligatorio)

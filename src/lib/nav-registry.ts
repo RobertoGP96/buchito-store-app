@@ -1,4 +1,5 @@
 import {
+  Bell,
   Bike,
   Boxes,
   Coins,
@@ -96,6 +97,7 @@ export const ADMIN_NAV_SECTIONS: NavSection[] = [
     items: [
       { id: "users", label: "Usuarios", href: "/admin/usuarios", icon: UserCog, matchPrefix: true, description: "Cuentas y roles de acceso" },
       { id: "settings", label: "Configuración", href: "/admin/configuracion", icon: Settings2, description: "Datos de la tienda, envío y folios" },
+      { id: "notifications", label: "Notificaciones", href: "/admin/notificaciones", icon: Bell, description: "Avisos de pedidos, entregas, cobros y stock" },
     ],
   },
 ];

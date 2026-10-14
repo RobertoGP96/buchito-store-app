@@ -12,6 +12,7 @@ import { AdminSearch } from "@/components/layout/admin/admin-search";
 import { useAdminNav } from "@/components/layout/admin/admin-nav-context";
 import { AdminUserMenu } from "@/components/layout/admin/admin-user-menu";
 import { findNavEntry, findNavSection } from "@/lib/nav-registry";
+import { NotificationsBell } from "@/modules/notifications/components/notifications-bell";
 
 interface AdminTopbarProps {
   userName: string;
@@ -66,6 +67,7 @@ export function AdminTopbar({ userName, role }: AdminTopbarProps) {
           <div className="ml-auto flex items-center gap-1 md:gap-2">
             <AdminSearch />
             <ThemeToggle className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-hover hover:text-navy-700" />
+            <NotificationsBell audience="admin" tone="light" inboxHref="/admin/notificaciones" />
             <AdminUserMenu userName={userName} role={role} />
           </div>
         </div>

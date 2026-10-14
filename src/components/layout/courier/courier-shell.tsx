@@ -8,6 +8,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { COURIER_NAV } from "@/lib/courier-nav";
 import { cn } from "@/lib/utils";
 import { logoutUser } from "@/modules/auth/actions/auth-actions";
+import { NotificationsBell } from "@/modules/notifications/components/notifications-bell";
 
 interface CourierShellProps {
   userName: string;
@@ -59,6 +60,7 @@ export function CourierShell({ userName, children }: CourierShellProps) {
             <p className="hidden max-w-[140px] truncate text-[12.5px] font-semibold text-slate-500 sm:block">
               {userName}
             </p>
+            <NotificationsBell audience="courier" tone="light" inboxHref="/mensajero/notificaciones" />
             <ThemeToggle className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-hover" />
             <button
               type="button"

@@ -9,6 +9,9 @@ import { LogoutButton } from "@/modules/auth/components/logout-button";
 import { TwoFactorCard } from "@/modules/auth/components/two-factor-card";
 import { getTwoFactorStatus } from "@/modules/auth/queries/two-factor-queries";
 import { ProfileEditButton } from "@/modules/customers/components/profile-edit-button";
+import { NotificationPreferencesCard } from "@/modules/notifications/components/notification-preferences-card";
+import { inboxHrefForRole } from "@/modules/notifications/lib/labels";
+import { getMutedCategories } from "@/modules/notifications/queries/notification-queries";
 
 export const metadata: Metadata = { title: "Mi perfil" };
 export const dynamic = "force-dynamic";
@@ -17,7 +20,7 @@ export default async function ProfilePage() {
   const [session, customer] = await Promise.all([auth(), getSessionCustomer()]);
   const user = session!.user;
   const roleLabel = isRole(user.role) ? ROLE_LABELS[user.role] : user.role;
-  const twoFactor = await getTwoFactorStatus(user.userId);
+  const [twoFactor, muted] = await Promise.all([getTwoFactorStatus(user.userId), getMutedCategories(user.userId)]);
 
   return (
     <>
@@ -84,6 +87,15 @@ export default async function ProfilePage() {
           </ButtonLink>
         </section>
         <TwoFactorCard status={twoFactor} />
+        {/* La clave remonta la card (y cierra su diálogo) al guardar. */}
+        {isRole(user.role) && (
+          <NotificationPreferencesCard
+            key={muted.join(",")}
+            role={user.role}
+            muted={muted}
+            inboxHref={inboxHrefForRole(user.role)}
+          />
+        )}
       </div>
     </>
   );

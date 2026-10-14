@@ -7,8 +7,11 @@ import { cartCount, useCart } from "@/modules/cart/store";
 import { BrandLogo } from "@/components/brand-logo";
 import { CurrencySwitcher } from "@/components/currency-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { CountBadge, ICON_ACTION, NAV_CONTROL } from "@/components/layout/store/nav-primitives";
 import { UserMenu, type NavUser } from "@/components/layout/store/user-menu";
 import { isCatalogPath } from "@/lib/store-nav";
+import { NotificationsBell } from "@/modules/notifications/components/notifications-bell";
+import { audienceForRole, inboxHrefForRole } from "@/modules/notifications/lib/labels";
 import { cn } from "@/lib/utils";
 
 interface NavLink {
@@ -31,27 +34,6 @@ const LINKS: NavLink[] = [
   { href: "/combos", label: "Combos", icon: Gift, isActive: (p) => p.startsWith("/combos") },
   { href: "/ofertas", label: "Ofertas", icon: BadgePercent, isActive: (p) => p === "/ofertas" },
 ];
-
-/** Controles de la barra sobre el fondo café: texto claro que se aviva al hover. */
-export const NAV_CONTROL =
-  "text-nav-muted transition-colors duration-150 hover:bg-nav-hover hover:text-nav-fg data-[pressed]:bg-nav-active data-[pressed]:text-nav-fg";
-
-/** Acción de icono del header: círculo de 36px que se tiñe al hover. */
-export const ICON_ACTION = cn(
-  "relative inline-flex h-9 w-9 items-center justify-center rounded-full",
-  NAV_CONTROL
-);
-
-/** El contador se ancla al icono, no al flujo: en píldora caramelo con un anillo
- *  del color de la barra se lee como marca sobre el icono y no desplaza la fila. */
-export function CountBadge({ count }: { count: number }) {
-  if (count <= 0) return null;
-  return (
-    <span className="pop-in tabular absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-gold-500 px-1 text-[9.5px] leading-none font-bold text-navy-950 ring-2 ring-nav">
-      {count > 99 ? "99+" : count}
-    </span>
-  );
-}
 
 export function TopNav({ user }: { user: NavUser | null }) {
   const pathname = usePathname();
@@ -100,6 +82,10 @@ export function TopNav({ user }: { user: NavUser | null }) {
             <ShoppingCart className="h-[18px] w-[18px]" strokeWidth={1.9} />
             <CountBadge count={count} />
           </Link>
+
+          {user && (
+            <NotificationsBell audience={audienceForRole(user.role)} tone="brand" inboxHref={inboxHrefForRole(user.role)} />
+          )}
 
           <UserMenu user={user} triggerClassName={NAV_CONTROL} />
         </div>

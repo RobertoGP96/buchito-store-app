@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import {
+  Bell,
   ChevronDown,
   Inbox,
   LayoutDashboard,
@@ -18,6 +19,7 @@ import {
 } from "lucide-react";
 import { logoutUser } from "@/modules/auth/actions/auth-actions";
 import { buttonLinkClasses } from "@/components/button-link";
+import { inboxHrefForRole } from "@/modules/notifications/lib/labels";
 import { cn } from "@/lib/utils";
 
 /** Lo mínimo de la sesión que necesita la barra; lo pasa el layout servidor. */
@@ -40,6 +42,7 @@ const AUTH_PATHS = ["/login", "/registro"];
 function linksFor(user: NavUser): MenuLink[] {
   return [
     { id: "profile", href: "/perfil", label: "Mi perfil", icon: UserRound },
+    { id: "notifications", href: inboxHrefForRole(user.role), label: "Notificaciones", icon: Bell },
     { id: "orders", href: "/perfil/pedidos", label: "Mis pedidos", icon: Package },
     { id: "recipients", href: "/perfil/destinatarios", label: "Mis destinatarios", icon: MapPin },
   ];

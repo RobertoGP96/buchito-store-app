@@ -12,6 +12,8 @@ import { CourierInactive } from "@/modules/deliveries/components/courier-inactiv
 import { CourierProfileEditButton } from "@/modules/deliveries/components/courier-profile-edit-button";
 import { VEHICLE_LABELS } from "@/modules/deliveries/lib/labels";
 import { getCourierProfile } from "@/modules/deliveries/queries/courier-queries";
+import { NotificationPreferencesCard } from "@/modules/notifications/components/notification-preferences-card";
+import { getMutedCategories } from "@/modules/notifications/queries/notification-queries";
 
 export const metadata: Metadata = { title: "Mi perfil" };
 export const dynamic = "force-dynamic";
@@ -19,7 +21,11 @@ export const dynamic = "force-dynamic";
 export default async function CourierProfilePage() {
   const session = await auth();
   const user = session!.user;
-  const [profile, twoFactor] = await Promise.all([getCourierProfile(user.userId), getTwoFactorStatus(user.userId)]);
+  const [profile, twoFactor, muted] = await Promise.all([
+    getCourierProfile(user.userId),
+    getTwoFactorStatus(user.userId),
+    getMutedCategories(user.userId),
+  ]);
   if (!profile) return <CourierInactive />;
 
   return (
@@ -64,6 +70,12 @@ export default async function CourierProfilePage() {
       </section>
 
       <TwoFactorCard status={twoFactor} />
+      <NotificationPreferencesCard
+        key={muted.join(",")}
+        role="courier"
+        muted={muted}
+        inboxHref="/mensajero/notificaciones"
+      />
     </>
   );
 }

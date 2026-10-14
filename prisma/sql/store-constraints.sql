@@ -173,3 +173,19 @@ ALTER TABLE user_two_factor ADD CONSTRAINT chk_two_factor_secret_by_method
 ALTER TABLE user_two_factor DROP CONSTRAINT IF EXISTS chk_two_factor_email_code_pair;
 ALTER TABLE user_two_factor ADD CONSTRAINT chk_two_factor_email_code_pair
   CHECK ((email_code_hash IS NULL) = (email_code_expires_at IS NULL));
+
+-- ===================== NOTIFICACIONES =====================
+
+-- Contador de no leídas y "marcar todas hasta N": solo las filas sin leer.
+CREATE INDEX IF NOT EXISTS idx_notifications_unread
+  ON notifications (user_id, notification_id) WHERE read_at IS NULL;
+
+ALTER TABLE notifications DROP CONSTRAINT IF EXISTS chk_notification_text_nonempty;
+ALTER TABLE notifications ADD CONSTRAINT chk_notification_text_nonempty
+  CHECK (length(title) > 0 AND length(body) > 0);
+
+-- Las categorías silenciadas son valores de NotificationCategory (la columna es
+-- text[] porque el array de enum no está verificado con el adapter de Neon).
+ALTER TABLE notification_preferences DROP CONSTRAINT IF EXISTS chk_notification_pref_categories;
+ALTER TABLE notification_preferences ADD CONSTRAINT chk_notification_pref_categories
+  CHECK (muted_categories <@ ARRAY['orders','deliveries','payments','stock']::text[]);

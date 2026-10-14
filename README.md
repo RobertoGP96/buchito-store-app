@@ -54,7 +54,7 @@ src/lib                     db, auth, audit, currency (tasas), format, roles
 src/modules/<modulo>        actions (server actions) · queries · components · lib (schemas, labels, máquinas de estado)
 ```
 
-Módulos: `auth`, `settings`, `currency`, `payments`, `products`, `cart`, `orders`, `deliveries`.
+Módulos: `auth`, `settings`, `currency`, `payments`, `products`, `cart`, `orders`, `deliveries`, `notifications`.
 
 ## Reglas de dominio
 
@@ -72,6 +72,7 @@ Flujo completo funcionando y verificado de punta a punta contra Neon:
 - **Compra**: carrito, checkout con entrega a domicilio por zona o recogida, método de pago en su moneda, cupones; el servidor recalcula precios con la tasa vigente y descuenta stock de forma atómica.
 - **Gestión**: pedidos (confirmar, listo, entregar en recogida, cancelar con reposición de stock), registro de cobros multi-moneda, entregas (asignar/desasignar mensajero).
 - **Mensajero**: recoger, entregar con cobro contra entrega, o registrar el fallo (el pedido vuelve a la cola).
+- **Notificaciones** (solo en la app): campana con contador en la tienda, el panel y la app del mensajero, y bandeja en `/perfil/notificaciones`, `/admin/notificaciones` y `/mensajero/notificaciones`. El cliente recibe los cambios de estado y los cobros de sus pedidos; el admin, pedidos nuevos, cancelaciones de clientes, pasos de entrega de los mensajeros, cobros de mensajeros y stock bajo; el mensajero, sus asignaciones, cancelaciones y liquidaciones. Cada usuario silencia categorías desde su perfil.
 
 ## Fotos de producto y CDN
 
@@ -83,4 +84,4 @@ En la base **no** se guarda la URL del bucket sino la ruta relativa `/media/<cla
 - `next/image` optimiza a partir de esa ruta; los `/_next/image` resultantes también se cachean en el edge.
 - Si prefieres un CDN propio con origen directo en el bucket (`${AWS_ENDPOINT_URL_S3}/products/`), pon su URL pública en `NEXT_PUBLIC_IMAGE_CDN_URL` (sin barra final): `imageSrc()` (`src/lib/image-url.ts`) reescribe `/media/<clave>` → `<CDN>/<clave>` y `next.config.ts` añade ese host a `images.remotePatterns`. Con Cloudflare: un Worker o una regla de origen que reenvíe `https://img.tu-dominio.com/<clave>` a `${AWS_ENDPOINT_URL_S3}/products/<clave>` con "cache everything"; el objeto ya trae `immutable`, así que no hay que purgar nunca (cada versión es una clave nueva).
 
-Pendiente / fuera de alcance por ahora: UI de administración de cupones (el modelo y la validación existen), reembolsos, pasarelas de pago online, notificaciones, favoritos, PWA, mapas, recuperación de contraseña.
+Pendiente / fuera de alcance por ahora: UI de administración de cupones (el modelo y la validación existen), reembolsos, pasarelas de pago online, notificaciones por correo o push, favoritos, PWA, mapas, recuperación de contraseña.

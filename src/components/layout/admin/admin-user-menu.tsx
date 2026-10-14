@@ -3,6 +3,7 @@
 import { Dropdown } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import {
+  Bell,
   ChevronDown,
   Inbox,
   LayoutDashboard,
@@ -39,6 +40,7 @@ const QUICK_LINKS: MenuLink[] = [
 ];
 
 const ACCOUNT_LINKS: MenuLink[] = [
+  { id: "notifications", href: "/admin/notificaciones", label: "Notificaciones", icon: Bell },
   { id: "settings", href: "/admin/configuracion", label: "Configuración", icon: Settings2 },
   { id: "profile", href: "/perfil", label: "Mi perfil", icon: UserRound },
   { id: "store", href: "/", label: "Ver la tienda", icon: Store },
@@ -79,7 +81,7 @@ export function AdminUserMenu({ userName, role, className }: AdminUserMenuProps)
           {initials || "U"}
         </span>
         <span className="hidden max-w-[120px] truncate text-[13px] font-semibold text-ink lg:inline">{userName}</span>
-        <ChevronDown className="h-3.5 w-3.5 flex-none" strokeWidth={2} />
+        <ChevronDown className="hidden h-3.5 w-3.5 flex-none sm:block" strokeWidth={2} />
       </Dropdown.Trigger>
       <Dropdown.Popover placement="bottom end" className="w-[248px]">
         {/* Fuera del Menu: React Aria solo admite ítems dentro de una sección

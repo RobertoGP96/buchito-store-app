@@ -9,6 +9,10 @@ import { roundToCurrency } from "@/lib/currency-math";
 import { decimalToNumber } from "@/lib/money";
 import { Prisma } from "@/generated/prisma";
 import type { ActionResult } from "@/types";
+import { stockItemLabel } from "@/modules/notifications/lib/build-notification";
+import { lowStockCrossing } from "@/modules/notifications/lib/low-stock";
+import { notify } from "@/modules/notifications/lib/notify";
+import { lowStockTargets } from "@/modules/notifications/lib/targets";
 import { stockAdjustmentSchema, type StockAdjustmentInput } from "../lib/schemas";
 import { isStockRuleError, planStockMovement, StockRuleError } from "../lib/stock";
 
@@ -39,9 +43,11 @@ export async function adjustStock(
       select: {
         stock: true,
         productId: true,
+        name: true,
+        unit: true,
         priceCurrencyId: true,
         costCurrencyId: true,
-        product: { select: { slug: true } },
+        product: { select: { slug: true, name: true } },
       },
     });
     if (!variant) return { success: false, error: "Variante no encontrada" };
@@ -137,6 +143,34 @@ export async function adjustStock(
           costCurrencyId: purchase?.costCurrencyId ?? null,
         },
       });
+
+      // Una salida o ajuste que deja la variante en stock bajo avisa a los
+      // demás admins. El umbral se lee dentro de la tx (sin caché).
+      if (type !== "entry" && after < currentStock) {
+        const settings = await tx.storeSetting.findUnique({ where: { id: 1 }, select: { lowStockThreshold: true } });
+        const threshold = settings?.lowStockThreshold ?? 0;
+        const level = lowStockCrossing(currentStock, after, threshold);
+        if (level) {
+          await notify(
+            tx,
+            userId,
+            lowStockTargets({
+              source: { type: "manual" },
+              items: [
+                {
+                  variantId,
+                  productId: variant.productId,
+                  label: stockItemLabel(variant.product.name, variant.name),
+                  stockAfter: after,
+                  unit: variant.unit,
+                  level,
+                },
+              ],
+              threshold,
+            })
+          );
+        }
+      }
       return after;
     });
 

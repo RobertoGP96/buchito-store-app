@@ -7,6 +7,8 @@ import { assertRole, ForbiddenError, getSessionCourierId } from "@/lib/auth-guar
 import { createAuditLog } from "@/lib/audit";
 import { failAction, firstIssueMessage, StaleVersionError } from "@/lib/action-utils";
 import { deleteObjectIfOurs } from "@/lib/storage";
+import { notify } from "@/modules/notifications/lib/notify";
+import { courierAssignmentTargets } from "@/modules/notifications/lib/targets";
 import type { ActionResult } from "@/types";
 import { isPaymentRuleError } from "@/modules/payments/lib/record-payment";
 import {
@@ -53,13 +55,21 @@ export async function assignCourier(input: AssignCourierInput): Promise<ActionRe
     const result = await db.$transaction(async (tx) => {
       const delivery = await tx.delivery.findUnique({
         where: { deliveryId },
-        select: { deliveryId: true, orderId: true, status: true, courierId: true },
+        select: {
+          deliveryId: true,
+          orderId: true,
+          status: true,
+          courierId: true,
+          courier: { select: { userId: true } },
+          order: { select: { orderNo: true } },
+          zone: { select: { name: true } },
+        },
       });
       if (!delivery) throw new DeliveryRuleError("Entrega no encontrada");
 
       const courier = await tx.courier.findUnique({
         where: { courierId },
-        select: { courierId: true, active: true, user: { select: { fullName: true } } },
+        select: { courierId: true, active: true, user: { select: { userId: true, fullName: true } } },
       });
       if (!courier?.active) throw new DeliveryRuleError("El mensajero no está activo");
 
@@ -93,6 +103,19 @@ export async function assignCourier(input: AssignCourierInput): Promise<ActionRe
         oldValues: { status: delivery.status, courierId: delivery.courierId },
         newValues: { status: "assigned", courierId, courierName: courier.user.fullName },
       });
+      await notify(
+        tx,
+        userId,
+        courierAssignmentTargets({
+          mode: "assign",
+          deliveryId,
+          orderNo: delivery.order.orderNo,
+          isRetry: delivery.status === "failed",
+          zoneName: delivery.zone?.name ?? null,
+          newCourierUserId: courier.user.userId,
+          previousCourierUserId: delivery.courier?.userId ?? null,
+        })
+      );
       return { orderId: delivery.orderId };
     });
 
@@ -120,7 +143,8 @@ export async function unassignCourier(deliveryId: number, version: number): Prom
           orderId: true,
           status: true,
           courierId: true,
-          courier: { select: { user: { select: { fullName: true } } } },
+          courier: { select: { user: { select: { userId: true, fullName: true } } } },
+          order: { select: { orderNo: true } },
         },
       });
       if (!delivery) throw new DeliveryRuleError("Entrega no encontrada");
@@ -153,6 +177,19 @@ export async function unassignCourier(deliveryId: number, version: number): Prom
         oldValues: { status: delivery.status, courierId: delivery.courierId, courierName },
         newValues: { status: "pending", courierId: null },
       });
+      await notify(
+        tx,
+        userId,
+        courierAssignmentTargets({
+          mode: "unassign",
+          deliveryId,
+          orderNo: delivery.order.orderNo,
+          isRetry: false,
+          zoneName: null,
+          newCourierUserId: null,
+          previousCourierUserId: delivery.courier?.user.userId ?? null,
+        })
+      );
       return { orderId: delivery.orderId };
     });
 
@@ -215,7 +252,10 @@ export async function transitionDelivery(input: TransitionDeliveryInput): Promis
         proofPhotoUrl: data.proofPhotoUrl,
         amountCollected: data.amountCollected ?? null,
         note: data.note,
-      })
+      }),
+      // Entregar con cobro recorre entrega, pedido, cobro y sus avisos en una
+      // sola tx: margen sobre los 5 s por defecto.
+      { timeout: 15_000 }
     );
 
     revalidateDeliveryPaths(result.orderId, result.deliveryId);

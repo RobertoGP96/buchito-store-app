@@ -15,6 +15,10 @@ import type { ActionResult } from "@/types";
 import { computeCartTotals } from "@/modules/cart/cart-totals";
 import { prorateComboLines } from "@/modules/combos/lib/combo-pricing";
 import { getOrderCombos } from "@/modules/combos/queries/order-combo-queries";
+import { stockItemLabel, type LowStockItem } from "@/modules/notifications/lib/build-notification";
+import { lowStockCrossing } from "@/modules/notifications/lib/low-stock";
+import { notify } from "@/modules/notifications/lib/notify";
+import { orderCreatedTargets } from "@/modules/notifications/lib/targets";
 import { fmtQty, isValidQty, roundQty } from "@/modules/products/lib/units";
 import { validateCoupon } from "../lib/coupon";
 import {
@@ -51,6 +55,8 @@ export async function createOrder(
     const customer = await assertSessionCustomer();
     const userId = customer.userId;
 
+    // Checkout es la tx más larga (stock, folio, cupón, audit y avisos): margen
+    // sobre los 5 s por defecto para no abortar un pedido válido por latencia.
     const created = await db.$transaction(async (tx) => {
       const settings = await tx.storeSetting.findUnique({ where: { id: 1 }, include: { baseCurrency: true } });
       if (!settings?.baseCurrency) throw new BaseCurrencyNotConfiguredError();
@@ -167,12 +173,13 @@ export async function createOrder(
         throw new CheckoutError("La tienda no ofrece recogida en tienda. Elige entrega a domicilio.");
       }
 
-      let zone: { zoneId: number; fee: number; freeShippingThreshold: number | null } | null = null;
+      let zone: { zoneId: number; name: string; fee: number; freeShippingThreshold: number | null } | null = null;
       if (data.fulfillment === "delivery") {
         const row = await tx.deliveryZone.findFirst({ where: { zoneId: data.zoneId ?? -1, active: true } });
         if (!row) throw new CheckoutError("La zona de entrega ya no está disponible. Elige otra.");
         zone = {
           zoneId: row.zoneId,
+          name: row.name,
           fee: decimalToNumber(row.fee),
           freeShippingThreshold: decimalToNullableNumber(row.freeShippingThreshold),
         };
@@ -434,8 +441,38 @@ export async function createOrder(
         },
       });
 
+      // Variantes que este pedido dejó en stock bajo o agotadas: un solo aviso.
+      const lowStockItems: LowStockItem[] = [];
+      for (const [variantId, qty] of stockNeeded) {
+        const after = stockAfter.get(variantId) ?? 0;
+        const level = lowStockCrossing(roundQty(after + qty), after, settings.lowStockThreshold);
+        if (!level) continue;
+        const variant = byId.get(variantId)!;
+        lowStockItems.push({
+          variantId,
+          productId: variant.productId,
+          label: stockItemLabel(variant.productName, variant.variantName),
+          stockAfter: after,
+          unit: variant.unit,
+          level,
+        });
+      }
+      await notify(
+        tx,
+        userId,
+        orderCreatedTargets({
+          orderId: order.orderId,
+          orderNo: order.orderNo,
+          customerName: customer.name,
+          total: { amount: totals.total, currency: base },
+          fulfillment: data.fulfillment,
+          zoneName: zone?.name ?? null,
+          lowStock: { items: lowStockItems, threshold: settings.lowStockThreshold },
+        })
+      );
+
       return order;
-    });
+    }, { timeout: 15_000 });
 
     revalidatePath("/admin/pedidos");
     revalidatePath("/admin");

@@ -9,6 +9,8 @@ import { getBaseCurrency } from "@/lib/currency";
 import { roundToCurrency } from "@/lib/currency-math";
 import { decimalToNumber } from "@/lib/money";
 import type { ActionResult } from "@/types";
+import { notify } from "@/modules/notifications/lib/notify";
+import { courierPaymentTargets } from "@/modules/notifications/lib/targets";
 import { DeliveryRuleError, isDeliveryRuleError } from "../lib/delivery-effects";
 import { courierPaymentSchema, type CourierPaymentInput } from "../lib/schemas";
 
@@ -36,7 +38,7 @@ export async function createCourierPayment(
     const result = await db.$transaction(async (tx) => {
       const courier = await tx.courier.findUnique({
         where: { courierId: data.courierId },
-        select: { courierId: true, user: { select: { fullName: true } } },
+        select: { courierId: true, user: { select: { userId: true, fullName: true } } },
       });
       if (!courier) throw new DeliveryRuleError("Mensajero no encontrado");
 
@@ -92,6 +94,15 @@ export async function createCourierPayment(
           notes: data.notes,
         },
       });
+      await notify(
+        tx,
+        userId,
+        courierPaymentTargets({
+          courierUserId: courier.user.userId,
+          amount: { amount: amountBase, currency: base },
+          deliveryCount: ids.length,
+        })
+      );
       return { courierPaymentId: payment.courierPaymentId, deliveryCount: ids.length };
     });
 

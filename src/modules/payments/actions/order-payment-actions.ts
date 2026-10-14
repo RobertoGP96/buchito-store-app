@@ -41,6 +41,9 @@ export async function registerOrderPayment(
         reference: data.reference,
         notes: data.notes,
         receivedById: userId,
+        actorRole: session?.user?.role === "admin" ? "admin" : "courier",
+        origin: "manual",
+        actorName: session?.user?.fullName ?? null,
       })
     );
 

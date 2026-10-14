@@ -7,6 +7,7 @@ import { buildWhatsappLink } from "@/lib/whatsapp";
 import { ButtonLink } from "@/components/button-link";
 import { EmptyState } from "@/components/empty-state";
 import { ScreenHeader } from "@/components/screen-header";
+import { CancelMyOrderButton } from "@/modules/orders/components/cancel-my-order-button";
 import { OrderDetail } from "@/modules/orders/components/order-detail";
 import { PaymentContactCard } from "@/modules/orders/components/payment-contact-card";
 import {
@@ -14,6 +15,7 @@ import {
   needsPaymentContact,
   outstandingInPaymentCurrency,
 } from "@/modules/orders/lib/payment-contact";
+import { orderScreenCopy } from "@/modules/orders/lib/labels";
 import { getOrderByNo, type OrderDetailData } from "@/modules/orders/queries/order-queries";
 import { getStoreSettingsSafe, type StoreSettingsData } from "@/modules/settings/queries/settings-queries";
 
@@ -79,15 +81,19 @@ export default async function OrderConfirmedPage({ params }: OrderConfirmedPageP
   const contact =
     needsPaymentContact(order) && session?.user.role !== "admin" ? buildPaymentContact(order, settings) : null;
 
+  const copy = orderScreenCopy(order.status, order.fulfillment);
+  // Solo su dueño cancela, y solo mientras nadie lo ha confirmado.
+  const canCancel =
+    order.status === "pending" && order.customerUserId != null && session?.user.userId === order.customerUserId;
 
   return (
     <>
       <ScreenHeader
-        eyebrow="Pedido recibido"
+        eyebrow={copy.eyebrow}
         title={order.orderNo}
         description={
           !contact
-            ? "Te avisaremos cuando esté en camino. Guarda este número para cualquier consulta."
+            ? copy.description
             : order.status === "pending"
               ? "Un paso más: coordina el pago por WhatsApp y te avisaremos cuando esté en camino."
               : "Tienes un pago pendiente: coordínalo por WhatsApp con nuestro equipo."
@@ -100,7 +106,10 @@ export default async function OrderConfirmedPage({ params }: OrderConfirmedPageP
       </ScreenHeader>
       <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-4 px-5 pb-12 md:px-6">
         {contact && <PaymentContactCard order={order} href={contact.href} amount={contact.amount} />}
-        <OrderDetail order={order} />
+        <OrderDetail
+          order={order}
+          actions={canCancel ? <CancelMyOrderButton orderId={order.orderId} version={order.version} /> : undefined}
+        />
       </div>
     </>
   );

@@ -98,6 +98,33 @@ enum VehicleType {
   on_foot
 }
 
+enum NotificationCategory {
+  orders
+  deliveries
+  payments
+  stock
+}
+
+enum NotificationKind {
+  order_created
+  order_confirmed
+  order_ready
+  order_out_for_delivery
+  order_delivered
+  order_delivery_failed
+  order_cancelled
+  payment_recorded
+  order_paid
+  delivery_assigned
+  delivery_unassigned
+  delivery_in_transit
+  delivery_delivered
+  delivery_failed
+  delivery_cancelled
+  low_stock
+  courier_payment
+}
+
 // =============================================
 // CORE
 // =============================================
@@ -123,6 +150,8 @@ model User {
   rateChanges      ExchangeRateHistory[] @relation("RateChangedBy")
   paymentsReceived OrderPayment[]        @relation("PaymentReceivedBy")
   courierPayments  CourierPayment[]      @relation("CourierPaymentPaidBy")
+  notifications    Notification[]
+  notificationPreference NotificationPreference?
 
   @@index([role, isActive])
   @@map("users")
@@ -822,4 +851,41 @@ model DeliveryEvent {
 
   @@index([deliveryId, createdAt])
   @@map("delivery_events")
+}
+
+// =============================================
+// NOTIFICATIONS
+// =============================================
+
+// Aviso en la bandeja de un usuario. El texto se fija al escribir (snapshot):
+// si el pedido o el producto cambian después, el aviso cuenta lo que pasó.
+model Notification {
+  notificationId Int                  @id @default(autoincrement()) @map("notification_id")
+  userId         Int                  @map("user_id")
+  category       NotificationCategory
+  kind           NotificationKind
+  title          String
+  body           String
+  href           String?
+  readAt         DateTime?            @map("read_at")
+  createdAt      DateTime             @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  // Lista y "último id" por usuario; el de no leídas es parcial (store-constraints.sql).
+  @@index([userId, notificationId])
+  @@map("notifications")
+}
+
+// Categorías silenciadas por usuario (valores de NotificationCategory; String[]
+// porque el array de enum no está verificado con adapter-neon). Lo silenciado
+// no se escribe, así que no hay nada que filtrar al leer. Sin fila = nada silenciado.
+model NotificationPreference {
+  userId          Int      @id @map("user_id")
+  mutedCategories String[] @default([]) @map("muted_categories")
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@map("notification_preferences")
 }
