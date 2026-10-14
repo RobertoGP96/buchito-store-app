@@ -10,6 +10,8 @@ export interface StoreSettingsData {
   storeName: string;
   baseCurrency: CurrencyInfo | null;
   phone: string | null;
+  /** WhatsApp para coordinar pagos; nunca se pinta en la tienda. */
+  whatsappPhone: string | null;
   email: string | null;
   address: string | null;
   orderPrefix: string;
@@ -51,6 +53,7 @@ const loadStoreSettingsCached = unstable_cache(
           }
         : null,
       phone: row.phone,
+      whatsappPhone: row.whatsappPhone,
       email: row.email,
       address: row.address,
       orderPrefix: row.orderPrefix,

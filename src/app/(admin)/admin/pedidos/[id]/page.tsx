@@ -12,6 +12,9 @@ import { RegisterPaymentForm } from "@/modules/payments/components/register-paym
 import { outstandingBase } from "@/modules/payments/lib/payment-status";
 import { getActivePaymentMethods } from "@/modules/payments/queries/payment-queries";
 import { fromBaseAmount, roundToCurrency } from "@/lib/currency-math";
+import { buildWhatsappLink } from "@/lib/whatsapp";
+import { getStoreSettings } from "@/modules/settings/queries/settings-queries";
+import { WhatsappLink } from "@/components/whatsapp-link";
 import { summarizeProfit } from "@/modules/finance/lib/profit";
 
 export const dynamic = "force-dynamic";
@@ -30,7 +33,11 @@ export default async function AdminOrderPage({ params }: AdminOrderPageProps) {
   const orderId = Number(id);
   if (!Number.isInteger(orderId)) notFound();
 
-  const [order, methods] = await Promise.all([getOrderById(orderId), getActivePaymentMethods()]);
+  const [order, methods, settings] = await Promise.all([
+    getOrderById(orderId),
+    getActivePaymentMethods(),
+    getStoreSettings(),
+  ]);
   if (!order) notFound();
 
   const outstanding = outstandingBase(order.paidBase, order.total);
@@ -47,6 +54,15 @@ export default async function AdminOrderPage({ params }: AdminOrderPageProps) {
     profit: roundToCurrency(lineProfit.profit - order.discount, decimals),
     linesWithoutCost: lineProfit.linesWithoutCost,
   };
+  // El empleado puede abrir el chat con el cliente desde la ficha. wa.me lee el
+  // número como internacional, así que sin "+" (código de país) no hay enlace
+  // y queda el `tel:` de siempre, que el móvil marca en su contexto local.
+  const customerWhatsapp = order.customerPhone.trim().startsWith("+")
+    ? buildWhatsappLink(
+        order.customerPhone,
+        `Hola ${order.customerName}, te escribimos de ${settings.storeName} por tu pedido ${order.orderNo}.`
+      )
+    : null;
 
   return (
     <>
@@ -80,6 +96,13 @@ export default async function AdminOrderPage({ params }: AdminOrderPageProps) {
               currencyCode={defaultMethod.currency.code}
               methods={methods.map((m) => ({ value: String(m.paymentMethodId), label: `${m.name} (${m.currency.code})` }))}
             />
+          ) : undefined
+        }
+        customerActions={
+          customerWhatsapp ? (
+            <WhatsappLink href={customerWhatsapp} variant="soft" size="sm">
+              WhatsApp
+            </WhatsappLink>
           ) : undefined
         }
         deliveryHref={order.delivery ? "/admin/entregas" : undefined}

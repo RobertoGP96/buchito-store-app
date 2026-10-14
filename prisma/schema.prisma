@@ -175,6 +175,10 @@ model StoreSetting {
   storeName             String   @default("Buchito") @map("store_name")
   baseCurrencyId        Int?     @map("base_currency_id")
   phone                 String?
+  // WhatsApp de la tienda para que el cliente coordine el pago tras el pedido.
+  // Se guarda tal cual lo escribe el admin; `buildWhatsappLink` lo normaliza.
+  // Nunca se muestra al cliente: solo abre el chat.
+  whatsappPhone         String?  @map("whatsapp_phone")
   email                 String?
   address               String?
   orderPrefix           String   @default("PED-") @map("order_prefix")

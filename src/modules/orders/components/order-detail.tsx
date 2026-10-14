@@ -21,6 +21,8 @@ interface OrderDetailProps {
   /** Slots que varían por audiencia (admin: acciones y registrar cobro). */
   actions?: React.ReactNode;
   paymentActions?: React.ReactNode;
+  /** Acciones sobre el cliente (admin: escribirle por WhatsApp). */
+  customerActions?: React.ReactNode;
   /** Enlace a la entrega (admin) si existe. */
   deliveryHref?: string;
   profit?: OrderProfit;
@@ -82,7 +84,7 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
 }
 
 /** Ficha de pedido compartida por admin y cliente. Server component. */
-export function OrderDetail({ order, actions, paymentActions, deliveryHref, profit }: OrderDetailProps) {
+export function OrderDetail({ order, actions, paymentActions, customerActions, deliveryHref, profit }: OrderDetailProps) {
   const outstanding = outstandingBase(order.paidBase, order.total);
   const groups = groupLines(order.lines);
   const timeline = [
@@ -223,7 +225,7 @@ export function OrderDetail({ order, actions, paymentActions, deliveryHref, prof
           )}
         </Section>
 
-        <Section title="Cliente">
+        <Section title="Cliente" aside={customerActions}>
           <p className="text-[14px] font-semibold text-ink">{order.customerName}</p>
           <p className="tabular mt-0.5 text-[13px] text-slate-500">
             <a href={`tel:${order.customerPhone.replace(/\s+/g, "")}`} className="hover:text-navy-700">{order.customerPhone}</a>

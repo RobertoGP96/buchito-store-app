@@ -70,6 +70,8 @@ export interface OrderDetailData extends OrderSummaryRow {
   paymentSurcharge: number;
   paidBase: number;
   paymentExchangeRate: number;
+  /** Instrucciones vigentes del método (cuenta, etc.) para coordinar el pago. */
+  paymentInstructions: string | null;
   couponCode: string | null;
   zoneName: string | null;
   deliveryAddress: DeliveryAddress | null;
@@ -143,6 +145,10 @@ export async function getOrdersForUser(userId: number): Promise<OrderSummaryRow[
 
 const DETAIL_INCLUDE = {
   ...SUMMARY_INCLUDE,
+  // Instrucciones vigentes del método, no snapshot: si la tienda cambia la
+  // cuenta, el cliente debe ver la nueva. La relación es obligatoria y Restrict:
+  // el método puede estar inactivo, nunca ausente.
+  paymentMethod: { select: { instructions: true } },
   customer: { select: { customerId: true, userId: true, email: true } },
   baseCurrency: true,
   zone: { select: { name: true } },
@@ -180,6 +186,7 @@ function toDetail(row: DetailRow): OrderDetailData {
     paymentSurcharge: decimalToNumber(row.paymentSurcharge),
     paidBase: decimalToNumber(row.paidBase),
     paymentExchangeRate: decimalToNumber(row.paymentExchangeRate),
+    paymentInstructions: row.paymentMethod.instructions,
     couponCode: row.couponCode,
     zoneName: row.zone?.name ?? null,
     deliveryAddress: (row.deliveryAddress as DeliveryAddress | null) ?? null,

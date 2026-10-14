@@ -8,6 +8,7 @@ import { Money } from "@/components/money";
 import { ScreenHeader } from "@/components/screen-header";
 import { StatusChip } from "@/components/status-chip";
 import { FULFILLMENT_LABELS, ORDER_STATUS_META } from "@/modules/orders/lib/labels";
+import { PAYMENT_STATUS_META } from "@/modules/payments/lib/labels";
 import { getOrdersForUser } from "@/modules/orders/queries/order-queries";
 
 export const metadata: Metadata = { title: "Mis pedidos" };
@@ -41,6 +42,7 @@ export default async function MyOrdersPage() {
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="font-semibold text-ink">{order.orderNo}</p>
                       <StatusChip {...ORDER_STATUS_META[order.status]} />
+                      <StatusChip {...PAYMENT_STATUS_META[order.paymentStatus]} />
                     </div>
                     <p className="tabular mt-1 text-[12.5px] text-slate-400">
                       {fmtDateTime(order.createdAt)} · {FULFILLMENT_LABELS[order.fulfillment]} · {order.lineCount}{" "}

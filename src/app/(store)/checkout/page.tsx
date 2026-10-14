@@ -8,6 +8,7 @@ import { getActiveZones } from "@/modules/deliveries/queries/zone-queries";
 import { getActivePaymentMethods } from "@/modules/payments/queries/payment-queries";
 import { getRecipientsForCustomer } from "@/modules/recipients/queries/recipient-queries";
 import { getStoreSettings } from "@/modules/settings/queries/settings-queries";
+import { buildWhatsappLink } from "@/lib/whatsapp";
 
 export const metadata: Metadata = { title: "Finalizar compra" };
 export const dynamic = "force-dynamic";
@@ -52,6 +53,7 @@ async function CheckoutContent({ customer }: { customer: SessionCustomer }) {
       defaultShippingFee={settings.defaultShippingFee}
       freeShippingThreshold={settings.freeShippingThreshold}
       allowPickup={settings.allowPickup}
+      whatsappEnabled={buildWhatsappLink(settings.whatsappPhone) !== null}
       customer={{ name: customer.name, phone: customer.phone, email: customer.email }}
       recipients={recipients}
     />

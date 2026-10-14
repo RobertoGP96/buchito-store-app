@@ -34,6 +34,8 @@ interface CheckoutFormProps {
   defaultShippingFee: number;
   freeShippingThreshold: number | null;
   allowPickup: boolean;
+  /** Hay WhatsApp de tienda: tras confirmar, el cliente coordina el pago allí. */
+  whatsappEnabled: boolean;
   /** Datos de la cuenta: se muestran, no se editan aquí. */
   customer: CheckoutCustomer;
   recipients: RecipientRow[];
@@ -65,6 +67,7 @@ export function CheckoutForm({
   defaultShippingFee,
   freeShippingThreshold,
   allowPickup,
+  whatsappEnabled,
   customer,
   recipients,
 }: CheckoutFormProps) {
@@ -334,6 +337,11 @@ export function CheckoutForm({
                 description="Lo verás en el comprobante de tu transferencia."
               />
             </div>
+          )}
+          {whatsappEnabled && (
+            <p className="mt-4 text-[12.5px] leading-[1.6] text-slate-500">
+              Después de confirmar verás cómo coordinar el pago por WhatsApp con la tienda y enviar el comprobante.
+            </p>
           )}
         </section>
 

@@ -24,6 +24,7 @@ export function SettingsForm({ settings, currencies }: SettingsFormProps) {
       storeName: settings.storeName,
       baseCurrencyId: settings.baseCurrency?.currencyId ?? "",
       phone: settings.phone ?? "",
+      whatsappPhone: settings.whatsappPhone ?? "",
       email: settings.email ?? "",
       address: settings.address ?? "",
       orderPrefix: settings.orderPrefix,
@@ -66,6 +67,13 @@ export function SettingsForm({ settings, currencies }: SettingsFormProps) {
             isRequired
           />
           <FormTextField control={control} name="phone" label="Teléfono" type="tel" />
+          <FormTextField
+            control={control}
+            name="whatsappPhone"
+            label="WhatsApp para coordinar pagos"
+            type="tel"
+            description="Con código de país, p. ej. +53 5 123 4567. Tras hacer su pedido el cliente ve un botón para escribirte; el número no se imprime en la tienda, solo lo ve al abrir el chat. Vacío = sin paso de WhatsApp."
+          />
           <FormTextField control={control} name="email" label="Correo" type="email" />
           <FormTextField control={control} name="address" label="Dirección" className="md:col-span-2" />
         </div>
