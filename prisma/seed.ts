@@ -161,7 +161,6 @@ async function main() {
         label: "Casa",
         line1: "Calle 23 #456, apto 3",
         neighborhood: "Vedado",
-        city: "La Habana",
         reference: "Edificio azul, timbre 3",
         zoneId: zoneRows[0].zoneId,
         isDefault: true,

@@ -8,7 +8,6 @@ const recipient = {
   line1: "Calle 23 #456",
   line2: "",
   neighborhood: "",
-  city: "La Habana",
   reference: "",
 };
 const base = { paymentMethodId: 1, paymentReference: "", couponCode: "", notes: "", lines, combos: [] };
@@ -78,7 +77,6 @@ describe("createOrderSchema", () => {
         line1: "Calle 23 #456",
         line2: null,
         neighborhood: null,
-        city: "La Habana",
         reference: null,
       });
     }

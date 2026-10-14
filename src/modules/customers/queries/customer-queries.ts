@@ -33,7 +33,6 @@ export interface CustomerAddressRow {
   line1: string;
   line2: string | null;
   neighborhood: string | null;
-  city: string;
   reference: string | null;
   zoneName: string | null;
   isDefault: boolean;
@@ -166,7 +165,6 @@ export async function getCustomerById(customerId: number): Promise<CustomerDetai
       line1: a.line1,
       line2: a.line2,
       neighborhood: a.neighborhood,
-      city: a.city,
       reference: a.reference,
       zoneName: a.zone?.name ?? null,
       isDefault: a.isDefault,

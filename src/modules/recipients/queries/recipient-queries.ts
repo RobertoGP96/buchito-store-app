@@ -8,7 +8,6 @@ export interface RecipientRow {
   line1: string;
   line2: string | null;
   neighborhood: string | null;
-  city: string;
   reference: string | null;
   zoneId: number | null;
   zoneName: string | null;
@@ -39,7 +38,6 @@ export async function getRecipientsForCustomer(customerId: number): Promise<Reci
     line1: a.line1,
     line2: a.line2,
     neighborhood: a.neighborhood,
-    city: a.city,
     reference: a.reference,
     zoneId: a.zoneId,
     zoneName: a.zone?.name ?? null,

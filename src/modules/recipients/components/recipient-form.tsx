@@ -31,7 +31,6 @@ export function RecipientForm({ open, onOpenChange, recipient, zones }: Recipien
       line1: recipient?.line1 ?? "",
       line2: recipient?.line2 ?? "",
       neighborhood: recipient?.neighborhood ?? "",
-      city: recipient?.city ?? "",
       reference: recipient?.reference ?? "",
       zoneId: recipient?.zoneId != null ? String(recipient.zoneId) : "",
       isDefault: recipient?.isDefault ?? false,
@@ -87,7 +86,6 @@ export function RecipientForm({ open, onOpenChange, recipient, zones }: Recipien
         <FormTextField control={control} name="line1" label="Dirección" placeholder="Calle y número" autoComplete="address-line1" isRequired className="sm:col-span-2" />
         <FormTextField control={control} name="line2" label="Apto / piso (opcional)" autoComplete="address-line2" />
         <FormTextField control={control} name="neighborhood" label="Barrio / reparto (opcional)" />
-        <FormTextField control={control} name="city" label="Ciudad" autoComplete="address-level2" isRequired />
         <FormTextField control={control} name="reference" label="Referencia (opcional)" placeholder="Edificio azul, timbre 3" />
         <FormSwitch
           control={control}

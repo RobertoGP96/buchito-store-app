@@ -265,9 +265,9 @@ export function OrderDetail({ order, actions, paymentActions, deliveryHref, prof
               )}
               {order.deliveryAddress.line1}
               {order.deliveryAddress.line2 && <>, {order.deliveryAddress.line2}</>}
-              <br />
-              {order.deliveryAddress.neighborhood && <>{order.deliveryAddress.neighborhood}, </>}
-              {order.deliveryAddress.city}
+              {order.deliveryAddress.neighborhood && (
+                <span className="block">{order.deliveryAddress.neighborhood}</span>
+              )}
               {order.zoneName && <span className="block text-slate-500">Zona: {order.zoneName}</span>}
               {order.deliveryAddress.reference && (
                 <span className="block text-slate-500">Ref.: {order.deliveryAddress.reference}</span>

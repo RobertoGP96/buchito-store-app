@@ -199,7 +199,6 @@ export async function createOrder(
             line1: saved.line1,
             line2: saved.line2,
             neighborhood: saved.neighborhood,
-            city: saved.city,
             reference: saved.reference,
           };
         } else if (data.newRecipient) {
@@ -213,7 +212,6 @@ export async function createOrder(
               line1: r.line1,
               line2: r.line2,
               neighborhood: r.neighborhood,
-              city: r.city,
               reference: r.reference,
               zoneId: zone.zoneId,
               isDefault: count === 0,
@@ -226,7 +224,6 @@ export async function createOrder(
             line1: r.line1,
             line2: r.line2,
             neighborhood: r.neighborhood,
-            city: r.city,
             reference: r.reference,
           };
         }

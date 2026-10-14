@@ -16,7 +16,6 @@ export const recipientSchema = z.object({
   line1: z.string().trim().min(3, "Escribe la dirección"),
   line2: optionalText,
   neighborhood: optionalText,
-  city: z.string().trim().min(2, "Escribe la ciudad"),
   reference: optionalText,
   zoneId: z
     .union([z.literal(""), z.null(), z.coerce.number().int().positive()])

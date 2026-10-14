@@ -23,7 +23,6 @@ export type DeliveryAddress = {
   line1: string;
   line2: string | null;
   neighborhood: string | null;
-  city: string;
   reference: string | null;
 };
 

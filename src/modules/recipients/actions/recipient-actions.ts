@@ -39,7 +39,6 @@ function toColumns(data: RecipientValues) {
     line1: data.line1,
     line2: data.line2,
     neighborhood: data.neighborhood,
-    city: data.city,
     reference: data.reference,
     zoneId: data.zoneId,
   };
@@ -51,7 +50,6 @@ function auditValues(row: {
   line1: string;
   line2: string | null;
   neighborhood: string | null;
-  city: string;
   reference: string | null;
   zoneId: number | null;
   isDefault: boolean;
@@ -62,7 +60,6 @@ function auditValues(row: {
     line1: row.line1,
     line2: row.line2,
     neighborhood: row.neighborhood,
-    city: row.city,
     reference: row.reference,
     zoneId: row.zoneId,
     isDefault: row.isDefault,

@@ -116,7 +116,6 @@ export function CheckoutForm({
         line1: "",
         line2: "",
         neighborhood: "",
-        city: "",
         reference: "",
       },
       paymentMethodId: paymentMethods[0]?.paymentMethodId ?? 0,
@@ -277,7 +276,6 @@ export function CheckoutForm({
                   <FormTextField control={control} name="newRecipient.line1" label="Dirección" placeholder="Calle y número" autoComplete="address-line1" isRequired className="sm:col-span-2" />
                   <FormTextField control={control} name="newRecipient.line2" label="Apto / piso (opcional)" autoComplete="address-line2" />
                   <FormTextField control={control} name="newRecipient.neighborhood" label="Barrio / reparto (opcional)" />
-                  <FormTextField control={control} name="newRecipient.city" label="Ciudad" autoComplete="address-level2" isRequired />
                   <FormTextField control={control} name="newRecipient.reference" label="Referencia (opcional)" placeholder="Edificio azul, timbre 3" />
                   <p className="text-[12px] leading-[1.6] text-slate-400 sm:col-span-2">
                     Se guarda en tus destinatarios para la próxima compra.

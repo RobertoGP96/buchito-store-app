@@ -7,7 +7,6 @@ const valid = {
   line1: "Calle 23 #456",
   line2: "",
   neighborhood: "",
-  city: "La Habana",
   reference: "",
   zoneId: "",
 };
@@ -37,7 +36,7 @@ describe("recipientSchema", () => {
     if (none.success) expect(none.data.zoneId).toBeNull();
   });
 
-  it("exige nombre, teléfono válido, dirección y ciudad", () => {
+  it("exige nombre, teléfono válido y dirección", () => {
     const name = recipientSchema.safeParse({ ...valid, name: "A" });
     expect(name.success).toBe(false);
     if (!name.success) expect(name.error.issues[0]?.message).toBe("Escribe el nombre del destinatario");
@@ -47,6 +46,5 @@ describe("recipientSchema", () => {
     if (!phone.success) expect(phone.error.issues[0]?.message).toBe("Escribe un teléfono válido");
 
     expect(recipientSchema.safeParse({ ...valid, line1: "" }).success).toBe(false);
-    expect(recipientSchema.safeParse({ ...valid, city: "" }).success).toBe(false);
   });
 });

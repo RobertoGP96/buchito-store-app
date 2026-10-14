@@ -359,7 +359,6 @@ model CustomerAddress {
   line1         String
   line2         String?
   neighborhood  String?
-  city          String
   reference     String?
   zoneId        Int?     @map("zone_id")
   isDefault     Boolean  @default(false) @map("is_default")

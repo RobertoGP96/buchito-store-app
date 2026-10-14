@@ -124,9 +124,7 @@ export function CustomerDetail({ customer }: { customer: CustomerDetailData }) {
                     <p>
                       {a.line1}
                       {a.line2 && <>, {a.line2}</>}
-                      <br />
-                      {a.neighborhood && <>{a.neighborhood}, </>}
-                      {a.city}
+                      {a.neighborhood && <span className="block">{a.neighborhood}</span>}
                     </p>
                     {a.zoneName && <p className="text-slate-500">Zona: {a.zoneName}</p>}
                     {a.reference && <p className="text-slate-500">Ref.: {a.reference}</p>}
