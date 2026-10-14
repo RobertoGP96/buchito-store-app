@@ -224,13 +224,15 @@ export function FormSwitch<T extends FieldValues>({
           isDisabled={isDisabled}
           className={className}
         >
-          <Switch.Control>
-            <Switch.Thumb />
-          </Switch.Control>
+          {/* Desde HeroUI 3.2 solo `Switch.Content` es la etiqueta clicable:
+              el control debe ir dentro o pulsar la pista no cambia nada. */}
           <Switch.Content>
+            <Switch.Control>
+              <Switch.Thumb />
+            </Switch.Control>
             <Label>{label}</Label>
-            {description && <Description>{description}</Description>}
           </Switch.Content>
+          {description && <Description>{description}</Description>}
         </Switch>
       )}
     />
