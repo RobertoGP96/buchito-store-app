@@ -1,7 +1,7 @@
 /**
  * Genera todos los activos de marca a partir de `logo-source.jpg` (el logo
  * original: isotipo taza+carrito sobre fondo blanco) y del wordmark que se
- * compone aquí ("BUCHITO SHOP" + "TIENDA & CAFÉ ONLINE").
+ * compone aquí ("BUCHITO SHOP", sin lema).
  *
  * El JPG no tiene transparencia, así que el fondo se "recorta" por cobertura:
  * el isotipo es plano, y cada píxel se reescribe con el color exacto y un alfa
@@ -40,7 +40,6 @@ const OUT = {
 };
 
 const WORDMARK = "BUCHITO SHOP";
-const TAGLINE = "TIENDA & CAFÉ ONLINE";
 
 // Colores del logo y de la tesela de marca (mismos que --c-brand-tile en globals.css).
 const CARAMEL = [0x9a, 0x6e, 0x41];
@@ -98,24 +97,21 @@ async function textLine(text, { size, weight, spacing, color }) {
   return sharp(Buffer.from(svg)).png().toBuffer().then((buf) => sharp(buf).trim().png().toBuffer());
 }
 
-/** Lockup apilado: isotipo, nombre y lema, centrados, con las proporciones del
- *  original (texto algo más ancho que la taza, lema a la mitad de cuerpo). */
+/** Lockup apilado: isotipo y nombre, centrados, con las proporciones del
+ *  original (texto algo más ancho que la taza). */
 async function lockup(mark, markColor, textColor) {
   const S = 2; // escala respecto al original de 1408×768
   const glyph = await mark().resize({ height: MARK_BOX.height * S }).png().toBuffer();
   const name = await textLine(WORDMARK, { size: 66 * S, weight: 700, spacing: 2 * S, color: hex(textColor) });
-  const tagline = await textLine(TAGLINE, { size: 37 * S, weight: 600, spacing: 1.5 * S, color: hex(textColor) });
-  const metas = await Promise.all([glyph, name, tagline].map((b) => sharp(b).metadata()));
+  const metas = await Promise.all([glyph, name].map((b) => sharp(b).metadata()));
   const gapName = 30 * S;
-  const gapTagline = 14 * S;
   const width = Math.max(...metas.map((m) => m.width));
-  const height = metas[0].height + gapName + metas[1].height + gapTagline + metas[2].height;
+  const height = metas[0].height + gapName + metas[1].height;
   const center = (m) => Math.round((width - m.width) / 2);
   return sharp({ create: { width, height, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
     .composite([
       { input: glyph, left: center(metas[0]), top: 0 },
       { input: name, left: center(metas[1]), top: metas[0].height + gapName },
-      { input: tagline, left: center(metas[2]), top: metas[0].height + gapName + metas[1].height + gapTagline },
     ])
     .png(PNG)
     .toBuffer();

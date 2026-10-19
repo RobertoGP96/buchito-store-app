@@ -20,13 +20,13 @@ export function CurrencySwitcher({ className }: CurrencySwitcherProps) {
       <Dropdown.Trigger
         aria-label={`Moneda: ${display.code}`}
         className={cn(
-          "nav-label inline-flex h-9 items-center gap-1.5 rounded-full px-2.5 text-slate-500 transition-colors duration-150 hover:bg-hover hover:text-navy-700",
+          "nav-label inline-flex h-9 items-center gap-1 rounded-full px-2 text-slate-500 sm:gap-1.5 sm:px-2.5 transition-colors duration-150 hover:bg-hover hover:text-navy-700",
           className
         )}
       >
         <Coins className="h-[18px] w-[18px] flex-none" strokeWidth={1.9} />
         <span className="tabular">{display.code}</span>
-        <ChevronDown className="h-3.5 w-3.5 flex-none" strokeWidth={2} />
+        <ChevronDown className="hidden h-3.5 w-3.5 flex-none sm:block" strokeWidth={2} />
       </Dropdown.Trigger>
       <Dropdown.Popover placement="bottom end">
         <Dropdown.Menu

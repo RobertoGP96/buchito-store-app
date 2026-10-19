@@ -49,7 +49,7 @@ interface BrandLogoProps {
    *  fondo, así que pasa a un velo claro para no desaparecer. */
   tone?: BrandTone;
   size?: BrandSize;
-  /** `stacked` es el logo completo (isotipo, nombre y lema) para pantallas
+  /** `stacked` es el logo completo (isotipo y nombre) para pantallas
    *  donde la marca preside, como login y registro. */
   variant?: "inline" | "stacked";
   /** Oculta la palabra por debajo de `sm`: en la barra de la tienda, con la
@@ -87,7 +87,7 @@ export function BrandLogo({
           src={source.src}
           alt={STORE_NAME}
           width={1002}
-          height={1188}
+          height={1090}
           sizes="180px"
           loading="eager"
           className={cn("h-[150px] w-auto", tone === "default" ? source.whenDefault : source.whenInverse)}

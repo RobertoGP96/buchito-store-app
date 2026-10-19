@@ -71,7 +71,7 @@ export function TopNav({ user }: { user: NavUser | null }) {
         </nav>
 
         <div className="ml-auto flex items-center gap-1 md:gap-2">
-          <CurrencySwitcher className={cn("hidden md:inline-flex", NAV_CONTROL)} />
+          <CurrencySwitcher className={NAV_CONTROL} />
           <ThemeToggle className={ICON_ACTION} />
 
           <Link
