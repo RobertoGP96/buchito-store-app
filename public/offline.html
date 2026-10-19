@@ -7,20 +7,20 @@
     <style>
       :root {
         color-scheme: light dark;
-        --page: #f6f3ec;
+        --page: #f6f1ea;
         --canvas: #ffffff;
-        --ink: #111827;
-        --muted: #64748b;
-        --navy: #14386f;
-        --on-navy: #e3ecf8;
+        --ink: #1f1711;
+        --muted: #6b625a;
+        --brand: #6b3f24;
+        --on-brand: #f1e8de;
       }
       @media (prefers-color-scheme: dark) {
         :root {
-          --page: #0b1220;
-          --canvas: #121a2b;
-          --ink: #e5e7eb;
-          --muted: #94a3b8;
-          --navy: #3b6fd3;
+          --page: #16100c;
+          --canvas: #1f1711;
+          --ink: #f1e8de;
+          --muted: #a89d92;
+          --brand: #6b3f24;
         }
       }
       * { box-sizing: border-box; }
@@ -41,7 +41,7 @@
         padding: 32px 24px;
         border-radius: 24px;
         background: var(--canvas);
-        box-shadow: 0 10px 30px rgba(17, 24, 39, 0.08);
+        box-shadow: 0 10px 30px rgba(42, 26, 15, 0.1);
         text-align: center;
       }
       .logo {
@@ -49,11 +49,11 @@
         height: 56px;
         margin: 0 auto 20px;
         border-radius: 16px;
-        background: var(--navy);
+        background: var(--brand);
         display: grid;
         place-items: center;
       }
-      .logo svg { width: 30px; height: 30px; }
+      .logo img { width: 40px; height: 40px; display: block; }
       h1 { margin: 0; font-size: 22px; line-height: 1.2; }
       p { margin: 12px 0 0; font-size: 14px; line-height: 1.6; color: var(--muted); }
       button {
@@ -61,8 +61,8 @@
         padding: 12px 24px;
         border: 0;
         border-radius: 999px;
-        background: var(--navy);
-        color: var(--on-navy);
+        background: var(--brand);
+        color: var(--on-brand);
         font: inherit;
         font-weight: 600;
         cursor: pointer;
@@ -71,12 +71,10 @@
   </head>
   <body>
     <main>
+      <!-- El isotipo va embebido: sin red no hay otra forma de cargarlo (el
+           service worker solo cachea esta página). Es public/brand/logo-mark-inverse.png a 112 px. -->
       <div class="logo" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#e3ecf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M15 21v-5a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v5" />
-          <path d="M17.774 10.31a1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.451 0 1.12 1.12 0 0 0-1.548 0 2.5 2.5 0 0 1-3.452 0 1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.77-3.248l2.889-4.184A2 2 0 0 1 7 2h10a2 2 0 0 1 1.653.873l2.895 4.192a2.5 2.5 0 0 1-3.774 3.244" />
-          <path d="M4 10.95V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8.05" />
-        </svg>
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHAAAABwCAMAAADxPgR5AAADAFBMVEVMaXHy6uDv5N7PwLzw593////w593+///w593////18+Pw6N7w593w6N7w597/qq6qqqpYWFjx6N7/gF3w597t5dnx6N7/7+zz6+D//6r06uDx6N7y6N755NPs59Tz6+Hv5tzx6d7o3dfx6N7y6N///3/06+Hx6d7x6N7z6uDz6eDv6N3z6eDv5t3x5tv07OHy6N7v597v6dnx6N7z6+H16uHz6uHx6d/y6N/z6d/z6d/w6N7z6uDy6d/u0tX06+Dy6d/u49n06uL16+Hy6t/z6t/z6N/x6d7x6N7x6N7q4t7p49fu6drx6N7b5Nbx6N3x6N7y7ODx6N7y6uDz6+Dx5+Dx6d737uTz6+H06uH27uPx6N717OHy6N/47eTw6N7y6d/06+Dw59zy6d/y6d/x6N7x6d747+T37uP27ePz6uD17eL06+Hs6t306+Ht5dvy6t/y697z6uDx6N727eT06+Hw59706+Dy6d7x6N7y6N/y6d/17OLy6d/w6d7m4NX58Oby6d727eL06+Dw6N317eL06+Hy6d/57+Tz6d/06uDx6N7z6t/w593x6N/16+H17OLy6d/y6d/w597x6N7y6eDx6N727ePz6OD06+Hx6d/y6OD17eP47+X37uT37eTz6uD06+H17OLx6N707OL37uT47+X27eLy6d/w59327OLz6uHy6d/w6N7x59706+Hy6d7x6N/27uP37+X17OL06+D27ePs5tr37+X06+D27uT58OXy6t717OP37eTz6d/x6N306+L07OL17OP27eL48OX17eL17OL06+Hy6N7y6d/z6uH27uP27uP47+T58OT27uT/9ef37+T47+X78ef78ujx6N727eL68Oby6d//9uv/9+z17OL/9+z/+O7z6uD88+j+9Or+9er37uTz6eD99On27eP/9ev68eb57+X17OH47+T88ujz6t/78uf98+n47uT58Ob///jw593//fL99Or/+u/78uj///b///T06+D/9uv68ef37uP27OL/+/E5aR/jAAAA1nRSTlMA5w8E/AP+Af0CBP38+v0DAwH7Afwp/g8SA9b8/gUJQP0pDPn7AlM9uxw/Ktn+Kx5XLg75CiU5/viP8Cx20wlgSxkj6rH2Qyb5UAcUDGoH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" alt="" />
       </div>
       <h1>Sin conexión</h1>
       <p>No se pudo cargar la tienda. Revisa tu conexión a internet y vuelve a intentarlo.</p>

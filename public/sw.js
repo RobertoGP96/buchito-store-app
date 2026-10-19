@@ -4,7 +4,7 @@
  * HTML o RSC mostraría información vieja. Solo guarda una página estática
  * para cuando no hay red, que es lo que un navegador espera de una app
  * instalable. */
-const VERSION = "v2";
+const VERSION = "v3";
 const CACHE = `buchito-offline-${VERSION}`;
 const OFFLINE_URL = "/offline.html";
 

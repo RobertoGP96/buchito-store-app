@@ -15,7 +15,7 @@ export function AuthCard({ eyebrow, title, description, footer, children }: Auth
   return (
     <div className="mx-auto flex w-full max-w-[440px] flex-1 flex-col px-5 pt-10 pb-12 md:pt-16">
       <div className="flex justify-center">
-        <BrandLogo />
+        <BrandLogo variant="stacked" />
       </div>
       <div className="mt-8 rounded-card bg-canvas p-6 shadow-card md:p-8">
         <p className="eyebrow">{eyebrow}</p>

@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown, ChevronsLeft, ChevronsRight, Store } from "lucide-react";
-import { BrandLogo } from "@/components/brand-logo";
+import { BrandLogo, BrandMark } from "@/components/brand-logo";
 import {
   ADMIN_NAV_SECTIONS,
   findNavEntry,
@@ -110,8 +110,8 @@ export function AdminSidebar() {
     >
       <div className={cn("flex items-center pt-5 pb-4", collapsed ? "justify-center px-0" : "justify-between px-5")}>
         {collapsed ? (
-          <Link href="/admin" aria-label="Ir al panel" className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-brand-tile text-brand-tile-fg shadow-card">
-            <Store className="h-[18px] w-[18px]" strokeWidth={2} />
+          <Link href="/admin" aria-label="Ir al panel" className="transition-opacity duration-150 hover:opacity-85">
+            <BrandMark tone="inverse" />
           </Link>
         ) : (
           <BrandLogo tone="inverse" href="/admin" />

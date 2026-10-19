@@ -1,4 +1,4 @@
-export const STORE_NAME = process.env.NEXT_PUBLIC_STORE_NAME ?? "Buchito";
+export const STORE_NAME = process.env.NEXT_PUBLIC_STORE_NAME ?? "Buchito Shop";
 
 // Contacto del footer: sin default a propósito. Un teléfono o correo inventado
 // en producción es peor que no mostrar el bloque. Los valores reales viven en

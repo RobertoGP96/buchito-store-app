@@ -18,6 +18,7 @@
     "db:sql": "node scripts/apply-sql.mjs",
     "db:constraints": "node scripts/apply-sql.mjs prisma/sql/store-constraints.sql",
     "db:seed": "tsx prisma/seed.ts",
+    "brand:assets": "node scripts/brand/generate.mjs",
     "postinstall": "prisma generate"
   },
   "dependencies": {
@@ -61,6 +62,7 @@
     "eslint": "^9.36.0",
     "eslint-config-next": "^15.3.2",
     "postcss": "^8.5.6",
+    "sharp": "0.35.5",
     "tailwindcss": "^4.1.16",
     "tsx": "^4.20.0",
     "typescript": "~5.9.3",
