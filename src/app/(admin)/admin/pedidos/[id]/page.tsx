@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Inbox } from "lucide-react";
-import { ButtonLink } from "@/components/button-link";
 import { PageHeader } from "@/components/page-header";
 import { StatusChip } from "@/components/status-chip";
 import { OrderActionsBar } from "@/modules/orders/components/order-actions-bar";
@@ -67,15 +66,14 @@ export default async function AdminOrderPage({ params }: AdminOrderPageProps) {
   return (
     <>
       <PageHeader
+        backHref="/admin/pedidos"
+        backLabel="Pedidos"
+        numericTitle
         icon={Inbox}
         title={order.orderNo}
         description={`Creado por ${order.customerName}`}
         badge={<StatusChip {...ORDER_STATUS_META[order.status]} />}
-      >
-        <ButtonLink href="/admin/pedidos" variant="ghost" size="sm">
-          Volver a pedidos
-        </ButtonLink>
-      </PageHeader>
+      />
       <OrderDetail
         order={order}
         actions={

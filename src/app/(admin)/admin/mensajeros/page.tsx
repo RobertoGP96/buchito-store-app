@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Bike } from "lucide-react";
-import { PageHeader } from "@/components/page-header";
+import { PageHeading } from "@/components/page-header";
 import { CourierList } from "@/modules/deliveries/components/courier-list";
 import { getCouriers } from "@/modules/deliveries/queries/courier-queries";
 
@@ -11,8 +11,9 @@ export default async function AdminCouriersPage() {
   const rows = await getCouriers();
   return (
     <>
-      <PageHeader icon={Bike} title="Mensajeros" description="Usuarios con rol mensajero que reparten pedidos." />
-      <CourierList rows={rows} />
+      <CourierList
+        heading={<PageHeading icon={Bike} title="Mensajeros" description="Usuarios con rol mensajero que reparten pedidos." />}
+        rows={rows} />
     </>
   );
 }

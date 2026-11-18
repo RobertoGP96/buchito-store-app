@@ -12,15 +12,7 @@ import { ORDER_STATUS_META } from "@/modules/orders/lib/labels";
 import { PAYMENT_STATUS_META } from "@/modules/payments/lib/labels";
 import { CustomerNotesForm } from "./customer-notes-form";
 import type { CustomerDetailData, CustomerOrderRow } from "../queries/customer-queries";
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="rounded-card bg-canvas p-5 shadow-card">
-      <p className="eyebrow">{title}</p>
-      <div className="mt-3">{children}</div>
-    </section>
-  );
-}
+import { SectionCard } from "@/components/section-card";
 
 function Field({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -62,7 +54,7 @@ export function CustomerDetail({ customer }: { customer: CustomerDetailData }) {
   return (
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div className="flex flex-col gap-4 lg:order-2">
-        <Section title="Datos">
+        <SectionCard title="Datos">
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-[13.5px]">
             <Field label="Nombre" value={customer.name} />
             <Field
@@ -78,9 +70,9 @@ export function CustomerDetail({ customer }: { customer: CustomerDetailData }) {
             <Field label="Pedidos" value={<span className="tabular">{customer.orderCount}</span>} />
             <Field label="Total comprado" value={<Money value={customer.totalSpent} />} />
           </dl>
-        </Section>
+        </SectionCard>
 
-        <Section title="Cuenta">
+        <SectionCard title="Cuenta">
           {customer.user ? (
             <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-[13.5px]">
               <Field label="Correo" value={customer.user.email} />
@@ -100,15 +92,15 @@ export function CustomerDetail({ customer }: { customer: CustomerDetailData }) {
               Compra como invitado. Si se registra con este teléfono, sus pedidos se enlazan a la cuenta.
             </p>
           )}
-        </Section>
+        </SectionCard>
 
-        <Section title="Notas">
+        <SectionCard title="Notas">
           <CustomerNotesForm key={customer.notes ?? ""} customerId={customer.customerId} notes={customer.notes} />
-        </Section>
+        </SectionCard>
       </div>
 
       <div className="flex flex-col gap-4 lg:order-1">
-        <Section title="Direcciones">
+        <SectionCard title="Direcciones">
           {customer.addresses.length === 0 ? (
             <p className="text-[13.5px] text-ink-muted">Sin direcciones guardadas.</p>
           ) : (
@@ -140,9 +132,9 @@ export function CustomerDetail({ customer }: { customer: CustomerDetailData }) {
               ))}
             </ul>
           )}
-        </Section>
+        </SectionCard>
 
-        <Section title="Pedidos">
+        <SectionCard title="Pedidos">
           <ResponsiveList
             rows={customer.orders}
             rowKey={(r) => r.orderId}
@@ -163,7 +155,7 @@ export function CustomerDetail({ customer }: { customer: CustomerDetailData }) {
               </Link>
             )}
           />
-        </Section>
+        </SectionCard>
       </div>
     </div>
   );

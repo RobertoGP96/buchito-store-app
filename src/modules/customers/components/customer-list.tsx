@@ -99,6 +99,7 @@ export function CustomerList({ rows, query }: CustomerListProps) {
         rows={rows}
         rowKey={(r) => r.customerId}
         columns={columns}
+        rowHref={(r) => `/admin/clientes/${r.customerId}`}
         ariaLabel="Clientes"
         empty={
           <div className="rounded-card bg-canvas shadow-card">

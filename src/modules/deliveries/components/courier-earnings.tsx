@@ -5,6 +5,8 @@ import { Money } from "@/components/money";
 import { fmtDate, fmtDateTime } from "@/lib/format";
 import type { CourierEarnings as Earnings, CourierOwnPayment } from "../queries/courier-payment-queries";
 import type { CourierUnpaidDelivery } from "../queries/delivery-queries";
+import { StatTile } from "@/components/stat-tile";
+import { SectionCard } from "@/components/section-card";
 
 interface CourierEarningsProps {
   earnings: Earnings;
@@ -12,18 +14,6 @@ interface CourierEarningsProps {
   deliveryFee: number;
   unpaid: CourierUnpaidDelivery[];
   payments: CourierOwnPayment[];
-}
-
-function Section({ title, hint, children }: { title: string; hint?: React.ReactNode; children: React.ReactNode }) {
-  return (
-    <section className="rounded-card bg-canvas p-5 shadow-card">
-      <div className="flex items-baseline justify-between gap-3">
-        <p className="eyebrow">{title}</p>
-        {hint && <span className="text-[12.5px] text-ink-muted">{hint}</span>}
-      </div>
-      <div className="mt-3">{children}</div>
-    </section>
-  );
 }
 
 /** Lo que el mensajero tiene por cobrar y lo que ya se le liquidó. Todo en
@@ -44,15 +34,11 @@ export function CourierEarnings({ earnings, deliveryFee, unpaid, payments }: Cou
       {/* En móvil, dos columnas y el último dato a lo ancho: tres no dejan sitio a los montos. */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {stats.map((stat) => (
-          <div key={stat.label} className="rounded-card bg-canvas p-3.5 shadow-card last:col-span-2 sm:p-4 sm:last:col-span-1">
-            <p className="num-display truncate text-[20px] leading-none text-espresso-900 sm:text-[22px]">{stat.value}</p>
-            <p className="mt-2 text-[11.5px] font-medium text-ink-muted sm:text-[12.5px]">{stat.label}</p>
-            <p className="tabular mt-0.5 text-[11.5px] text-ink-subtle">{stat.hint}</p>
-          </div>
+          <StatTile key={stat.label} size="sm" className="last:col-span-2 sm:last:col-span-1" {...stat} />
         ))}
       </div>
 
-      <Section title="Pendiente de liquidar" hint={unpaid.length > 0 ? <Money value={earnings.pendingFees} className="font-semibold text-espresso-900" /> : undefined}>
+      <SectionCard title="Pendiente de liquidar" aside={unpaid.length > 0 ? <Money value={earnings.pendingFees} className="font-semibold text-espresso-900" /> : undefined}>
         {unpaid.length === 0 ? (
           <p className="text-[13.5px] text-ink-muted">No tienes entregas sin liquidar.</p>
         ) : (
@@ -76,9 +62,9 @@ export function CourierEarnings({ earnings, deliveryFee, unpaid, payments }: Cou
             ))}
           </ul>
         )}
-      </Section>
+      </SectionCard>
 
-      <Section title="Liquidaciones recibidas">
+      <SectionCard title="Liquidaciones recibidas">
         {payments.length === 0 ? (
           <div className="-mx-5 -mb-5">
             <EmptyState
@@ -104,7 +90,7 @@ export function CourierEarnings({ earnings, deliveryFee, unpaid, payments }: Cou
             ))}
           </ul>
         )}
-      </Section>
+      </SectionCard>
     </>
   );
 }

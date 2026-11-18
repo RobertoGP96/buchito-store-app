@@ -13,6 +13,8 @@ import { fmtDate } from "@/lib/format";
 import { deleteCoupon } from "../actions/coupon-actions";
 import { COUPON_STATE_META } from "../lib/labels";
 import type { CouponRow } from "../queries/coupon-queries";
+import type { ReactNode } from "react";
+import { PageHeaderRow } from "@/components/page-header";
 
 const CouponForm = lazyDialog(() => import("./coupon-form").then((m) => m.CouponForm));
 
@@ -57,7 +59,7 @@ function DeleteCouponButton({ row, appearance }: { row: CouponRow; appearance: "
   );
 }
 
-export function CouponList({ rows }: { rows: CouponRow[] }) {
+export function CouponList({ rows, heading }: { rows: CouponRow[]; heading?: ReactNode }) {
   const [editing, setEditing] = useState<CouponRow | null>(null);
   const [open, setOpen] = useState(false);
 
@@ -104,12 +106,12 @@ export function CouponList({ rows }: { rows: CouponRow[] }) {
 
   return (
     <>
-      <div className="flex justify-end">
-        <Button variant="primary" className="rounded-full" onPress={openNew}>
+      <PageHeaderRow heading={heading}>
+        <Button variant="primary" onPress={openNew}>
           <Plus className="h-4 w-4" strokeWidth={2.2} />
           Nuevo cupón
         </Button>
-      </div>
+      </PageHeaderRow>
 
       <ResponsiveList
         rows={rows}

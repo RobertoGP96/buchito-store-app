@@ -1,6 +1,4 @@
-import Link from "next/link";
 import {
-  ArrowUpRight,
   Banknote,
   CalendarRange,
   Inbox,
@@ -9,21 +7,12 @@ import {
   Truck,
   UserX,
   Wallet,
-  type LucideIcon,
 } from "lucide-react";
 import { Money } from "@/components/money";
-import { cn } from "@/lib/utils";
+import { StatGroup, StatTile, type StatTileProps } from "@/components/stat-tile";
 import type { DashboardKpis } from "../queries/dashboard-queries";
 
-interface Tile {
-  label: string;
-  value: React.ReactNode;
-  hint: string;
-  icon: LucideIcon;
-  href: string;
-  /** `warn`: el valor pide atención. `featured`: la tesela principal, en café. */
-  tone?: "warn" | "featured";
-}
+type Tile = StatTileProps & { href: string };
 
 interface TileGroup {
   label: string;
@@ -114,78 +103,12 @@ export function KpiTiles({ kpis }: { kpis: DashboardKpis }) {
   return (
     <div className="flex flex-col gap-5">
       {groups.map((group) => (
-        <div key={group.label}>
-          <p className="eyebrow mb-2.5 px-0.5">{group.label}</p>
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
-            {group.tiles.map((tile) => (
-              <KpiTile key={tile.label} tile={tile} />
-            ))}
-          </div>
-        </div>
+        <StatGroup key={group.label} label={group.label}>
+          {group.tiles.map((tile) => (
+            <StatTile key={tile.label} {...tile} />
+          ))}
+        </StatGroup>
       ))}
     </div>
-  );
-}
-
-function KpiTile({ tile }: { tile: Tile }) {
-  const Icon = tile.icon;
-  const featured = tile.tone === "featured";
-  const warn = tile.tone === "warn";
-
-  return (
-    <Link
-      href={tile.href}
-      className={cn(
-        "group relative flex min-h-[128px] flex-col justify-between overflow-hidden rounded-card p-4 shadow-card transition-[transform,box-shadow] duration-200 hover:shadow-float motion-safe:hover:-translate-y-0.5",
-        featured ? "bg-brand-tile text-brand-tile-fg" : "bg-canvas"
-      )}
-    >
-      {featured && (
-        <span
-          aria-hidden
-          className="pointer-events-none absolute -top-10 -right-10 h-32 w-32 rounded-full bg-brand-tile-fg/8"
-        />
-      )}
-      <div className="relative flex items-start justify-between">
-        <span
-          className={cn(
-            "flex h-9 w-9 items-center justify-center rounded-chip",
-            featured ? "bg-brand-tile-fg/12 text-brand-tile-fg" : warn ? "bg-warn-soft text-warn" : "bg-crema-100 text-tostado-700"
-          )}
-        >
-          <Icon className="h-[18px] w-[18px]" strokeWidth={1.9} />
-        </span>
-        <ArrowUpRight
-          aria-hidden
-          className={cn(
-            "h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100",
-            featured ? "text-brand-tile-fg" : "text-ink-subtle"
-          )}
-          strokeWidth={2}
-        />
-      </div>
-      <div className="relative min-w-0">
-        <p
-          className={cn(
-            "num-display truncate text-[24px] leading-none md:text-[28px]",
-            featured ? "text-brand-tile-fg" : warn ? "text-warn" : "text-espresso-900"
-          )}
-        >
-          {tile.value}
-        </p>
-        <p className={cn("mt-2 text-[12.5px] font-medium", featured ? "text-brand-tile-fg/90" : "text-ink-muted")}>
-          {tile.label}
-        </p>
-        <p
-          className={cn(
-            "tabular mt-0.5 flex items-center gap-1.5 text-[11.5px]",
-            featured ? "text-footer-muted/80" : "text-ink-subtle"
-          )}
-        >
-          {warn && <span aria-hidden className="h-1.5 w-1.5 flex-none rounded-full bg-warn" />}
-          {tile.hint}
-        </p>
-      </div>
-    </Link>
   );
 }

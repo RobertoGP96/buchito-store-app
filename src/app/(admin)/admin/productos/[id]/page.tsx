@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 import { AlertTriangle, Package } from "lucide-react";
-import { ButtonLink } from "@/components/button-link";
 import { PageHeader } from "@/components/page-header";
 import { StatusChip } from "@/components/status-chip";
 import { getActiveCurrencies } from "@/modules/currency/queries/currency-queries";
@@ -58,6 +57,8 @@ export default async function AdminProductPage({ params }: AdminProductPageProps
   return (
     <>
       <PageHeader
+        backHref="/admin/productos"
+        backLabel="Productos"
         icon={Package}
         title={product.name}
         description={subtitle}
@@ -80,9 +81,6 @@ export default async function AdminProductPage({ params }: AdminProductPageProps
           orderLineCount={product.orderLineCount}
           totalStock={product.variants.reduce((sum, v) => sum + v.stock, 0)}
         />
-        <ButtonLink href="/admin/productos" variant="ghost" size="sm">
-          Volver a productos
-        </ButtonLink>
       </PageHeader>
 
       {!hasActiveVariants && (

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Coins } from "lucide-react";
-import { PageHeader } from "@/components/page-header";
+import { PageHeading } from "@/components/page-header";
 import { CurrencyList } from "@/modules/currency/components/currency-list";
 import { getCurrencies } from "@/modules/currency/queries/currency-queries";
 
@@ -11,12 +11,10 @@ export default async function AdminCurrenciesPage() {
   const rows = await getCurrencies();
   return (
     <>
-      <PageHeader
-        icon={Coins}
-        title="Monedas"
-        description="Monedas en las que se fijan precios y se cobra. La base se cambia con «Hacer base» o desde Configuración."
+      <CurrencyList
+        heading={<PageHeading icon={Coins} title="Monedas" description="Monedas en las que se fijan precios y se cobra. La base se cambia con «Hacer base» o desde Configuración." />}
+        rows={rows}
       />
-      <CurrencyList rows={rows} />
     </>
   );
 }

@@ -8,6 +8,7 @@ import { CourierInactive } from "@/modules/deliveries/components/courier-inactiv
 import { CourierToday } from "@/modules/deliveries/components/courier-today";
 import { getCourierEarnings } from "@/modules/deliveries/queries/courier-payment-queries";
 import { getCourierOpenDeliveries } from "@/modules/deliveries/queries/delivery-queries";
+import { StatTile } from "@/components/stat-tile";
 
 export const metadata: Metadata = { title: "Mis entregas" };
 export const dynamic = "force-dynamic";
@@ -46,11 +47,7 @@ export default async function CourierHomePage() {
       {/* En móvil, dos columnas y el último dato a lo ancho: tres no dejan sitio al monto. */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {stats.map((stat) => (
-          <div key={stat.label} className="rounded-card bg-canvas p-3.5 shadow-card last:col-span-2 sm:p-4 sm:last:col-span-1">
-            <p className="num-display truncate text-[20px] leading-none text-espresso-900 sm:text-[22px]">{stat.value}</p>
-            <p className="mt-2 text-[11.5px] font-medium text-ink-muted sm:text-[12.5px]">{stat.label}</p>
-            <p className="tabular mt-0.5 hidden text-[11.5px] text-ink-subtle sm:block">{stat.hint}</p>
-          </div>
+          <StatTile key={stat.label} size="sm" className="last:col-span-2 sm:last:col-span-1" {...stat} />
         ))}
       </div>
       <CourierToday rows={rows} />

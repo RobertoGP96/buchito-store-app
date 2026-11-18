@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Users } from "lucide-react";
-import { ButtonLink } from "@/components/button-link";
 import { PageHeader } from "@/components/page-header";
 import { StatusChip } from "@/components/status-chip";
 import { CustomerDetail } from "@/modules/customers/components/customer-detail";
@@ -30,6 +29,8 @@ export default async function AdminCustomerPage({ params }: AdminCustomerPagePro
   return (
     <>
       <PageHeader
+        backHref="/admin/clientes"
+        backLabel="Clientes"
         icon={Users}
         title={customer.name}
         description={customer.email ? `${customer.phone} · ${customer.email}` : customer.phone}
@@ -47,9 +48,6 @@ export default async function AdminCustomerPage({ params }: AdminCustomerPagePro
           addressCount={customer.addresses.length}
           deletesAccount={customer.user?.role === "customer"}
         />
-        <ButtonLink href="/admin/clientes" variant="ghost" size="sm">
-          Volver a clientes
-        </ButtonLink>
       </PageHeader>
       <CustomerDetail customer={customer} />
     </>

@@ -1,6 +1,7 @@
 "use client";
 
 import { Table } from "@heroui/react";
+import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
@@ -25,6 +26,9 @@ interface ResponsiveListProps<Row> {
   tableRows?: Row[];
   /** Clases extra por fila de la tabla (p. ej. resaltar sub-filas). */
   rowClassName?: (row: Row) => string | undefined;
+  /** Detalle de la fila: toda la fila de la tabla navega a él. La celda que
+   *  identifica la fila debe seguir llevando su `Link` (abrir en otra pestaña). */
+  rowHref?: (row: Row) => string | undefined;
   ariaLabel: string;
   empty: ReactNode;
   className?: string;
@@ -38,10 +42,13 @@ export function ResponsiveList<Row>({
   renderCard,
   tableRows = rows,
   rowClassName,
+  rowHref,
   ariaLabel,
   empty,
   className,
 }: ResponsiveListProps<Row>) {
+  const router = useRouter();
+
   if (rows.length === 0) return <>{empty}</>;
 
   return (
@@ -52,8 +59,8 @@ export function ResponsiveList<Row>({
         ))}
       </ul>
 
-      <div className="hidden md:block">
-        <Table>
+      <div className="data-table hidden overflow-hidden rounded-card bg-canvas shadow-card md:block">
+        <Table variant="secondary">
           <Table.ScrollContainer>
             <Table.Content aria-label={ariaLabel}>
               <Table.Header>
@@ -69,8 +76,18 @@ export function ResponsiveList<Row>({
                 ))}
               </Table.Header>
               <Table.Body>
-                {tableRows.map((row) => (
-                  <Table.Row key={rowKey(row)} id={String(rowKey(row))} className={rowClassName?.(row)}>
+                {tableRows.map((row) => {
+                  const href = rowHref?.(row);
+                  return (
+                  <Table.Row
+                    key={rowKey(row)}
+                    id={String(rowKey(row))}
+                    className={rowClassName?.(row)}
+                    data-href={href}
+                    // `onAction` y no `href`: el `href` de react-aria navega con
+                    // recarga completa si no hay un RouterProvider montado.
+                    onAction={href ? () => router.push(href) : undefined}
+                  >
                     {columns.map((column) => (
                       <Table.Cell
                         key={column.id}
@@ -80,7 +97,8 @@ export function ResponsiveList<Row>({
                       </Table.Cell>
                     ))}
                   </Table.Row>
-                ))}
+                  );
+                })}
               </Table.Body>
             </Table.Content>
           </Table.ScrollContainer>
@@ -110,16 +128,16 @@ export function ListCard({
   children?: ReactNode;
 }) {
   return (
-    <article className={cn("rounded-card bg-canvas p-4 shadow-card", className)}>
+    <article className={cn("h-full rounded-card bg-canvas p-4 shadow-card", className)}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="truncate text-[14.5px] font-semibold text-ink">{title}</p>
-          {subtitle && <p className="mt-0.5 truncate text-[12.5px] text-ink-subtle">{subtitle}</p>}
+          <p className="type-subheading truncate font-semibold text-ink">{title}</p>
+          {subtitle && <p className="type-meta mt-0.5 truncate text-ink-subtle">{subtitle}</p>}
         </div>
         {badge}
       </div>
       {rows && rows.length > 0 && (
-        <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-[13px]">
+        <dl className="type-meta mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5">
           {rows.map((row) => (
             <div key={row.label} className="contents">
               <dt className="text-ink-subtle">{row.label}</dt>

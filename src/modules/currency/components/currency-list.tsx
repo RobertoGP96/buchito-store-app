@@ -11,6 +11,8 @@ import { StatusChip } from "@/components/status-chip";
 import { deleteCurrency } from "../actions/currency-actions";
 import { SetBaseCurrencyButton } from "./set-base-currency-button";
 import type { CurrencyRow } from "../queries/currency-queries";
+import type { ReactNode } from "react";
+import { PageHeaderRow } from "@/components/page-header";
 
 const CurrencyForm = lazyDialog(() => import("./currency-form").then((m) => m.CurrencyForm));
 
@@ -49,7 +51,7 @@ function RateCell({ row, baseCode }: { row: CurrencyRow; baseCode: string | null
   );
 }
 
-export function CurrencyList({ rows }: { rows: CurrencyRow[] }) {
+export function CurrencyList({ rows, heading }: { rows: CurrencyRow[]; heading?: ReactNode }) {
   const [editing, setEditing] = useState<CurrencyRow | null>(null);
   const [open, setOpen] = useState(false);
   const baseCode = rows.find((r) => r.isBase)?.code ?? null;
@@ -97,12 +99,12 @@ export function CurrencyList({ rows }: { rows: CurrencyRow[] }) {
 
   return (
     <>
-      <div className="flex justify-end">
-        <Button variant="primary" className="rounded-full" onPress={openNew}>
+      <PageHeaderRow heading={heading}>
+        <Button variant="primary" onPress={openNew}>
           <Plus className="h-4 w-4" strokeWidth={2.2} />
           Nueva moneda
         </Button>
-      </div>
+      </PageHeaderRow>
 
       <ResponsiveList
         rows={rows}

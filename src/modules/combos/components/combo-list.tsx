@@ -11,6 +11,8 @@ import { StatusChip } from "@/components/status-chip";
 import { fmtDate } from "@/lib/format";
 import { COMBO_STATE_META, comboItemsSummary } from "../lib/labels";
 import type { AdminComboRow } from "../queries/combo-queries";
+import type { ReactNode } from "react";
+import { PageHeaderRow } from "@/components/page-header";
 
 function itemsSummary(row: AdminComboRow): string {
   return comboItemsSummary(row.items);
@@ -63,7 +65,7 @@ function Chips({ row }: { row: AdminComboRow }) {
   );
 }
 
-export function ComboList({ rows }: { rows: AdminComboRow[] }) {
+export function ComboList({ rows, heading }: { rows: AdminComboRow[]; heading?: ReactNode }) {
   const columns: ListColumn<AdminComboRow>[] = [
     {
       id: "name",
@@ -108,17 +110,18 @@ export function ComboList({ rows }: { rows: AdminComboRow[] }) {
 
   return (
     <>
-      <div className="flex justify-end">
-        <ButtonLink href="/admin/combos/nuevo" variant="solid" size="sm">
+      <PageHeaderRow heading={heading}>
+        <ButtonLink href="/admin/combos/nuevo" variant="solid">
           <Plus className="h-4 w-4" strokeWidth={2.2} />
           Nuevo combo
         </ButtonLink>
-      </div>
+      </PageHeaderRow>
 
       <ResponsiveList
         rows={rows}
         rowKey={(r) => r.comboId}
         columns={columns}
+        rowHref={(r) => `/admin/combos/${r.comboId}`}
         ariaLabel="Combos"
         empty={
           <div className="rounded-card bg-canvas shadow-card">

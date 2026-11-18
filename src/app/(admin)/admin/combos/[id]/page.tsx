@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 import { AlertTriangle, Gift } from "lucide-react";
-import { ButtonLink } from "@/components/button-link";
 import { PageHeader } from "@/components/page-header";
 import { StatusChip } from "@/components/status-chip";
 import { ComboForm } from "@/modules/combos/components/combo-form";
@@ -48,6 +47,8 @@ export default async function AdminComboPage({ params }: AdminComboPageProps) {
   return (
     <>
       <PageHeader
+        backHref="/admin/combos"
+        backLabel="Combos"
         icon={Gift}
         title={combo.name}
         description={`${combo.items.length} ${combo.items.length === 1 ? "producto" : "productos"} · ${combo.available} disponibles`}
@@ -59,9 +60,6 @@ export default async function AdminComboPage({ params }: AdminComboPageProps) {
         }
       >
         <ComboStatusActions comboId={combo.comboId} status={combo.status} hasItems={combo.items.length > 0} />
-        <ButtonLink href="/admin/combos" variant="ghost" size="sm">
-          Volver a combos
-        </ButtonLink>
       </PageHeader>
 
       {unsellable.length > 0 && (

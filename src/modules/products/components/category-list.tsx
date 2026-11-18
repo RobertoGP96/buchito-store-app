@@ -12,6 +12,8 @@ import { StatusChip } from "@/components/status-chip";
 import { deleteCategory } from "../actions/category-actions";
 import type { CategoryRow } from "../queries/category-queries";
 import { cn } from "@/lib/utils";
+import type { ReactNode } from "react";
+import { PageHeaderRow } from "@/components/page-header";
 
 const CategoryForm = lazyDialog(() => import("./category-form").then((m) => m.CategoryForm));
 
@@ -57,7 +59,7 @@ function DeleteCategoryButton({ row, appearance }: { row: CategoryRow; appearanc
   );
 }
 
-export function CategoryList({ rows }: { rows: CategoryRow[] }) {
+export function CategoryList({ rows, heading }: { rows: CategoryRow[]; heading?: ReactNode }) {
   const [editing, setEditing] = useState<CategoryRow | null>(null);
   const [open, setOpen] = useState(false);
 
@@ -116,12 +118,12 @@ export function CategoryList({ rows }: { rows: CategoryRow[] }) {
 
   return (
     <>
-      <div className="flex justify-end">
-        <Button variant="primary" className="rounded-full" onPress={openNew}>
+      <PageHeaderRow heading={heading}>
+        <Button variant="primary" onPress={openNew}>
           <Plus className="h-4 w-4" strokeWidth={2.2} />
           Nueva categoría
         </Button>
-      </div>
+      </PageHeaderRow>
 
       <ResponsiveList
         rows={rows}

@@ -97,6 +97,7 @@ export function OrderList({ rows, activeStatus, counts }: OrderListProps) {
         rows={rows}
         rowKey={(r) => r.orderId}
         columns={columns}
+        rowHref={(r) => `/admin/pedidos/${r.orderId}`}
         ariaLabel="Pedidos"
         empty={
           <div className="rounded-card bg-canvas shadow-card">

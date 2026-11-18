@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Package, Tags } from "lucide-react";
-import { ButtonLink } from "@/components/button-link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { ProductForm } from "@/modules/products/components/product-form";
@@ -17,14 +16,12 @@ export default async function NewProductPage() {
   return (
     <>
       <PageHeader
+        backHref="/admin/productos"
+        backLabel="Productos"
         icon={Package}
         title="Nuevo producto"
         description="Primero los datos generales; las variantes (SKU, precio y stock) se añaden después de crearlo."
-      >
-        <ButtonLink href="/admin/productos" variant="ghost" size="sm">
-          Volver a productos
-        </ButtonLink>
-      </PageHeader>
+      />
 
       {activeTypes.length === 0 ? (
         <div className="rounded-card bg-canvas shadow-card">

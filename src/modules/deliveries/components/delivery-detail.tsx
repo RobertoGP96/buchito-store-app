@@ -17,6 +17,7 @@ import { DELIVERY_STATUS_META, DELIVERY_TRANSITION_LABELS, type DeliveryStatus }
 import { nextDeliveryStates, type DeliveryActor } from "../lib/state-machine";
 import type { DeliveryDetailData } from "../queries/delivery-queries";
 import { DeliveryProofDialog, type DeliveryProofResult } from "./delivery-proof-dialog";
+import { SectionCard } from "@/components/section-card";
 
 interface DeliveryDetailProps {
   delivery: DeliveryDetailData;
@@ -24,18 +25,6 @@ interface DeliveryDetailProps {
 }
 
 type Asking = "delivered" | "failed" | "proof" | null;
-
-function Section({ title, hint, children, className }: { title: string; hint?: React.ReactNode; children: React.ReactNode; className?: string }) {
-  return (
-    <section className={cn("rounded-card bg-canvas p-5 shadow-card", className)}>
-      <div className="flex items-center justify-between gap-3">
-        <p className="eyebrow">{title}</p>
-        {hint}
-      </div>
-      <div className="mt-3">{children}</div>
-    </section>
-  );
-}
 
 function PhoneLink({ phone }: { phone: string }) {
   return (
@@ -135,9 +124,9 @@ export function DeliveryDetail({ delivery, isAssignedCourier }: DeliveryDetailPr
 
   return (
     <div className="flex flex-col gap-4">
-      <Section
+      <SectionCard
         title="Siguiente paso"
-        hint={delivery.attempts > 0 ? <span className="text-[12.5px] text-ink-subtle">{delivery.attempts} intento(s) fallido(s)</span> : undefined}
+        aside={delivery.attempts > 0 ? <span className="text-[12.5px] text-ink-subtle">{delivery.attempts} intento(s) fallido(s)</span> : undefined}
       >
         <div className="flex items-center gap-3">
           <StatusChip {...DELIVERY_STATUS_META[delivery.status]} size="md" />
@@ -164,9 +153,9 @@ export function DeliveryDetail({ delivery, isAssignedCourier }: DeliveryDetailPr
             ))}
           </div>
         )}
-      </Section>
+      </SectionCard>
 
-      <Section title="Destinatario">
+      <SectionCard title="Destinatario">
         <p className="text-[17px] font-semibold text-ink">{delivery.recipientName}</p>
         <div className="mt-2.5">
           <PhoneLink phone={delivery.recipientPhone} />
@@ -176,11 +165,11 @@ export function DeliveryDetail({ delivery, isAssignedCourier }: DeliveryDetailPr
             Pedido de {delivery.customerName} · <span className="tabular">{delivery.customerPhone}</span>
           </p>
         )}
-      </Section>
+      </SectionCard>
 
-      <Section
+      <SectionCard
         title="Dirección"
-        hint={
+        aside={
           mapsQuery ? (
             <a
               href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapsQuery)}`}
@@ -216,9 +205,9 @@ export function DeliveryDetail({ delivery, isAssignedCourier }: DeliveryDetailPr
             {delivery.orderNotes}
           </p>
         )}
-      </Section>
+      </SectionCard>
 
-      <Section title="Artículos" hint={<span className="tabular text-[12.5px] text-ink-subtle">{delivery.lines.length}</span>}>
+      <SectionCard title="Artículos" aside={<span className="tabular text-[12.5px] text-ink-subtle">{delivery.lines.length}</span>}>
         <ul className="divide-y divide-line-soft">
           {delivery.lines.map((line, i) => (
             <li key={i} className="flex items-center justify-between gap-3 py-2 text-[14px]">
@@ -230,9 +219,9 @@ export function DeliveryDetail({ delivery, isAssignedCourier }: DeliveryDetailPr
             </li>
           ))}
         </ul>
-      </Section>
+      </SectionCard>
 
-      <Section title="Cobro">
+      <SectionCard title="Cobro">
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-[13px] text-ink-muted">{delivery.paymentMethodName}</p>
@@ -251,12 +240,12 @@ export function DeliveryDetail({ delivery, isAssignedCourier }: DeliveryDetailPr
             Cobra este monto al entregar y regístralo al marcar la entrega como entregada.
           </p>
         )}
-      </Section>
+      </SectionCard>
 
       {(delivery.status === "delivered" || proofSrc) && (
-        <Section
+        <SectionCard
           title="Prueba de entrega"
-          hint={
+          aside={
             canEditProof ? (
               <Button
                 variant="outline"
@@ -290,11 +279,11 @@ export function DeliveryDetail({ delivery, isAssignedCourier }: DeliveryDetailPr
           {delivery.deliveredAt && (
             <p className="tabular mt-3 text-[12.5px] text-ink-muted">Entregada {fmtDateTime(delivery.deliveredAt)}</p>
           )}
-        </Section>
+        </SectionCard>
       )}
 
       {delivery.events.length > 0 && (
-        <Section title="Historial">
+        <SectionCard title="Historial">
           <ol className="flex flex-col gap-2 text-[12.5px]">
             {delivery.events.map((e) => (
               <li key={e.eventId} className="flex items-start justify-between gap-3">
@@ -307,7 +296,7 @@ export function DeliveryDetail({ delivery, isAssignedCourier }: DeliveryDetailPr
               </li>
             ))}
           </ol>
-        </Section>
+        </SectionCard>
       )}
 
       <DeliveryProofDialog

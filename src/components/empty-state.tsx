@@ -38,27 +38,33 @@ export function EmptyState({
         className
       )}
     >
+      {/* Doble anillo: el icono solo, en un círculo pálido, se perdía en una
+          pantalla vacía. */}
       <span
         className={cn(
-          "flex items-center justify-center rounded-full bg-crema-100",
-          compact ? "h-11 w-11" : "h-[52px] w-[52px]"
+          "flex items-center justify-center rounded-full bg-cream-50 ring-1 ring-line",
+          compact ? "h-14 w-14" : "h-[84px] w-[84px]"
         )}
       >
-        <Icon
-          className={cn(compact ? "h-5 w-5" : "h-[22px] w-[22px]", iconColor)}
-          strokeWidth={1.8}
-        />
+        <span
+          className={cn(
+            "flex items-center justify-center rounded-full bg-crema-100",
+            compact ? "h-10 w-10" : "h-[60px] w-[60px]"
+          )}
+        >
+          <Icon className={cn(compact ? "h-5 w-5" : "h-7 w-7", iconColor)} strokeWidth={1.7} />
+        </span>
       </span>
-      {eyebrow && <p className="eyebrow mt-5">{eyebrow}</p>}
+      {eyebrow && <p className="eyebrow mt-6 text-tostado-700">{eyebrow}</p>}
       <p
         className={cn(
-          "font-display mt-3.5 leading-tight text-balance text-espresso-900",
-          compact ? "text-[17px]" : "text-[22px]"
+          "font-display leading-tight text-balance text-espresso-900",
+          compact ? "type-subheading mt-3.5" : "type-heading mt-5"
         )}
       >
         {title}
       </p>
-      <p className="mt-3 max-w-[380px] text-[13.5px] leading-[1.65] text-pretty text-ink-muted">
+      <p className={cn("type-body max-w-[380px] text-pretty text-ink-muted", compact ? "mt-2" : "mt-3")}>
         {description}
       </p>
       {ctaLabel && ctaHref && (

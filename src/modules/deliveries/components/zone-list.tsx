@@ -11,6 +11,8 @@ import { ListCard, ResponsiveList, type ListColumn } from "@/components/responsi
 import { StatusChip } from "@/components/status-chip";
 import { deleteZone } from "../actions/zone-actions";
 import type { ZoneRow } from "../queries/zone-queries";
+import type { ReactNode } from "react";
+import { PageHeaderRow } from "@/components/page-header";
 
 const ZoneForm = lazyDialog(() => import("./zone-form").then((m) => m.ZoneForm));
 
@@ -40,7 +42,7 @@ function DeleteZoneButton({ row, appearance }: { row: ZoneRow; appearance: "icon
   );
 }
 
-export function ZoneList({ rows }: { rows: ZoneRow[] }) {
+export function ZoneList({ rows, heading }: { rows: ZoneRow[]; heading?: ReactNode }) {
   const [editing, setEditing] = useState<ZoneRow | null>(null);
   const [open, setOpen] = useState(false);
 
@@ -92,12 +94,12 @@ export function ZoneList({ rows }: { rows: ZoneRow[] }) {
 
   return (
     <>
-      <div className="flex justify-end">
-        <Button variant="primary" className="rounded-full" onPress={openNew}>
+      <PageHeaderRow heading={heading}>
+        <Button variant="primary" onPress={openNew}>
           <Plus className="h-4 w-4" strokeWidth={2.2} />
           Nueva zona
         </Button>
-      </div>
+      </PageHeaderRow>
 
       <ResponsiveList
         rows={rows}

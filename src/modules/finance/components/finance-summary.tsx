@@ -14,23 +14,17 @@ import {
   TrendingUp,
   Truck,
   Wallet,
-  type LucideIcon,
 } from "lucide-react";
 import { CHIP_BASE, CHIP_OFF, CHIP_ON } from "@/components/choice-chips";
 import { Money } from "@/components/money";
 import { LinkPending } from "@/components/nav-icon";
+import { StatGroup, StatTile, type StatTileProps } from "@/components/stat-tile";
 import { cn } from "@/lib/utils";
 import { PAYMENT_RANGE_LABELS, PAYMENT_RANGES, type PaymentRange } from "@/modules/payments/lib/payment-ranges";
 import type { FinanceSummary } from "../queries/finance-queries";
 import { ScrollFadeRow } from "@/components/scroll-fade-row";
 
-interface Tile {
-  label: string;
-  value: React.ReactNode;
-  hint: React.ReactNode;
-  icon: LucideIcon;
-  tone?: "featured" | "warn" | "good" | "bad";
-}
+type Tile = StatTileProps;
 
 function pct(value: number | null): string {
   return value == null ? "—" : `${value} %`;
@@ -38,48 +32,6 @@ function pct(value: number | null): string {
 
 function plural(n: number, singular: string, pluralForm: string): string {
   return `${n} ${n === 1 ? singular : pluralForm}`;
-}
-
-function StatTile({ tile }: { tile: Tile }) {
-  const Icon = tile.icon;
-  const featured = tile.tone === "featured";
-  return (
-    <div
-      className={cn(
-        "relative flex min-h-[124px] flex-col justify-between overflow-hidden rounded-card p-4 shadow-card",
-        featured ? "bg-brand-tile text-brand-tile-fg" : "bg-canvas"
-      )}
-    >
-      <span
-        className={cn(
-          "flex h-9 w-9 items-center justify-center rounded-chip",
-          featured
-            ? "bg-brand-tile-fg/12 text-brand-tile-fg"
-            : tile.tone === "warn"
-              ? "bg-warn-soft text-warn"
-              : tile.tone === "bad"
-                ? "bg-danger-soft text-danger"
-                : tile.tone === "good"
-                  ? "bg-ok-soft text-ok"
-                  : "bg-crema-100 text-tostado-700"
-        )}
-      >
-        <Icon className="h-[18px] w-[18px]" strokeWidth={1.9} />
-      </span>
-      <div className="min-w-0">
-        <p
-          className={cn(
-            "num-display truncate text-[22px] leading-none md:text-[26px]",
-            featured ? "text-brand-tile-fg" : tile.tone === "bad" ? "text-danger" : tile.tone === "good" ? "text-ok" : "text-espresso-900"
-          )}
-        >
-          {tile.value}
-        </p>
-        <p className={cn("mt-2 text-[12.5px] font-medium", featured ? "text-brand-tile-fg/90" : "text-ink-muted")}>{tile.label}</p>
-        <p className={cn("tabular mt-0.5 text-[11.5px]", featured ? "text-footer-muted/80" : "text-ink-subtle")}>{tile.hint}</p>
-      </div>
-    </div>
-  );
 }
 
 export function FinanceSummaryView({ summary, activeRange }: { summary: FinanceSummary; activeRange: PaymentRange }) {
@@ -197,14 +149,11 @@ export function FinanceSummaryView({ summary, activeRange }: { summary: FinanceS
 
       <div className="flex flex-col gap-5">
         {groups.map((group) => (
-          <div key={group.label}>
-            <p className="eyebrow mb-2.5 px-0.5">{group.label}</p>
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
-              {group.tiles.map((tile) => (
-                <StatTile key={tile.label} tile={tile} />
-              ))}
-            </div>
-          </div>
+          <StatGroup key={group.label} label={group.label}>
+            {group.tiles.map((tile) => (
+              <StatTile key={tile.label} {...tile} />
+            ))}
+          </StatGroup>
         ))}
       </div>
     </>

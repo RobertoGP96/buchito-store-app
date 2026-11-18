@@ -8,6 +8,9 @@ interface StockLabelProps {
   /** Unidad de venta: "Quedan 2.5 kg" en vez de "Quedan 2.5 unidades". */
   unit?: SaleUnit;
   threshold?: number;
+  /** En las cards: no dice nada mientras hay stock de sobra. «Disponible» en
+   *  verde en cada card de la retícula era ruido. */
+  quiet?: boolean;
   className?: string;
 }
 
@@ -21,8 +24,11 @@ export function StockLabel({
   stock,
   unit = "unit",
   threshold = LOW_STOCK_THRESHOLD,
+  quiet = false,
   className,
 }: StockLabelProps) {
+  if (quiet && stock > threshold) return null;
+
   const tone =
     stock <= 0
       ? "font-semibold text-danger"
@@ -31,7 +37,7 @@ export function StockLabel({
         : "font-medium text-ok";
 
   return (
-    <span className={cn("text-[12px] leading-none", tone, className)}>
+    <span className={cn("type-caption leading-none", tone, className)}>
       {stockText(stock, threshold, unit)}
     </span>
   );

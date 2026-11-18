@@ -14,10 +14,14 @@ import { deleteUser } from "../actions/user-actions";
 import { USER_ROLE_LABELS, USER_ROLE_TONE } from "../lib/labels";
 import type { UserRow } from "../queries/user-queries";
 import { ResetTwoFactorButton } from "./reset-two-factor-button";
+import type { ReactNode } from "react";
+import { PageHeaderRow } from "@/components/page-header";
 
 const UserForm = lazyDialog(() => import("./user-form").then((m) => m.UserForm));
 
 interface UserListProps {
+  /** Cabecera de la página, ya renderizada en el servidor. */
+  heading?: ReactNode;
   rows: UserRow[];
   /** Sesión actual: su propia cuenta no se puede eliminar. */
   currentUserId: number;
@@ -54,7 +58,7 @@ function TwoFactorChip({ row }: { row: UserRow }) {
   );
 }
 
-export function UserList({ rows, currentUserId }: UserListProps) {
+export function UserList({ rows, currentUserId, heading }: UserListProps) {
   const [editing, setEditing] = useState<UserRow | null>(null);
   const [open, setOpen] = useState(false);
 
@@ -110,12 +114,12 @@ export function UserList({ rows, currentUserId }: UserListProps) {
 
   return (
     <>
-      <div className="flex justify-end">
-        <Button variant="primary" className="rounded-full" onPress={openNew}>
+      <PageHeaderRow heading={heading}>
+        <Button variant="primary" onPress={openNew}>
           <Plus className="h-4 w-4" strokeWidth={2.2} />
           Nuevo usuario
         </Button>
-      </div>
+      </PageHeaderRow>
 
       <ResponsiveList
         rows={rows}

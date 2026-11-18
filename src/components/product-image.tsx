@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { ImageIcon } from "lucide-react";
 import { imageSrc } from "@/lib/image-url";
 
 interface ProductImageProps {
@@ -42,8 +41,16 @@ export function ProductImage({
     );
   }
   return (
-    <span className="flex items-center justify-center text-ink-faint">
-      <ImageIcon className="h-[26px] w-[26px]" strokeWidth={1.5} aria-hidden />
+    // Sin foto: el isotipo en marca de agua. Un icono genérico de imagen hacía
+    // que la card pareciera rota.
+    <span className="flex h-full w-full items-center justify-center">
+      <Image
+        src="/brand/logo-mark.png"
+        alt=""
+        width={96}
+        height={96}
+        className="h-auto w-[34%] max-w-[72px] opacity-25"
+      />
       <span className="sr-only">{label}</span>
     </span>
   );

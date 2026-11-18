@@ -12,6 +12,8 @@ import { StatusChip } from "@/components/status-chip";
 import { deleteCourier } from "../actions/courier-actions";
 import { VEHICLE_LABELS } from "../lib/labels";
 import type { CourierRow } from "../queries/courier-queries";
+import type { ReactNode } from "react";
+import { PageHeaderRow } from "@/components/page-header";
 
 const CourierForm = lazyDialog(() => import("./courier-form").then((m) => m.CourierForm));
 
@@ -32,7 +34,7 @@ function DeleteCourierButton({ row, appearance }: { row: CourierRow; appearance:
   );
 }
 
-export function CourierList({ rows }: { rows: CourierRow[] }) {
+export function CourierList({ rows, heading }: { rows: CourierRow[]; heading?: ReactNode }) {
   const [editing, setEditing] = useState<CourierRow | null>(null);
   const [open, setOpen] = useState(false);
 
@@ -86,12 +88,12 @@ export function CourierList({ rows }: { rows: CourierRow[] }) {
 
   return (
     <>
-      <div className="flex justify-end">
-        <Button variant="primary" className="rounded-full" onPress={openNew}>
+      <PageHeaderRow heading={heading}>
+        <Button variant="primary" onPress={openNew}>
           <Plus className="h-4 w-4" strokeWidth={2.2} />
           Nuevo mensajero
         </Button>
-      </div>
+      </PageHeaderRow>
 
       <ResponsiveList
         rows={rows}

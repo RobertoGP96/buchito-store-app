@@ -10,6 +10,8 @@ import { ListCard, ResponsiveList, type ListColumn } from "@/components/responsi
 import { StatusChip } from "@/components/status-chip";
 import { deleteProductType } from "../actions/product-type-actions";
 import type { ProductTypeRow } from "../queries/product-type-queries";
+import type { ReactNode } from "react";
+import { PageHeaderRow } from "@/components/page-header";
 
 const ProductTypeForm = lazyDialog(() => import("./product-type-form").then((m) => m.ProductTypeForm));
 
@@ -37,7 +39,7 @@ function DeleteTypeButton({ row, appearance }: { row: ProductTypeRow; appearance
   );
 }
 
-export function ProductTypeList({ rows }: { rows: ProductTypeRow[] }) {
+export function ProductTypeList({ rows, heading }: { rows: ProductTypeRow[]; heading?: ReactNode }) {
   const [editing, setEditing] = useState<ProductTypeRow | null>(null);
   const [open, setOpen] = useState(false);
 
@@ -86,12 +88,12 @@ export function ProductTypeList({ rows }: { rows: ProductTypeRow[] }) {
 
   return (
     <>
-      <div className="flex justify-end">
-        <Button variant="primary" className="rounded-full" onPress={openNew}>
+      <PageHeaderRow heading={heading}>
+        <Button variant="primary" onPress={openNew}>
           <Plus className="h-4 w-4" strokeWidth={2.2} />
           Nuevo tipo
         </Button>
-      </div>
+      </PageHeaderRow>
 
       <ResponsiveList
         rows={rows}

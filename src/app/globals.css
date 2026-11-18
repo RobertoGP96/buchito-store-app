@@ -731,3 +731,63 @@ html {
   content: "*";
   content: "*" / "";
 }
+
+/* Botón de HeroUI: píldora y peso de la marca en un solo sitio, sin repetir
+   `rounded-full` en cada uso. En la capa de componentes, después del import de
+   HeroUI: gana por orden y una utilidad en `className` sigue mandando. */
+@layer components {
+  .button {
+    border-radius: 9999px;
+    font-weight: 600;
+  }
+}
+
+/* Tabla de datos (ResponsiveList): card blanca con cabecera crema en lugar del
+   aspecto por defecto de HeroUI. Sin capa, porque sus reglas de radio y fondo
+   por celda tienen más especificidad dentro de la suya. */
+.data-table .table__content {
+  font-size: 0.8125rem;
+}
+
+.data-table .table__column {
+  border-radius: 0;
+  border-bottom: 1px solid var(--c-line);
+  background: var(--c-cream-50);
+  padding: 0.75rem 1.25rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-ink-subtle);
+}
+
+.data-table .table__column::after {
+  content: none;
+}
+
+.data-table .table__cell {
+  border-radius: 0;
+  border-bottom: 1px solid var(--c-line-soft);
+  background: transparent;
+  padding: 0.875rem 1.25rem;
+  font-size: 0.8125rem;
+  transition: background-color 120ms ease;
+}
+
+.data-table .table__row:last-child .table__cell {
+  border-bottom: 0;
+}
+
+.data-table .table__row {
+  border-bottom: 0;
+}
+
+@media (hover: hover) {
+  .data-table .table__row:hover .table__cell {
+    background: var(--c-hover);
+  }
+}
+
+.data-table .table__row[data-href] {
+  cursor: pointer;
+}

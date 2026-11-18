@@ -17,10 +17,14 @@ import { PRODUCT_STATUS_META } from "../lib/labels";
 import { fmtQtyNumber } from "../lib/units";
 import type { AdminProductRow, AdminVariantSummary } from "../queries/product-queries";
 import { VariantChips, VariantPriceCell, VariantStockCell } from "./variant-list";
+import type { ReactNode } from "react";
+import { PageHeaderRow } from "@/components/page-header";
 
 const VariantForm = lazyDialog(() => import("./variant-form").then((m) => m.VariantForm));
 
 interface ProductListProps {
+  /** Cabecera de la página, ya renderizada en el servidor. */
+  heading?: ReactNode;
   rows: AdminProductRow[];
   currencies: CurrencyInfo[];
   lowStockThreshold: number;
@@ -122,7 +126,7 @@ function EditProductLink({ product, label }: { product: AdminProductRow; label?:
   );
 }
 
-export function ProductList({ rows, currencies, lowStockThreshold }: ProductListProps) {
+export function ProductList({ rows, currencies, lowStockThreshold, heading }: ProductListProps) {
   const [expanded, setExpanded] = useState<ReadonlySet<number>>(() => new Set());
   const [editing, setEditing] = useState<EditingVariant | null>(null);
   const [formOpen, setFormOpen] = useState(false);
@@ -239,12 +243,12 @@ export function ProductList({ rows, currencies, lowStockThreshold }: ProductList
 
   return (
     <>
-      <div className="flex justify-end">
+      <PageHeaderRow heading={heading}>
         <ButtonLink href="/admin/productos/nuevo" variant="solid">
           <Plus className="h-4 w-4" strokeWidth={2.2} />
           Nuevo producto
         </ButtonLink>
-      </div>
+      </PageHeaderRow>
 
       <ResponsiveList
         rows={productRows}
