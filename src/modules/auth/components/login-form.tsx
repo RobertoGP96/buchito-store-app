@@ -2,9 +2,10 @@
 
 import { unstable_rethrow } from "next/navigation";
 import { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button, FieldError, Input, Label, TextField, toast } from "@heroui/react";
+import { Button, toast } from "@heroui/react";
+import { FormTextField } from "@/components/form/fields";
 import { loginUser } from "../actions/auth-actions";
 import { loginSchema, type LoginInput } from "../lib/schemas";
 import type { LoginChallenge } from "../lib/two-factor-labels";
@@ -48,45 +49,24 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
-      <Controller
+      {/* `username` y no `email`: es el token con el que los gestores de
+          contraseñas emparejan el correo con la contraseña guardada. */}
+      <FormTextField
         control={control}
         name="email"
-        render={({ field, fieldState }) => (
-          <TextField
-            type="email"
-            autoComplete="email"
-            value={field.value}
-            onChange={field.onChange}
-            onBlur={field.onBlur}
-            isInvalid={fieldState.invalid}
-            isRequired
-            fullWidth
-          >
-            <Label>Correo</Label>
-            <Input placeholder="tu@correo.com" />
-            <FieldError>{fieldState.error?.message}</FieldError>
-          </TextField>
-        )}
+        label="Correo"
+        type="email"
+        autoComplete="username"
+        placeholder="tu@correo.com"
+        isRequired
       />
-      <Controller
+      <FormTextField
         control={control}
         name="password"
-        render={({ field, fieldState }) => (
-          <TextField
-            type="password"
-            autoComplete="current-password"
-            value={field.value}
-            onChange={field.onChange}
-            onBlur={field.onBlur}
-            isInvalid={fieldState.invalid}
-            isRequired
-            fullWidth
-          >
-            <Label>Contraseña</Label>
-            <Input placeholder="••••••••" />
-            <FieldError>{fieldState.error?.message}</FieldError>
-          </TextField>
-        )}
+        label="Contraseña"
+        type="password"
+        autoComplete="current-password"
+        isRequired
       />
       <Button
         type="submit"

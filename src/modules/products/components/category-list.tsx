@@ -12,6 +12,8 @@ import { StatusChip } from "@/components/status-chip";
 import { deleteCategory } from "../actions/category-actions";
 import type { CategoryRow } from "../queries/category-queries";
 import { cn } from "@/lib/utils";
+import type { ReactNode } from "react";
+import { PageHeaderRow } from "@/components/page-header";
 
 const CategoryForm = lazyDialog(() => import("./category-form").then((m) => m.CategoryForm));
 
@@ -57,7 +59,7 @@ function DeleteCategoryButton({ row, appearance }: { row: CategoryRow; appearanc
   );
 }
 
-export function CategoryList({ rows }: { rows: CategoryRow[] }) {
+export function CategoryList({ rows, heading }: { rows: CategoryRow[]; heading?: ReactNode }) {
   const [editing, setEditing] = useState<CategoryRow | null>(null);
   const [open, setOpen] = useState(false);
 
@@ -84,10 +86,10 @@ export function CategoryList({ rows }: { rows: CategoryRow[] }) {
       isRowHeader: true,
       cell: (r) => (
         <div className={cn("flex min-w-0 items-center gap-2", r.depth > 0 && "pl-5")}>
-          {r.depth > 0 && <CornerDownRight className="h-3.5 w-3.5 flex-none text-slate-300" strokeWidth={1.9} />}
+          {r.depth > 0 && <CornerDownRight className="h-3.5 w-3.5 flex-none text-ink-faint" strokeWidth={1.9} />}
           <div className="min-w-0">
             <p className="font-semibold text-ink">{r.name}</p>
-            <p className="text-[12px] text-slate-400">{r.slug}</p>
+            <p className="type-caption text-ink-subtle">{r.slug}</p>
           </div>
         </div>
       ),
@@ -116,12 +118,12 @@ export function CategoryList({ rows }: { rows: CategoryRow[] }) {
 
   return (
     <>
-      <div className="flex justify-end">
-        <Button variant="primary" className="rounded-full" onPress={openNew}>
+      <PageHeaderRow heading={heading}>
+        <Button variant="primary" onPress={openNew}>
           <Plus className="h-4 w-4" strokeWidth={2.2} />
           Nueva categoría
         </Button>
-      </div>
+      </PageHeaderRow>
 
       <ResponsiveList
         rows={rows}
@@ -144,7 +146,7 @@ export function CategoryList({ rows }: { rows: CategoryRow[] }) {
             ]}
             actions={
               <>
-                <Button variant="outline" size="sm" className="rounded-full" onPress={() => openEdit(r)}>
+                <Button variant="outline" size="sm" onPress={() => openEdit(r)}>
                   <Pencil className="h-3.5 w-3.5" strokeWidth={1.9} />
                   Editar
                 </Button>

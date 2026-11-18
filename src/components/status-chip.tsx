@@ -5,9 +5,11 @@ import { cn } from "@/lib/utils";
 
 export type StatusTone = "neutral" | "info" | "success" | "warning" | "danger";
 
-const COLOR: Record<StatusTone, "default" | "accent" | "success" | "warning" | "danger"> = {
+// `info` no usa el `accent` de HeroUI: ese es el café del CTA y un estado
+// informativo se confundía con una acción. Va en azul, por clases.
+const COLOR: Record<StatusTone, "default" | "success" | "warning" | "danger"> = {
   neutral: "default",
-  info: "accent",
+  info: "default",
   success: "success",
   warning: "warning",
   danger: "danger",
@@ -38,7 +40,7 @@ export function StatusChip({
       color={COLOR[tone]}
       variant="soft"
       size={size}
-      className={cn("whitespace-nowrap font-semibold", className)}
+      className={cn("whitespace-nowrap font-semibold", tone === "info" && "bg-azul-100 text-azul-700", className)}
     >
       {label}
     </Chip>

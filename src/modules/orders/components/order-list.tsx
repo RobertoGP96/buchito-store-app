@@ -3,16 +3,18 @@
 import Link from "next/link";
 import { Inbox } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
-import { CHIP_BASE, CHIP_OFF, CHIP_ON } from "@/components/choice-chips";
 import { Money } from "@/components/money";
-import { LinkPending } from "@/components/nav-icon";
 import { ListCard, ResponsiveList, type ListColumn } from "@/components/responsive-list";
 import { StatusChip } from "@/components/status-chip";
 import { fmtDateTime } from "@/lib/format";
 import { PAYMENT_STATUS_META } from "@/modules/payments/lib/labels";
 import { FULFILLMENT_LABELS, ORDER_STATUS_META, ORDER_STATUSES, type OrderStatus } from "../lib/labels";
 import type { OrderSummaryRow } from "../queries/order-queries";
-import { cn } from "@/lib/utils";
+import { StatusFilter } from "@/components/status-filter";
+
+const ORDER_STATUS_LABELS = Object.fromEntries(
+  ORDER_STATUSES.map((status) => [status, ORDER_STATUS_META[status].label])
+) as Record<OrderStatus, string>;
 
 interface OrderListProps {
   rows: OrderSummaryRow[];
@@ -27,7 +29,7 @@ export function OrderList({ rows, activeStatus, counts }: OrderListProps) {
       header: "Pedido",
       isRowHeader: true,
       cell: (r) => (
-        <Link href={`/admin/pedidos/${r.orderId}`} className="font-semibold text-navy-700 hover:underline">
+        <Link href={`/admin/pedidos/${r.orderId}`} className="tabular font-semibold whitespace-nowrap text-tostado-700 hover:underline">
           {r.orderNo}
         </Link>
       ),
@@ -38,7 +40,7 @@ export function OrderList({ rows, activeStatus, counts }: OrderListProps) {
       cell: (r) => (
         <div className="min-w-0">
           <p className="font-medium text-ink">{r.customerName}</p>
-          <p className="tabular text-[12px] text-slate-400">{r.customerPhone}</p>
+          <p className="tabular type-caption text-ink-subtle">{r.customerPhone}</p>
         </div>
       ),
     },
@@ -51,7 +53,7 @@ export function OrderList({ rows, activeStatus, counts }: OrderListProps) {
         <div>
           <Money value={r.total} className="font-semibold" />
           {r.paymentCurrency.code !== undefined && (
-            <p className="text-[11.5px] text-slate-400">
+            <p className="type-caption text-ink-subtle">
               <Money value={r.totalInPaymentCurrency} currency={r.paymentCurrency} /> · {r.paymentMethodName}
             </p>
           )}
@@ -68,34 +70,27 @@ export function OrderList({ rows, activeStatus, counts }: OrderListProps) {
         </div>
       ),
     },
-    { id: "date", header: "Fecha", cell: (r) => <span className="tabular text-slate-500">{fmtDateTime(r.createdAt)}</span> },
+    { id: "date", header: "Fecha", cell: (r) => <span className="tabular text-ink-muted">{fmtDateTime(r.createdAt)}</span> },
   ];
 
   return (
     <>
-      <div className="no-scrollbar -mx-1 flex snap-x gap-2 overflow-x-auto px-1 py-1">
-        <Link href="/admin/pedidos" scroll={false} className={cn(CHIP_BASE, activeStatus === null ? CHIP_ON : CHIP_OFF)}>
-          Todos
-          <LinkPending />
-        </Link>
-        {ORDER_STATUSES.map((status) => (
-          <Link
-            key={status}
-            href={`/admin/pedidos?status=${status}`}
-            scroll={false}
-            className={cn(CHIP_BASE, activeStatus === status ? CHIP_ON : CHIP_OFF)}
-          >
-            {ORDER_STATUS_META[status].label}
-            {counts[status] > 0 && <span className="ml-1.5 text-[11px] opacity-70">{counts[status]}</span>}
-            <LinkPending />
-          </Link>
-        ))}
-      </div>
+      <StatusFilter
+        basePath="/admin/pedidos"
+        allLabel="Todos"
+        statuses={ORDER_STATUSES}
+        labels={ORDER_STATUS_LABELS}
+        counts={counts}
+        active={activeStatus}
+        resultCount={rows.length}
+        noun={["pedido", "pedidos"]}
+      />
 
       <ResponsiveList
         rows={rows}
         rowKey={(r) => r.orderId}
         columns={columns}
+        rowHref={(r) => `/admin/pedidos/${r.orderId}`}
         ariaLabel="Pedidos"
         empty={
           <div className="rounded-card bg-canvas shadow-card">

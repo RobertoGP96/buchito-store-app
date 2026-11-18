@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { useCurrency } from "@/modules/currency/store/currency-provider";
 import { PAYMENT_RANGE_LABELS as RANGE_LABELS, PAYMENT_RANGES, type PaymentRange } from "../lib/payment-ranges";
 import type { OrderPaymentRow, OrderPaymentsResult } from "../queries/order-payment-queries";
+import { ScrollFadeRow } from "@/components/scroll-fade-row";
 
 interface OrderPaymentListProps {
   result: OrderPaymentsResult;
@@ -25,7 +26,7 @@ function AmountCell({ row }: { row: OrderPaymentRow }) {
     <div className="flex flex-col items-end">
       <Money value={row.amountBase} className="font-semibold text-ink" />
       {foreign && (
-        <span className="text-[11.5px] text-slate-400">
+        <span className="type-caption text-ink-subtle">
           <Money value={row.amountTendered} currency={row.currency} /> · tasa{" "}
           <span className="tabular">{row.exchangeRate}</span>
         </span>
@@ -41,10 +42,10 @@ function Totals({ result }: { result: OrderPaymentsResult }) {
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
       <div className="rounded-card bg-canvas p-4 shadow-card">
         <p className="eyebrow">Total cobrado</p>
-        <p className="tabular font-display mt-2 text-[24px] leading-none text-navy-900">
+        <p className="num-display mt-2 text-[24px] leading-none text-espresso-900">
           <Money value={result.totalBase} />
         </p>
-        <p className="mt-1.5 text-[12px] text-slate-500">
+        <p className="mt-1.5 type-caption text-ink-muted">
           {result.rows.length} {result.rows.length === 1 ? "cobro" : "cobros"}
           {result.truncated ? " (listado recortado)" : ""}
         </p>
@@ -52,10 +53,10 @@ function Totals({ result }: { result: OrderPaymentsResult }) {
       {foreign.map((t) => (
         <div key={t.currency.currencyId} className="rounded-card bg-canvas p-4 shadow-card">
           <p className="eyebrow">Recibido en {t.currency.code}</p>
-          <p className="tabular font-display mt-2 text-[24px] leading-none text-navy-900">
+          <p className="num-display mt-2 text-[24px] leading-none text-espresso-900">
             <Money value={t.amount} currency={t.currency} />
           </p>
-          <p className="mt-1.5 text-[12px] text-slate-500">Suma de lo entregado en esa moneda.</p>
+          <p className="mt-1.5 type-caption text-ink-muted">Suma de lo entregado en esa moneda.</p>
         </div>
       ))}
     </div>
@@ -68,17 +69,17 @@ export function OrderPaymentList({ result, activeRange }: OrderPaymentListProps)
       id: "date",
       header: "Fecha",
       isRowHeader: true,
-      cell: (r) => <span className="tabular text-slate-500">{fmtDateTime(r.paidAt)}</span>,
+      cell: (r) => <span className="tabular text-ink-muted">{fmtDateTime(r.paidAt)}</span>,
     },
     {
       id: "order",
       header: "Pedido",
       cell: (r) => (
         <div className="min-w-0">
-          <Link href={`/admin/pedidos/${r.orderId}`} className="font-semibold text-navy-700 hover:underline">
+          <Link href={`/admin/pedidos/${r.orderId}`} className="font-semibold text-tostado-700 hover:underline">
             {r.orderNo}
           </Link>
-          <p className="text-[12px] text-slate-400">{r.customerName}</p>
+          <p className="type-caption text-ink-subtle">{r.customerName}</p>
         </div>
       ),
     },
@@ -88,17 +89,17 @@ export function OrderPaymentList({ result, activeRange }: OrderPaymentListProps)
       cell: (r) => (
         <div className="min-w-0">
           <p className="text-ink">{r.methodName}</p>
-          {r.reference && <p className="tabular text-[12px] text-slate-400">Ref. {r.reference}</p>}
+          {r.reference && <p className="tabular type-caption text-ink-subtle">Ref. {r.reference}</p>}
         </div>
       ),
     },
     { id: "amount", header: "Monto", align: "right", cell: (r) => <AmountCell row={r} /> },
-    { id: "receivedBy", header: "Recibido por", cell: (r) => <span className="text-slate-500">{r.receivedBy ?? "—"}</span> },
+    { id: "receivedBy", header: "Recibido por", cell: (r) => <span className="text-ink-muted">{r.receivedBy ?? "—"}</span> },
   ];
 
   return (
     <>
-      <div className="no-scrollbar -mx-1 flex snap-x gap-2 overflow-x-auto px-1 py-1">
+      <ScrollFadeRow>
         {PAYMENT_RANGES.map((range) => (
           <Link
             key={range}
@@ -110,7 +111,7 @@ export function OrderPaymentList({ result, activeRange }: OrderPaymentListProps)
             <LinkPending />
           </Link>
         ))}
-      </div>
+      </ScrollFadeRow>
 
       <Totals result={result} />
 

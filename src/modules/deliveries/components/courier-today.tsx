@@ -12,27 +12,27 @@ function DeliveryCard({ d }: { d: DeliveryRow }) {
     <li>
       <Link
         href={`/mensajero/entregas/${d.deliveryId}`}
-        className="flex items-center gap-4 rounded-card bg-canvas p-4 shadow-card transition-shadow duration-200 hover:shadow-float"
+        className="flex items-center gap-4 rounded-card bg-canvas p-4 shadow-card transition-[box-shadow,transform] duration-200 hover:shadow-float motion-safe:active:scale-[.99]"
       >
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="font-semibold text-ink">{d.orderNo}</p>
+            <p className="tabular type-meta font-semibold text-ink-muted">{d.orderNo}</p>
             <StatusChip {...DELIVERY_STATUS_META[d.status]} />
             {d.attempts > 0 && (
-              <span className="text-[11.5px] font-semibold text-warning">Reintento {d.attempts + 1}</span>
+              <span className="type-caption font-semibold text-warn">Reintento {d.attempts + 1}</span>
             )}
           </div>
-          <p className="mt-2 text-[15px] font-semibold text-ink">{d.recipientName}</p>
+          <p className="type-subheading mt-2 font-semibold text-ink">{d.recipientName}</p>
           {d.addressLine && (
-            <p className="mt-1 flex items-start gap-1.5 text-[13px] leading-[1.5] text-slate-600">
-              <MapPin className="mt-0.5 h-3.5 w-3.5 flex-none text-navy-700" strokeWidth={1.9} />
+            <p className="mt-1 flex items-start gap-1.5 type-meta leading-[1.5] text-ink-muted">
+              <MapPin className="mt-0.5 h-3.5 w-3.5 flex-none text-tostado-700" strokeWidth={1.9} />
               <span>
                 {d.addressLine}
-                {d.zoneName && <span className="text-slate-400"> · {d.zoneName}</span>}
+                {d.zoneName && <span className="text-ink-subtle"> · {d.zoneName}</span>}
               </span>
             </p>
           )}
-          <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12.5px] text-slate-500">
+          <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 type-meta text-ink-muted">
             <span className="inline-flex items-center gap-1">
               <Phone className="h-3.5 w-3.5" strokeWidth={1.9} />
               <span className="tabular">{d.recipientPhone}</span>
@@ -44,7 +44,7 @@ function DeliveryCard({ d }: { d: DeliveryRow }) {
             )}
           </p>
         </div>
-        <ChevronRight className="h-5 w-5 flex-none text-slate-300" strokeWidth={2} />
+        <ChevronRight className="h-5 w-5 flex-none text-ink-faint" strokeWidth={1.9} />
       </Link>
     </li>
   );
@@ -55,7 +55,7 @@ function Group({ title, rows }: { title: string; rows: DeliveryRow[] }) {
   return (
     <section>
       <p className="eyebrow mb-2.5">
-        {title} <span className="tabular text-slate-400">· {rows.length}</span>
+        {title} <span className="tabular text-ink-subtle">· {rows.length}</span>
       </p>
       <ul className="flex flex-col gap-3">
         {rows.map((d) => (

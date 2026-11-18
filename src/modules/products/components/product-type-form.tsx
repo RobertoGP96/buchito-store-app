@@ -156,7 +156,6 @@ export function ProductTypeForm({ open, onOpenChange, type }: ProductTypeFormPro
             <Button
               variant="secondary"
               size="sm"
-              className="rounded-full"
               onPress={() =>
                 append({ key: "", label: "", kind: "text", optionsText: "", required: false, scope: "product" })
               }
@@ -166,12 +165,12 @@ export function ProductTypeForm({ open, onOpenChange, type }: ProductTypeFormPro
             </Button>
           </div>
           {fields.length === 0 && (
-            <p className="text-[13px] text-slate-400">
+            <p className="type-meta text-ink-subtle">
               Sin atributos: los productos de este tipo solo tienen nombre, descripción, precio y stock.
             </p>
           )}
           {fields.map((field, index) => (
-            <div key={field.id} className="rounded-field border border-line bg-page p-3.5">
+            <div key={field.id} className="rounded-field border border-line bg-cream-50 p-3.5">
               <div className="grid gap-3 sm:grid-cols-2">
                 <FormTextField control={control} name={`attributes.${index}.label`} label="Etiqueta" placeholder="Talla" isRequired />
                 <FormTextField control={control} name={`attributes.${index}.key`} label="Clave" placeholder="talla" isRequired />

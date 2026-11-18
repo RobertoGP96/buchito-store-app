@@ -44,10 +44,12 @@ export function TopNav({ user }: { user: NavUser | null }) {
   // página asoma por debajo en los rincones, así que no lleva borde ni blur.
   return (
     <header className="on-brand sticky top-0 z-40 rounded-b-[22px] bg-nav text-nav-fg shadow-float md:rounded-b-[26px]">
-      <div className="mx-auto flex h-16 w-full max-w-[1200px] items-center gap-5 px-5 md:h-[68px] md:gap-7 md:px-6">
+      <div className="mx-auto flex h-16 w-full max-w-[1120px] items-center gap-5 px-5 md:h-[68px] md:px-6 lg:gap-7">
         <BrandLogo tone="on-brand" compact />
 
-        <nav className="hidden items-center gap-6 md:flex">
+        {/* Entre 768 y 1024px logo, enlaces y acciones no caben con su aire de
+            escritorio: los enlaces van sin icono y más juntos hasta `lg`. */}
+        <nav aria-label="Principal" className="hidden items-center gap-4 md:flex lg:gap-6">
           {LINKS.map((link) => {
             const active = link.isActive(pathname);
             const Icon = link.icon;
@@ -59,18 +61,18 @@ export function TopNav({ user }: { user: NavUser | null }) {
                 className={cn(
                   "nav-label inline-flex items-center gap-1.5 border-b-2 pt-1 pb-1 transition-colors duration-150",
                   active
-                    ? "border-gold-500 font-bold text-nav-fg"
+                    ? "border-caramelo-500 font-bold text-nav-fg"
                     : "border-transparent font-medium text-nav-muted hover:text-nav-fg"
                 )}
               >
-                <Icon className="h-[15px] w-[15px] flex-none" strokeWidth={1.9} />
+                <Icon className="hidden h-4 w-4 flex-none lg:block" strokeWidth={1.9} />
                 {link.label}
               </Link>
             );
           })}
         </nav>
 
-        <div className="ml-auto flex items-center gap-1 md:gap-2">
+        <div className="ml-auto flex items-center gap-1 lg:gap-2">
           <CurrencySwitcher className={NAV_CONTROL} />
           <ThemeToggle className={ICON_ACTION} />
 

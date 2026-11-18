@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Gift, Package } from "lucide-react";
-import { ButtonLink } from "@/components/button-link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { ComboForm } from "@/modules/combos/components/combo-form";
@@ -16,14 +15,12 @@ export default async function NewComboPage() {
   return (
     <>
       <PageHeader
+        backHref="/admin/combos"
+        backLabel="Combos"
         icon={Gift}
         title="Nuevo combo"
         description="Elige los productos y sus cantidades, fija el precio del paquete y publícalo cuando esté listo."
-      >
-        <ButtonLink href="/admin/combos" variant="ghost" size="sm">
-          Volver a combos
-        </ButtonLink>
-      </PageHeader>
+      />
 
       {variants.length === 0 ? (
         <div className="rounded-card bg-canvas shadow-card">

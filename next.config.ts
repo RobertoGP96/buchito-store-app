@@ -13,11 +13,31 @@ function cdnHostname(): string | null {
 
 const cdnHost = cdnHostname();
 
+/** Cabeceras estáticas para todas las respuestas: no dependen del request, así
+ *  que van aquí y no en el middleware (que solo corre en rutas con sesión).
+ *  Una CSP de scripts necesitaría nonce por request; aquí solo va la parte que
+ *  no lo requiere (quién puede incrustar la app en un iframe). */
+const SECURITY_HEADERS = [
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Content-Security-Policy", value: "frame-ancestors 'self'" },
+  { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  // La cámara se queda para el propio origen: el mensajero adjunta la foto de
+  // la entrega desde el formulario.
+  { key: "Permissions-Policy", value: "camera=(self), microphone=(), geolocation=()" },
+];
+
 const nextConfig: NextConfig = {
   // El driver de Neon abre WebSockets desde Node; empaquetarlo rompe el
   // adapter en server actions.
   serverExternalPackages: ["@neondatabase/serverless"],
+  poweredByHeader: false,
+  async headers() {
+    return [{ source: "/:path*", headers: SECURITY_HEADERS }];
+  },
   images: {
+    // AVIF primero; quien no lo acepta recibe WebP (lo decide la cabecera Accept).
+    formats: ["image/avif", "image/webp"],
     // Las fotos propias van por `/media/<clave>` (ruta local, no necesita
     // patrón). Estos son los orígenes externos que el optimizador acepta.
     remotePatterns: [

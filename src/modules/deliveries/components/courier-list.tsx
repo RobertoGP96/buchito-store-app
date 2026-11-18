@@ -12,6 +12,8 @@ import { StatusChip } from "@/components/status-chip";
 import { deleteCourier } from "../actions/courier-actions";
 import { VEHICLE_LABELS } from "../lib/labels";
 import type { CourierRow } from "../queries/courier-queries";
+import type { ReactNode } from "react";
+import { PageHeaderRow } from "@/components/page-header";
 
 const CourierForm = lazyDialog(() => import("./courier-form").then((m) => m.CourierForm));
 
@@ -32,7 +34,7 @@ function DeleteCourierButton({ row, appearance }: { row: CourierRow; appearance:
   );
 }
 
-export function CourierList({ rows }: { rows: CourierRow[] }) {
+export function CourierList({ rows, heading }: { rows: CourierRow[]; heading?: ReactNode }) {
   const [editing, setEditing] = useState<CourierRow | null>(null);
   const [open, setOpen] = useState(false);
 
@@ -53,7 +55,7 @@ export function CourierList({ rows }: { rows: CourierRow[] }) {
       cell: (r) => (
         <div className="min-w-0">
           <p className="font-semibold text-ink">{r.fullName}</p>
-          <p className="text-[12px] text-slate-400">{r.email}</p>
+          <p className="type-caption text-ink-subtle">{r.email}</p>
         </div>
       ),
     },
@@ -66,7 +68,7 @@ export function CourierList({ rows }: { rows: CourierRow[] }) {
       id: "pending",
       header: "Por pagar",
       align: "right",
-      cell: (r) => <Money value={r.pendingFees} className={r.pendingFees > 0 ? "font-semibold text-warn" : "text-slate-400"} />,
+      cell: (r) => <Money value={r.pendingFees} className={r.pendingFees > 0 ? "font-semibold text-warn" : "text-ink-subtle"} />,
     },
     { id: "status", header: "Estado", cell: (r) => <StatusChip label={r.active ? "Activo" : "Inactivo"} tone={r.active ? "success" : "neutral"} /> },
     {
@@ -86,12 +88,12 @@ export function CourierList({ rows }: { rows: CourierRow[] }) {
 
   return (
     <>
-      <div className="flex justify-end">
-        <Button variant="primary" className="rounded-full" onPress={openNew}>
+      <PageHeaderRow heading={heading}>
+        <Button variant="primary" onPress={openNew}>
           <Plus className="h-4 w-4" strokeWidth={2.2} />
           Nuevo mensajero
         </Button>
-      </div>
+      </PageHeaderRow>
 
       <ResponsiveList
         rows={rows}
@@ -116,7 +118,7 @@ export function CourierList({ rows }: { rows: CourierRow[] }) {
             ]}
             actions={
               <>
-                <Button variant="outline" size="sm" className="rounded-full" onPress={() => openEdit(r)}>
+                <Button variant="outline" size="sm" onPress={() => openEdit(r)}>
                   <Pencil className="h-3.5 w-3.5" strokeWidth={1.9} />
                   Editar
                 </Button>

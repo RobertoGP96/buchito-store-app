@@ -92,9 +92,9 @@ export function UserForm({ open, onOpenChange, user }: UserFormProps) {
             isRequired
           />
           {isCourier && (
-            <p className="text-[12px] leading-[1.5] text-slate-500">
+            <p className="type-caption leading-[1.5] text-ink-muted">
               El rol de un mensajero no se cambia desde aquí; su perfil se gestiona en{" "}
-              <Link href="/admin/mensajeros" className="font-semibold text-navy-700 hover:underline">
+              <Link href="/admin/mensajeros" className="font-semibold text-tostado-700 hover:underline">
                 Mensajeros
               </Link>
               .

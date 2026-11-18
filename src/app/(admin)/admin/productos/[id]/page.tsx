@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 import { AlertTriangle, Package } from "lucide-react";
-import { ButtonLink } from "@/components/button-link";
 import { PageHeader } from "@/components/page-header";
 import { StatusChip } from "@/components/status-chip";
 import { getActiveCurrencies } from "@/modules/currency/queries/currency-queries";
@@ -58,6 +57,8 @@ export default async function AdminProductPage({ params }: AdminProductPageProps
   return (
     <>
       <PageHeader
+        backHref="/admin/productos"
+        backLabel="Productos"
         icon={Package}
         title={product.name}
         description={subtitle}
@@ -80,17 +81,14 @@ export default async function AdminProductPage({ params }: AdminProductPageProps
           orderLineCount={product.orderLineCount}
           totalStock={product.variants.reduce((sum, v) => sum + v.stock, 0)}
         />
-        <ButtonLink href="/admin/productos" variant="ghost" size="sm">
-          Volver a productos
-        </ButtonLink>
       </PageHeader>
 
       {!hasActiveVariants && (
         <p
           role="status"
-          className="flex items-start gap-2.5 rounded-field bg-gold-100 px-4 py-3 text-[13px] leading-[1.5] text-gold-600"
+          className="flex items-start gap-2.5 rounded-field bg-warn-soft px-4 py-3 type-meta leading-[1.5] text-warn"
         >
-          <AlertTriangle className="mt-0.5 h-4 w-4 flex-none" strokeWidth={2} />
+          <AlertTriangle className="mt-0.5 h-4 w-4 flex-none" strokeWidth={1.9} />
           <span>
             <span className="font-semibold">Publica al menos una variante para que aparezca en la tienda.</span>{" "}
             Sin variantes activas el producto no se muestra aunque esté publicado.

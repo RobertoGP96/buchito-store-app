@@ -30,13 +30,13 @@ export default async function CombosPage() {
           />
         ) : (
           <>
-            <p className="tabular text-[12.5px] text-slate-400">
+            <p className="tabular type-meta text-ink-subtle">
               {combos.length} {combos.length === 1 ? "combo" : "combos"}
             </p>
             <ProductGrid>
               {combos.map((combo, i) => (
                 <ProductGridCell key={combo.comboId}>
-                  <ComboCard combo={combo} priority={i < 4} />
+                  <ComboCard combo={combo} priority={i < 2} />
                 </ProductGridCell>
               ))}
             </ProductGrid>

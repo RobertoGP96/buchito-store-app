@@ -27,8 +27,8 @@ export function BrandMark({ tone = "default", size = "md", className }: BrandMar
       className={cn(
         "flex flex-none items-center justify-center bg-brand-tile shadow-card",
         size === "sm" ? "h-8 w-8 rounded-[9px]" : "h-9 w-9 rounded-[10px]",
-        tone === "inverse" && "ring-1 ring-white/15",
-        tone === "on-brand" && "bg-white/15 shadow-none ring-1 ring-white/20",
+        tone === "inverse" && "ring-1 ring-nav-fg/15",
+        tone === "on-brand" && "bg-nav-fg/15 shadow-none ring-1 ring-nav-fg/20",
         className
       )}
     >
@@ -98,10 +98,10 @@ export function BrandLogo({
         <BrandMark tone={tone} size={size} />
         <span
           className={cn(
-            "font-display leading-none tracking-[.04em] uppercase",
+            "font-sans leading-none font-bold tracking-[.04em] uppercase",
             compact && "hidden sm:inline",
             size === "sm" ? "text-[15px]" : "text-[17px]",
-            tone === "default" ? "text-navy-700" : "text-white"
+            tone === "default" ? "text-tostado-700" : "text-nav-fg"
           )}
         >
           {STORE_NAME}

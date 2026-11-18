@@ -4,11 +4,9 @@ import Link from "next/link";
 import { useState } from "react";
 import { Button, ListBox, Select, toast } from "@heroui/react";
 import { Camera, Truck } from "lucide-react";
-import { CHIP_BASE, CHIP_OFF, CHIP_ON } from "@/components/choice-chips";
 import { EmptyState } from "@/components/empty-state";
 import { Money } from "@/components/money";
 import { PhotoLightbox } from "@/components/photo-lightbox";
-import { LinkPending } from "@/components/nav-icon";
 import { ListCard, ResponsiveList, type ListColumn } from "@/components/responsive-list";
 import { StatusChip } from "@/components/status-chip";
 import { fmtDateTime } from "@/lib/format";
@@ -17,7 +15,7 @@ import { assignCourier, unassignCourier } from "../actions/delivery-actions";
 import { DELIVERY_STATUS_META, DELIVERY_STATUSES, VEHICLE_LABELS, type DeliveryStatus } from "../lib/labels";
 import type { CourierRow } from "../queries/courier-queries";
 import type { DeliveryRow } from "../queries/delivery-queries";
-import { cn } from "@/lib/utils";
+import { StatusFilter } from "@/components/status-filter";
 
 /** Abre la foto de prueba en un visor sin salir de la lista. */
 function ProofLink({ url, orderNo, deliveredAt }: { url: string; orderNo: string; deliveredAt: string | null }) {
@@ -27,7 +25,7 @@ function ProofLink({ url, orderNo, deliveredAt }: { url: string; orderNo: string
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="mt-1 inline-flex items-center gap-1 text-[12px] font-semibold text-navy-700 hover:underline"
+        className="mt-1 inline-flex items-center gap-1 type-caption font-semibold text-tostado-700 hover:underline"
       >
         <Camera className="h-3.5 w-3.5" strokeWidth={1.9} />
         Ver foto de entrega
@@ -44,10 +42,15 @@ function ProofLink({ url, orderNo, deliveredAt }: { url: string; orderNo: string
   );
 }
 
+const DELIVERY_STATUS_LABELS = Object.fromEntries(
+  DELIVERY_STATUSES.map((status) => [status, DELIVERY_STATUS_META[status].label])
+) as Record<DeliveryStatus, string>;
+
 interface DeliveryListProps {
   rows: DeliveryRow[];
   couriers: Pick<CourierRow, "courierId" | "fullName" | "vehicle" | "openDeliveries">[];
   activeStatus: DeliveryStatus | null;
+  counts: Record<DeliveryStatus, number>;
 }
 
 function AssignControl({
@@ -62,7 +65,7 @@ function AssignControl({
   const canAssign = delivery.status === "pending" || delivery.status === "failed";
   const canUnassign = delivery.status === "assigned";
 
-  if (!canAssign && !canUnassign) return <span className="text-[12.5px] text-slate-400">{delivery.courierName ?? "—"}</span>;
+  if (!canAssign && !canUnassign) return <span className="type-meta text-ink-subtle">{delivery.courierName ?? "—"}</span>;
 
   const run = async () => {
     setPending(true);
@@ -102,7 +105,7 @@ function AssignControl({
               {couriers.map((c) => (
                 <ListBox.Item key={c.courierId} id={String(c.courierId)} textValue={c.fullName}>
                   {c.fullName}
-                  <span className="ml-2 text-[12px] text-slate-400">
+                  <span className="ml-2 type-caption text-ink-subtle">
                     {VEHICLE_LABELS[c.vehicle]} · {c.openDeliveries} en curso
                   </span>
                   <ListBox.ItemIndicator />
@@ -115,7 +118,6 @@ function AssignControl({
       <Button
         variant={canUnassign ? "outline" : "primary"}
         size="sm"
-        className="rounded-full"
         isPending={pending}
         isDisabled={pending || (canAssign && !courierId)}
         onPress={() => void run()}
@@ -126,7 +128,7 @@ function AssignControl({
   );
 }
 
-export function DeliveryList({ rows, couriers, activeStatus }: DeliveryListProps) {
+export function DeliveryList({ rows, couriers, activeStatus, counts }: DeliveryListProps) {
   const columns: ListColumn<DeliveryRow>[] = [
     {
       id: "order",
@@ -134,10 +136,10 @@ export function DeliveryList({ rows, couriers, activeStatus }: DeliveryListProps
       isRowHeader: true,
       cell: (r) => (
         <div className="min-w-0">
-          <Link href={`/admin/pedidos/${r.orderId}`} className="font-semibold text-navy-700 hover:underline">
+          <Link href={`/admin/pedidos/${r.orderId}`} className="tabular font-semibold whitespace-nowrap text-tostado-700 hover:underline">
             {r.orderNo}
           </Link>
-          <p className="text-[12px] text-slate-400">
+          <p className="type-caption text-ink-subtle">
             {r.recipientName} · <span className="tabular">{r.recipientPhone}</span>
           </p>
           {r.proofPhotoUrl && <ProofLink url={r.proofPhotoUrl} orderNo={r.orderNo} deliveredAt={r.deliveredAt} />}
@@ -148,28 +150,21 @@ export function DeliveryList({ rows, couriers, activeStatus }: DeliveryListProps
     { id: "fee", header: "Tarifa", align: "right", cell: (r) => <Money value={r.fee} /> },
     { id: "status", header: "Estado", cell: (r) => <StatusChip {...DELIVERY_STATUS_META[r.status]} /> },
     { id: "courier", header: "Mensajero", cell: (r) => <AssignControl delivery={r} couriers={couriers} /> },
-    { id: "date", header: "Creada", cell: (r) => <span className="tabular text-slate-500">{fmtDateTime(r.createdAt)}</span> },
+    { id: "date", header: "Creada", cell: (r) => <span className="tabular text-ink-muted">{fmtDateTime(r.createdAt)}</span> },
   ];
 
   return (
     <>
-      <div className="no-scrollbar -mx-1 flex snap-x gap-2 overflow-x-auto px-1 py-1">
-        <Link href="/admin/entregas" scroll={false} className={cn(CHIP_BASE, activeStatus === null ? CHIP_ON : CHIP_OFF)}>
-          Todas
-          <LinkPending />
-        </Link>
-        {DELIVERY_STATUSES.map((status) => (
-          <Link
-            key={status}
-            href={`/admin/entregas?status=${status}`}
-            scroll={false}
-            className={cn(CHIP_BASE, activeStatus === status ? CHIP_ON : CHIP_OFF)}
-          >
-            {DELIVERY_STATUS_META[status].label}
-            <LinkPending />
-          </Link>
-        ))}
-      </div>
+      <StatusFilter
+        basePath="/admin/entregas"
+        allLabel="Todas"
+        statuses={DELIVERY_STATUSES}
+        labels={DELIVERY_STATUS_LABELS}
+        counts={counts}
+        active={activeStatus}
+        resultCount={rows.length}
+        noun={["entrega", "entregas"]}
+      />
 
       <ResponsiveList
         rows={rows}

@@ -38,11 +38,11 @@ export function ResponsiveFormDialog({
             <Modal.Dialog className={cn("bg-canvas", className)}>
               <Modal.CloseTrigger />
               <Modal.Header>
-                <Modal.Heading className="font-display text-[20px] text-navy-900">
+                <Modal.Heading className="font-display text-[20px] text-espresso-900">
                   {title}
                 </Modal.Heading>
                 {description && (
-                  <p className="mt-1 text-[13px] leading-[1.6] text-slate-500">
+                  <p className="mt-1 type-meta leading-[1.6] text-ink-muted">
                     {description}
                   </p>
                 )}
@@ -63,11 +63,11 @@ export function ResponsiveFormDialog({
           <Drawer.Dialog className={cn("max-h-[92dvh] bg-canvas", className)}>
             <Drawer.Handle />
             <Drawer.Header>
-              <Drawer.Heading className="font-display text-[20px] text-navy-900">
+              <Drawer.Heading className="font-display text-[20px] text-espresso-900">
                 {title}
               </Drawer.Heading>
               {description && (
-                <p className="mt-1 text-[13px] leading-[1.6] text-slate-500">
+                <p className="mt-1 type-meta leading-[1.6] text-ink-muted">
                   {description}
                 </p>
               )}

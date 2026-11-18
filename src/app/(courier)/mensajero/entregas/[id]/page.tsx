@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Truck } from "lucide-react";
 import { getSessionCourierId } from "@/lib/auth-guard";
-import { ButtonLink } from "@/components/button-link";
 import { PageHeader } from "@/components/page-header";
 import { DeliveryDetail } from "@/modules/deliveries/components/delivery-detail";
 import { getDeliveryForCourier } from "@/modules/deliveries/queries/delivery-queries";
@@ -34,14 +33,13 @@ export default async function CourierDeliveryPage({ params }: CourierDeliveryPag
   return (
     <>
       <PageHeader
+        backHref={back.href}
+        backLabel={back.label}
+        numericTitle
         icon={Truck}
         title={delivery.orderNo}
         description={[delivery.recipientName, delivery.zoneName].filter(Boolean).join(" · ")}
-      >
-        <ButtonLink href={back.href} variant="ghost" size="sm">
-          {back.label}
-        </ButtonLink>
-      </PageHeader>
+      />
       <DeliveryDetail
         delivery={delivery}
         isAssignedCourier={delivery.courierId === courierId}

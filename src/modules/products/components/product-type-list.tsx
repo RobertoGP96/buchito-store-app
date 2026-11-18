@@ -10,6 +10,8 @@ import { ListCard, ResponsiveList, type ListColumn } from "@/components/responsi
 import { StatusChip } from "@/components/status-chip";
 import { deleteProductType } from "../actions/product-type-actions";
 import type { ProductTypeRow } from "../queries/product-type-queries";
+import type { ReactNode } from "react";
+import { PageHeaderRow } from "@/components/page-header";
 
 const ProductTypeForm = lazyDialog(() => import("./product-type-form").then((m) => m.ProductTypeForm));
 
@@ -37,7 +39,7 @@ function DeleteTypeButton({ row, appearance }: { row: ProductTypeRow; appearance
   );
 }
 
-export function ProductTypeList({ rows }: { rows: ProductTypeRow[] }) {
+export function ProductTypeList({ rows, heading }: { rows: ProductTypeRow[]; heading?: ReactNode }) {
   const [editing, setEditing] = useState<ProductTypeRow | null>(null);
   const [open, setOpen] = useState(false);
 
@@ -58,11 +60,11 @@ export function ProductTypeList({ rows }: { rows: ProductTypeRow[] }) {
       cell: (r) => (
         <div className="min-w-0">
           <p className="font-semibold text-ink">{r.name}</p>
-          <p className="text-[12px] text-slate-400">{r.slug}</p>
+          <p className="type-caption text-ink-subtle">{r.slug}</p>
         </div>
       ),
     },
-    { id: "attributes", header: "Atributos", cell: (r) => <span className="text-[13px] text-slate-500">{attributeSummary(r)}</span> },
+    { id: "attributes", header: "Atributos", cell: (r) => <span className="type-meta text-ink-muted">{attributeSummary(r)}</span> },
     { id: "products", header: "Productos", align: "right", cell: (r) => <span className="tabular">{r.productCount}</span> },
     {
       id: "status",
@@ -86,12 +88,12 @@ export function ProductTypeList({ rows }: { rows: ProductTypeRow[] }) {
 
   return (
     <>
-      <div className="flex justify-end">
-        <Button variant="primary" className="rounded-full" onPress={openNew}>
+      <PageHeaderRow heading={heading}>
+        <Button variant="primary" onPress={openNew}>
           <Plus className="h-4 w-4" strokeWidth={2.2} />
           Nuevo tipo
         </Button>
-      </div>
+      </PageHeaderRow>
 
       <ResponsiveList
         rows={rows}
@@ -111,7 +113,7 @@ export function ProductTypeList({ rows }: { rows: ProductTypeRow[] }) {
             rows={[{ label: "Productos", value: r.productCount }]}
             actions={
               <>
-                <Button variant="outline" size="sm" className="rounded-full" onPress={() => openEdit(r)}>
+                <Button variant="outline" size="sm" onPress={() => openEdit(r)}>
                   <Pencil className="h-3.5 w-3.5" strokeWidth={1.9} />
                   Editar
                 </Button>

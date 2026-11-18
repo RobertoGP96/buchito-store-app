@@ -11,6 +11,8 @@ import { StatusChip } from "@/components/status-chip";
 import { fmtDate } from "@/lib/format";
 import { COMBO_STATE_META, comboItemsSummary } from "../lib/labels";
 import type { AdminComboRow } from "../queries/combo-queries";
+import type { ReactNode } from "react";
+import { PageHeaderRow } from "@/components/page-header";
 
 function itemsSummary(row: AdminComboRow): string {
   return comboItemsSummary(row.items);
@@ -23,20 +25,20 @@ function PriceCell({ row }: { row: AdminComboRow }) {
         <Money value={row.price} currency={row.priceCurrency} />
       </span>
       {row.regularPriceBase != null && row.regularPriceBase > (row.priceBase ?? 0) && (
-        <span className="text-[11.5px] text-slate-400">
+        <span className="type-caption text-ink-subtle">
           <span className="line-through">
             <Money value={row.regularPriceBase} />
           </span>
           {row.savingsPct > 0 && <span className="ml-1 font-semibold text-ok">−{row.savingsPct}%</span>}
         </span>
       )}
-      {row.priceBase == null && <span className="text-[11.5px] font-medium text-warn">Sin tasa</span>}
+      {row.priceBase == null && <span className="type-caption font-medium text-warn">Sin tasa</span>}
     </div>
   );
 }
 
 function Validity({ row }: { row: AdminComboRow }) {
-  if (!row.startsAt && !row.endsAt) return <span className="text-slate-400">Siempre</span>;
+  if (!row.startsAt && !row.endsAt) return <span className="text-ink-subtle">Siempre</span>;
   return (
     <span className="tabular whitespace-nowrap">
       {row.startsAt ? fmtDate(row.startsAt) : "…"} – {row.endsAt ? fmtDate(row.endsAt) : "…"}
@@ -49,7 +51,7 @@ function Availability({ row }: { row: AdminComboRow }) {
   return (
     <span className={out ? "tabular font-semibold text-danger" : "tabular font-semibold text-ink"}>
       {row.available}
-      {out && <span className="ml-1.5 text-[11px] font-medium">Agotado</span>}
+      {out && <span className="ml-1.5 type-micro font-medium">Agotado</span>}
     </span>
   );
 }
@@ -63,7 +65,7 @@ function Chips({ row }: { row: AdminComboRow }) {
   );
 }
 
-export function ComboList({ rows }: { rows: AdminComboRow[] }) {
+export function ComboList({ rows, heading }: { rows: AdminComboRow[]; heading?: ReactNode }) {
   const columns: ListColumn<AdminComboRow>[] = [
     {
       id: "name",
@@ -77,10 +79,10 @@ export function ComboList({ rows }: { rows: AdminComboRow[] }) {
             </span>
           </span>
           <div className="min-w-0">
-            <Link href={`/admin/combos/${r.comboId}`} className="font-semibold text-ink hover:text-navy-700">
+            <Link href={`/admin/combos/${r.comboId}`} className="font-semibold text-ink hover:text-tostado-700">
               {r.name}
             </Link>
-            <p className="line-clamp-1 text-[12px] text-slate-400">{itemsSummary(r)}</p>
+            <p className="line-clamp-1 type-caption text-ink-subtle">{itemsSummary(r)}</p>
           </div>
         </div>
       ),
@@ -98,7 +100,7 @@ export function ComboList({ rows }: { rows: AdminComboRow[] }) {
         <Link
           href={`/admin/combos/${r.comboId}`}
           aria-label={`Editar ${r.name}`}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-500 hover:bg-hover hover:text-navy-700"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-muted hover:bg-hover hover:text-tostado-700"
         >
           <Pencil className="h-4 w-4" strokeWidth={1.9} />
         </Link>
@@ -108,17 +110,18 @@ export function ComboList({ rows }: { rows: AdminComboRow[] }) {
 
   return (
     <>
-      <div className="flex justify-end">
-        <ButtonLink href="/admin/combos/nuevo" variant="solid" size="sm">
+      <PageHeaderRow heading={heading}>
+        <ButtonLink href="/admin/combos/nuevo" variant="solid">
           <Plus className="h-4 w-4" strokeWidth={2.2} />
           Nuevo combo
         </ButtonLink>
-      </div>
+      </PageHeaderRow>
 
       <ResponsiveList
         rows={rows}
         rowKey={(r) => r.comboId}
         columns={columns}
+        rowHref={(r) => `/admin/combos/${r.comboId}`}
         ariaLabel="Combos"
         empty={
           <div className="rounded-card bg-canvas shadow-card">

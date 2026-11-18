@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { History } from "lucide-react";
-import { ButtonLink } from "@/components/button-link";
 import { PageHeader } from "@/components/page-header";
 import { StockMovementList } from "@/modules/products/components/stock-movement-list";
 import { getStockMovements } from "@/modules/products/queries/inventory-queries";
@@ -25,14 +24,12 @@ export default async function AdminStockMovementsPage({ searchParams }: AdminSto
   return (
     <>
       <PageHeader
+        backHref="/admin/inventario"
+        backLabel="Inventario"
         icon={History}
         title="Movimientos de stock"
         description="Kardex: entradas, salidas y recuentos, del más reciente al más antiguo."
-      >
-        <ButtonLink href="/admin/inventario" variant="ghost" size="sm">
-          Volver al inventario
-        </ButtonLink>
-      </PageHeader>
+      />
       <StockMovementList rows={rows} variantId={variantId} />
     </>
   );

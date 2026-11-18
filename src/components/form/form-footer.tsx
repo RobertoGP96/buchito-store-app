@@ -14,7 +14,7 @@ interface FormFooterProps {
 export function FormFooter({ formId, submitLabel, isSubmitting, onCancel }: FormFooterProps) {
   return (
     <div className="flex w-full items-center justify-end gap-2">
-      <Button variant="ghost" onPress={onCancel} isDisabled={isSubmitting} className="rounded-full">
+      <Button variant="ghost" onPress={onCancel} isDisabled={isSubmitting}>
         Cancelar
       </Button>
       <Button
@@ -23,7 +23,6 @@ export function FormFooter({ formId, submitLabel, isSubmitting, onCancel }: Form
         variant="primary"
         isPending={isSubmitting}
         isDisabled={isSubmitting}
-        className="rounded-full"
       >
         {submitLabel}
       </Button>

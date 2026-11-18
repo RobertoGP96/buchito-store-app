@@ -11,7 +11,7 @@ import { logoutUser } from "@/modules/auth/actions/auth-actions";
 import { cn } from "@/lib/utils";
 
 const TAB =
-  "flex flex-col items-center justify-center gap-1 rounded-chip py-1.5 text-[10.5px] font-semibold transition-colors duration-150";
+  "flex flex-col items-center justify-center gap-1 rounded-chip py-1.5 type-micro font-semibold transition-colors duration-150";
 
 /** Barra inferior del admin en móvil: cuatro secciones principales y un
  *  quinto slot "Más" que abre el resto, agrupado por sección, en una hoja. */
@@ -41,12 +41,12 @@ export function AdminBottomTabs({ userName }: { userName: string }) {
                 key={entry.id}
                 href={entry.href}
                 aria-current={active ? "page" : undefined}
-                className={cn(TAB, active ? "text-navy-700" : "text-slate-500")}
+                className={cn(TAB, active ? "text-tostado-700" : "text-ink-muted")}
               >
                 <span
                   className={cn(
                     "flex h-7 w-11 items-center justify-center rounded-full transition-colors duration-150",
-                    active && "bg-tint"
+                    active && "bg-crema-100"
                   )}
                 >
                   <Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2.2 : 1.8} />
@@ -60,12 +60,12 @@ export function AdminBottomTabs({ userName }: { userName: string }) {
             onClick={() => setMoreOpen(true)}
             aria-expanded={moreOpen}
             aria-haspopup="dialog"
-            className={cn(TAB, restActive ? "text-navy-700" : "text-slate-500")}
+            className={cn(TAB, restActive ? "text-tostado-700" : "text-ink-muted")}
           >
             <span
               className={cn(
                 "flex h-7 w-11 items-center justify-center rounded-full transition-colors duration-150",
-                restActive && "bg-tint"
+                restActive && "bg-crema-100"
               )}
             >
               <MoreHorizontal className="h-[18px] w-[18px]" strokeWidth={restActive ? 2.2 : 1.8} />
@@ -81,7 +81,7 @@ export function AdminBottomTabs({ userName }: { userName: string }) {
             <Drawer.Dialog className="max-h-[88dvh] bg-canvas">
               <Drawer.Handle />
               <Drawer.Header>
-                <Drawer.Heading className="font-display text-[18px] text-navy-900">
+                <Drawer.Heading className="font-display text-[18px] text-espresso-900">
                   Todas las secciones
                 </Drawer.Heading>
               </Drawer.Header>
@@ -89,10 +89,10 @@ export function AdminBottomTabs({ userName }: { userName: string }) {
                 <AdminNavList exclude={ADMIN_BOTTOM_TABS} layout="grid" onNavigate={() => setMoreOpen(false)} />
                 <div className="mt-5 flex items-center justify-between gap-3 border-t border-line pt-4">
                   <div className="min-w-0">
-                    <p className="truncate text-[13px] font-semibold text-ink">{userName}</p>
+                    <p className="truncate type-meta font-semibold text-ink">{userName}</p>
                     <Link
                       href="/"
-                      className="mt-0.5 inline-flex items-center gap-1.5 text-[12px] font-medium text-slate-500 hover:text-navy-700"
+                      className="mt-0.5 inline-flex items-center gap-1.5 type-caption font-medium text-ink-muted hover:text-tostado-700"
                     >
                       <Store className="h-3.5 w-3.5" strokeWidth={1.9} />
                       Ver la tienda
@@ -101,7 +101,7 @@ export function AdminBottomTabs({ userName }: { userName: string }) {
                   <button
                     type="button"
                     onClick={() => void logoutUser()}
-                    className="inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-[13px] font-semibold text-danger transition-colors duration-150 hover:bg-danger-soft"
+                    className="inline-flex items-center gap-2 rounded-full px-3.5 py-2 type-meta font-semibold text-danger transition-colors duration-150 hover:bg-danger-soft"
                   >
                     <LogOut className="h-4 w-4" strokeWidth={1.9} />
                     Salir

@@ -32,18 +32,18 @@ export function RecipientPicker({ recipients, value, onChange, labelledBy }: Rec
             role="radio"
             aria-checked={checked}
             onClick={() => onChange(r.addressId)}
-            className={cn(CARD, checked ? "border-navy-700 bg-tint" : "border-line bg-canvas hover:border-navy-700")}
+            className={cn(CARD, checked ? "border-tostado-700 bg-crema-100" : "border-line bg-canvas hover:border-tostado-700")}
           >
-            <span className={cn(RADIO, checked ? "border-navy-700 bg-navy-700 text-on-brand" : "border-line")}>
+            <span className={cn(RADIO, checked ? "border-tostado-700 bg-tostado-700 text-on-tostado" : "border-line")}>
               {checked && <Check className="h-3 w-3" strokeWidth={3} />}
             </span>
             <span className="min-w-0">
               <span className="flex flex-wrap items-center gap-2">
-                <span className="text-[14px] font-semibold text-ink">{r.name}</span>
+                <span className="type-body font-semibold text-ink">{r.name}</span>
                 {r.isDefault && <StatusChip label="Principal" tone="info" />}
               </span>
-              <span className="tabular mt-0.5 block text-[12.5px] text-slate-500">{r.phone}</span>
-              <RecipientAddress address={r} className="mt-1 block text-[12.5px] leading-[1.55] text-slate-500" />
+              <span className="tabular mt-0.5 block type-meta text-ink-muted">{r.phone}</span>
+              <RecipientAddress address={r} className="mt-1 block type-meta leading-[1.55] text-ink-muted" />
             </span>
           </button>
         );
@@ -53,14 +53,14 @@ export function RecipientPicker({ recipients, value, onChange, labelledBy }: Rec
         role="radio"
         aria-checked={isNew}
         onClick={() => onChange(null)}
-        className={cn(CARD, isNew ? "border-navy-700 bg-tint" : "border-dashed border-line bg-canvas hover:border-navy-700")}
+        className={cn(CARD, isNew ? "border-tostado-700 bg-crema-100" : "border-dashed border-line bg-canvas hover:border-tostado-700")}
       >
-        <span className={cn(RADIO, isNew ? "border-navy-700 bg-navy-700 text-on-brand" : "border-line")}>
+        <span className={cn(RADIO, isNew ? "border-tostado-700 bg-tostado-700 text-on-tostado" : "border-line")}>
           {isNew ? <Check className="h-3 w-3" strokeWidth={3} /> : <Plus className="h-3 w-3" strokeWidth={3} />}
         </span>
         <span className="min-w-0">
-          <span className="block text-[14px] font-semibold text-ink">Nuevo destinatario</span>
-          <span className="mt-0.5 block text-[12.5px] text-slate-500">
+          <span className="block type-body font-semibold text-ink">Nuevo destinatario</span>
+          <span className="mt-0.5 block type-meta text-ink-muted">
             Otra persona u otra dirección. Se guarda para la próxima vez.
           </span>
         </span>

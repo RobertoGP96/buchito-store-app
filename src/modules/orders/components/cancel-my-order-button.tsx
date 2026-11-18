@@ -37,7 +37,7 @@ export function CancelMyOrderButton({ orderId, version }: CancelMyOrderButtonPro
 
   return (
     <>
-      <Button variant="danger-soft" size="sm" className="rounded-full" onPress={() => setAsking(true)}>
+      <Button variant="danger-soft" size="sm" onPress={() => setAsking(true)}>
         Cancelar pedido
       </Button>
       <PromptDialog

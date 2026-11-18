@@ -12,7 +12,7 @@ export function CourierProfileEditButton({ profile }: { profile: CourierProfileF
   const [open, setOpen] = useState(false);
   return (
     <>
-      <Button variant="outline" size="sm" className="rounded-full" onPress={() => setOpen(true)}>
+      <Button variant="outline" size="sm" onPress={() => setOpen(true)}>
         <Pencil className="h-3.5 w-3.5" strokeWidth={1.9} />
         Editar
       </Button>

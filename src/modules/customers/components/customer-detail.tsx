@@ -12,20 +12,12 @@ import { ORDER_STATUS_META } from "@/modules/orders/lib/labels";
 import { PAYMENT_STATUS_META } from "@/modules/payments/lib/labels";
 import { CustomerNotesForm } from "./customer-notes-form";
 import type { CustomerDetailData, CustomerOrderRow } from "../queries/customer-queries";
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="rounded-card bg-canvas p-5 shadow-card">
-      <p className="eyebrow">{title}</p>
-      <div className="mt-3">{children}</div>
-    </section>
-  );
-}
+import { SectionCard } from "@/components/section-card";
 
 function Field({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="contents">
-      <dt className="text-slate-400">{label}</dt>
+      <dt className="text-ink-subtle">{label}</dt>
       <dd className="font-medium text-ink">{value}</dd>
     </div>
   );
@@ -40,12 +32,12 @@ export function CustomerDetail({ customer }: { customer: CustomerDetailData }) {
       header: "Pedido",
       isRowHeader: true,
       cell: (r) => (
-        <Link href={`/admin/pedidos/${r.orderId}`} className="font-semibold text-navy-700 hover:underline">
+        <Link href={`/admin/pedidos/${r.orderId}`} className="font-semibold text-tostado-700 hover:underline">
           {r.orderNo}
         </Link>
       ),
     },
-    { id: "date", header: "Fecha", cell: (r) => <span className="tabular text-slate-500">{fmtDateTime(r.createdAt)}</span> },
+    { id: "date", header: "Fecha", cell: (r) => <span className="tabular text-ink-muted">{fmtDateTime(r.createdAt)}</span> },
     {
       id: "status",
       header: "Estado",
@@ -60,29 +52,29 @@ export function CustomerDetail({ customer }: { customer: CustomerDetailData }) {
   ];
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
+    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
       <div className="flex flex-col gap-4 lg:order-2">
-        <Section title="Datos">
-          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-[13.5px]">
+        <SectionCard title="Datos">
+          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 type-body">
             <Field label="Nombre" value={customer.name} />
             <Field
               label="Teléfono"
               value={
-                <a href={`tel:${customer.phone.replace(/\s+/g, "")}`} className="tabular text-navy-700 hover:underline">
+                <a href={`tel:${customer.phone.replace(/\s+/g, "")}`} className="tabular text-tostado-700 hover:underline">
                   {customer.phone}
                 </a>
               }
             />
-            <Field label="Correo" value={customer.email ?? <span className="text-slate-400">—</span>} />
+            <Field label="Correo" value={customer.email ?? <span className="text-ink-subtle">—</span>} />
             <Field label="Alta" value={<span className="tabular">{fmtDate(customer.createdAt)}</span>} />
             <Field label="Pedidos" value={<span className="tabular">{customer.orderCount}</span>} />
             <Field label="Total comprado" value={<Money value={customer.totalSpent} />} />
           </dl>
-        </Section>
+        </SectionCard>
 
-        <Section title="Cuenta">
+        <SectionCard title="Cuenta">
           {customer.user ? (
-            <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-[13.5px]">
+            <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 type-body">
               <Field label="Correo" value={customer.user.email} />
               <Field label="Rol" value={ROLE_LABELS[customer.user.role]} />
               <Field
@@ -96,26 +88,26 @@ export function CustomerDetail({ customer }: { customer: CustomerDetailData }) {
               />
             </dl>
           ) : (
-            <p className="text-[13.5px] text-slate-500">
+            <p className="type-body text-ink-muted">
               Compra como invitado. Si se registra con este teléfono, sus pedidos se enlazan a la cuenta.
             </p>
           )}
-        </Section>
+        </SectionCard>
 
-        <Section title="Notas">
+        <SectionCard title="Notas">
           <CustomerNotesForm key={customer.notes ?? ""} customerId={customer.customerId} notes={customer.notes} />
-        </Section>
+        </SectionCard>
       </div>
 
       <div className="flex flex-col gap-4 lg:order-1">
-        <Section title="Direcciones">
+        <SectionCard title="Direcciones">
           {customer.addresses.length === 0 ? (
-            <p className="text-[13.5px] text-slate-500">Sin direcciones guardadas.</p>
+            <p className="type-body text-ink-muted">Sin direcciones guardadas.</p>
           ) : (
             <ul className="flex flex-col gap-3">
               {customer.addresses.map((a) => (
-                <li key={a.addressId} className="flex items-start gap-2 text-[13.5px] leading-[1.6] text-ink">
-                  <MapPin className="mt-1 h-4 w-4 flex-none text-navy-700" strokeWidth={2} />
+                <li key={a.addressId} className="flex items-start gap-2 type-body leading-[1.6] text-ink">
+                  <MapPin className="mt-1 h-4 w-4 flex-none text-tostado-700" strokeWidth={1.9} />
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       {a.label && <span className="font-semibold">{a.label}</span>}
@@ -126,10 +118,10 @@ export function CustomerDetail({ customer }: { customer: CustomerDetailData }) {
                       {a.line2 && <>, {a.line2}</>}
                       {a.neighborhood && <span className="block">{a.neighborhood}</span>}
                     </p>
-                    {a.zoneName && <p className="text-slate-500">Zona: {a.zoneName}</p>}
-                    {a.reference && <p className="text-slate-500">Ref.: {a.reference}</p>}
+                    {a.zoneName && <p className="text-ink-muted">Zona: {a.zoneName}</p>}
+                    {a.reference && <p className="text-ink-muted">Ref.: {a.reference}</p>}
                     {(a.recipientName || a.phone) && (
-                      <p className="text-slate-500">
+                      <p className="text-ink-muted">
                         {a.recipientName}
                         {a.recipientName && a.phone && " · "}
                         {a.phone && <span className="tabular">{a.phone}</span>}
@@ -140,9 +132,9 @@ export function CustomerDetail({ customer }: { customer: CustomerDetailData }) {
               ))}
             </ul>
           )}
-        </Section>
+        </SectionCard>
 
-        <Section title="Pedidos">
+        <SectionCard title="Pedidos">
           <ResponsiveList
             rows={customer.orders}
             rowKey={(r) => r.orderId}
@@ -163,7 +155,7 @@ export function CustomerDetail({ customer }: { customer: CustomerDetailData }) {
               </Link>
             )}
           />
-        </Section>
+        </SectionCard>
       </div>
     </div>
   );

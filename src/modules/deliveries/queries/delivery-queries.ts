@@ -222,6 +222,21 @@ export async function getDeliveryForCourier(deliveryId: number, courierId: numbe
   return row ? toDetail(row) : null;
 }
 
+/** Entregas por estado, para los chips del listado del panel. */
+export async function getDeliveryStatusCounts(): Promise<Record<DeliveryStatus, number>> {
+  const groups = await db.delivery.groupBy({ by: ["status"], _count: { _all: true } });
+  const byStatus: Record<DeliveryStatus, number> = {
+    pending: 0,
+    assigned: 0,
+    in_transit: 0,
+    delivered: 0,
+    failed: 0,
+    cancelled: 0,
+  };
+  for (const g of groups) byStatus[g.status] = g._count._all;
+  return byStatus;
+}
+
 export async function getDeliveryCounts(): Promise<{ inTransit: number; pending: number }> {
   const [inTransit, pending] = await Promise.all([
     db.delivery.count({ where: { status: { in: ["assigned", "in_transit"] } } }),

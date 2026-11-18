@@ -89,22 +89,31 @@ export function ProductBadges({
   );
 }
 
-export function ProductPrice({ variant, className }: { variant: CatalogVariant; className?: string }) {
+export function ProductPrice({
+  variant,
+  size = "md",
+  className,
+}: {
+  variant: CatalogVariant;
+  /** `lg` en la ficha completa, donde el precio manda sobre el título. */
+  size?: "md" | "lg";
+  className?: string;
+}) {
   const { base } = useCurrency();
   const unitSuffix = perUnitSuffix(variant.unit);
   return (
     <div className={cn("flex flex-wrap items-baseline gap-x-3 gap-y-1", className)} aria-live="polite">
-      <p className="font-display text-[26px] leading-none text-navy-900">
+      <p className={cn("num-display text-espresso-900", size === "lg" ? "text-[30px] md:text-[34px]" : "text-[26px]")}>
         <Money value={variant.price} />
-        {unitSuffix && <span className="ml-1.5 text-[14px] font-medium text-slate-400">{unitSuffix}</span>}
+        {unitSuffix && <span className="type-body ml-1.5 font-medium text-ink-subtle">{unitSuffix}</span>}
       </p>
       {variant.compareAtPrice != null && variant.compareAtPrice > variant.price && (
-        <p className="text-[14px] font-medium text-slate-400 line-through">
+        <p className="type-body font-medium text-ink-subtle line-through">
           <Money value={variant.compareAtPrice} />
         </p>
       )}
       {variant.origCurrency.currencyId !== base.currencyId && (
-        <p className="text-[12px] text-slate-400">
+        <p className="type-caption w-full text-ink-subtle">
           Precio en <Money value={variant.origPrice} currency={variant.origCurrency} /> a la tasa del día
         </p>
       )}
@@ -117,7 +126,7 @@ export function ProductAvailability({ variant, className }: { variant: CatalogVa
     <div className={cn("flex flex-wrap items-center gap-x-3 gap-y-1", className)}>
       <StockLabel stock={variant.stock} unit={variant.unit} />
       {variant.unit !== "unit" && (
-        <span className="text-[12px] leading-none text-slate-400">
+        <span className="type-caption leading-none text-ink-subtle">
           Se vende en pasos de {fmtQty(variant.qtyStep, variant.unit)}
         </span>
       )}
@@ -167,12 +176,12 @@ export function ProductDescription({ product, className }: { product: CatalogPro
   return (
     <div className={cn("border-t border-line pt-6", className)}>
       <p className="eyebrow">Descripción</p>
-      <p className="mt-2.5 text-[14px] leading-[1.7] text-pretty text-slate-500">{product.description}</p>
+      <p className="mt-2.5 type-body leading-[1.7] text-pretty text-ink-muted">{product.description}</p>
     </div>
   );
 }
 
-/** Atributos de producto del tipo más el SKU de la variante elegida. */
+/** Atributos de producto del tipo y, al pie, la referencia (SKU) de la variante elegida. */
 export function ProductSpecs({
   product,
   variant,
@@ -185,24 +194,27 @@ export function ProductSpecs({
   const attributes = product.attributeSchema
     .filter((def) => def.scope === "product" && product.attributes[def.key] !== undefined)
     .map((def) => ({ label: def.label, value: String(product.attributes[def.key]) }));
+  // El SKU es una referencia para soporte, no un dato de compra: va al final y
+  // en pequeño, no como una especificación más.
   return (
-    <dl
-      className={cn(
-        "grid grid-cols-[auto_minmax(0,1fr)] gap-x-6 gap-y-2 border-t border-line pt-6 text-[13.5px]",
-        className
+    <div className={cn(attributes.length > 0 && "border-t border-line pt-6", className)}>
+      {attributes.length > 0 && (
+        <>
+          <p className="eyebrow">Detalles</p>
+          <dl className="type-body mt-2.5 grid grid-cols-[auto_minmax(0,1fr)] gap-x-6 gap-y-2">
+            {attributes.map((attr) => (
+              <div key={attr.label} className="contents">
+                <dt className="text-ink-subtle">{attr.label}</dt>
+                <dd className="min-w-0 font-medium break-words text-ink">{attr.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </>
       )}
-    >
-      {attributes.map((attr) => (
-        <div key={attr.label} className="contents">
-          <dt className="text-slate-400">{attr.label}</dt>
-          <dd className="min-w-0 font-medium break-words text-ink">{attr.value}</dd>
-        </div>
-      ))}
-      <div className="contents">
-        <dt className="text-slate-400">SKU</dt>
-        <dd className="tabular min-w-0 font-medium break-words text-ink">{variant.sku}</dd>
-      </div>
-    </dl>
+      <p className={cn("tabular type-caption break-words text-ink-subtle", attributes.length > 0 && "mt-4")}>
+        Ref. {variant.sku}
+      </p>
+    </div>
   );
 }
 
@@ -239,7 +251,7 @@ export function ProductAddControls({
           if (addSelection()) onAdded?.();
         }}
       >
-        <ShoppingCart className="h-4 w-4" strokeWidth={2} />
+        <ShoppingCart className="h-4 w-4" strokeWidth={1.9} />
         {soldOut ? "Agotado" : "Añadir al carrito"}
       </Button>
     </div>

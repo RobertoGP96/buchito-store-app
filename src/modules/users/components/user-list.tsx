@@ -14,10 +14,14 @@ import { deleteUser } from "../actions/user-actions";
 import { USER_ROLE_LABELS, USER_ROLE_TONE } from "../lib/labels";
 import type { UserRow } from "../queries/user-queries";
 import { ResetTwoFactorButton } from "./reset-two-factor-button";
+import type { ReactNode } from "react";
+import { PageHeaderRow } from "@/components/page-header";
 
 const UserForm = lazyDialog(() => import("./user-form").then((m) => m.UserForm));
 
 interface UserListProps {
+  /** Cabecera de la página, ya renderizada en el servidor. */
+  heading?: ReactNode;
   rows: UserRow[];
   /** Sesión actual: su propia cuenta no se puede eliminar. */
   currentUserId: number;
@@ -54,7 +58,7 @@ function TwoFactorChip({ row }: { row: UserRow }) {
   );
 }
 
-export function UserList({ rows, currentUserId }: UserListProps) {
+export function UserList({ rows, currentUserId, heading }: UserListProps) {
   const [editing, setEditing] = useState<UserRow | null>(null);
   const [open, setOpen] = useState(false);
 
@@ -75,7 +79,7 @@ export function UserList({ rows, currentUserId }: UserListProps) {
       cell: (r) => (
         <div className="min-w-0">
           <p className="font-semibold text-ink">{r.fullName}</p>
-          <p className="text-[12px] text-slate-400">{r.email}</p>
+          <p className="type-caption text-ink-subtle">{r.email}</p>
         </div>
       ),
     },
@@ -89,9 +93,9 @@ export function UserList({ rows, currentUserId }: UserListProps) {
     {
       id: "lastLogin",
       header: "Último acceso",
-      cell: (r) => <span className="tabular text-slate-500">{r.lastLoginAt ? fmtDateTime(r.lastLoginAt) : "Nunca"}</span>,
+      cell: (r) => <span className="tabular text-ink-muted">{r.lastLoginAt ? fmtDateTime(r.lastLoginAt) : "Nunca"}</span>,
     },
-    { id: "created", header: "Alta", cell: (r) => <span className="tabular text-slate-500">{fmtDateTime(r.createdAt)}</span> },
+    { id: "created", header: "Alta", cell: (r) => <span className="tabular text-ink-muted">{fmtDateTime(r.createdAt)}</span> },
     {
       id: "actions",
       header: "",
@@ -110,12 +114,12 @@ export function UserList({ rows, currentUserId }: UserListProps) {
 
   return (
     <>
-      <div className="flex justify-end">
-        <Button variant="primary" className="rounded-full" onPress={openNew}>
+      <PageHeaderRow heading={heading}>
+        <Button variant="primary" onPress={openNew}>
           <Plus className="h-4 w-4" strokeWidth={2.2} />
           Nuevo usuario
         </Button>
-      </div>
+      </PageHeaderRow>
 
       <ResponsiveList
         rows={rows}
@@ -140,7 +144,7 @@ export function UserList({ rows, currentUserId }: UserListProps) {
             ]}
             actions={
               <>
-                <Button variant="outline" size="sm" className="rounded-full" onPress={() => openEdit(r)}>
+                <Button variant="outline" size="sm" onPress={() => openEdit(r)}>
                   <Pencil className="h-3.5 w-3.5" strokeWidth={1.9} />
                   Editar
                 </Button>

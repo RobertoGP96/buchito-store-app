@@ -11,6 +11,8 @@ import { ListCard, ResponsiveList, type ListColumn } from "@/components/responsi
 import { StatusChip } from "@/components/status-chip";
 import { deleteZone } from "../actions/zone-actions";
 import type { ZoneRow } from "../queries/zone-queries";
+import type { ReactNode } from "react";
+import { PageHeaderRow } from "@/components/page-header";
 
 const ZoneForm = lazyDialog(() => import("./zone-form").then((m) => m.ZoneForm));
 
@@ -40,7 +42,7 @@ function DeleteZoneButton({ row, appearance }: { row: ZoneRow; appearance: "icon
   );
 }
 
-export function ZoneList({ rows }: { rows: ZoneRow[] }) {
+export function ZoneList({ rows, heading }: { rows: ZoneRow[]; heading?: ReactNode }) {
   const [editing, setEditing] = useState<ZoneRow | null>(null);
   const [open, setOpen] = useState(false);
 
@@ -61,7 +63,7 @@ export function ZoneList({ rows }: { rows: ZoneRow[] }) {
       cell: (r) => (
         <div className="min-w-0">
           <p className="font-semibold text-ink">{r.name}</p>
-          {r.description && <p className="text-[12px] text-slate-400">{r.description}</p>}
+          {r.description && <p className="type-caption text-ink-subtle">{r.description}</p>}
         </div>
       ),
     },
@@ -70,7 +72,7 @@ export function ZoneList({ rows }: { rows: ZoneRow[] }) {
       id: "free",
       header: "Gratis desde",
       align: "right",
-      cell: (r) => (r.freeShippingThreshold == null ? <span className="text-slate-400">General</span> : <Money value={r.freeShippingThreshold} />),
+      cell: (r) => (r.freeShippingThreshold == null ? <span className="text-ink-subtle">General</span> : <Money value={r.freeShippingThreshold} />),
     },
     { id: "eta", header: "Tiempo", cell: (r) => r.etaLabel ?? "—" },
     { id: "orders", header: "Pedidos", align: "right", cell: (r) => <span className="tabular">{r.orderCount}</span> },
@@ -92,12 +94,12 @@ export function ZoneList({ rows }: { rows: ZoneRow[] }) {
 
   return (
     <>
-      <div className="flex justify-end">
-        <Button variant="primary" className="rounded-full" onPress={openNew}>
+      <PageHeaderRow heading={heading}>
+        <Button variant="primary" onPress={openNew}>
           <Plus className="h-4 w-4" strokeWidth={2.2} />
           Nueva zona
         </Button>
-      </div>
+      </PageHeaderRow>
 
       <ResponsiveList
         rows={rows}
@@ -121,7 +123,7 @@ export function ZoneList({ rows }: { rows: ZoneRow[] }) {
             ]}
             actions={
               <>
-                <Button variant="outline" size="sm" className="rounded-full" onPress={() => openEdit(r)}>
+                <Button variant="outline" size="sm" onPress={() => openEdit(r)}>
                   <Pencil className="h-3.5 w-3.5" strokeWidth={1.9} />
                   Editar
                 </Button>

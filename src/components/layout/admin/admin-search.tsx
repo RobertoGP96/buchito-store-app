@@ -14,6 +14,7 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
+import { LoadingStatus } from "@/components/loading-status";
 import { Money } from "@/components/money";
 import { StatusChip } from "@/components/status-chip";
 import { ADMIN_NAV, type NavEntry } from "@/lib/nav-registry";
@@ -97,7 +98,7 @@ function buildItems(term: string, results: AdminSearchResult): SearchItem[] {
       subtitle: o.customerName,
       trailing: (
         <span className="flex items-center gap-2">
-          <Money value={o.total} className="text-[12px] font-semibold text-slate-500" />
+          <Money value={o.total} className="type-caption font-semibold text-ink-muted" />
           <StatusChip label={meta.label} tone={meta.tone} />
         </span>
       ),
@@ -284,13 +285,13 @@ export function AdminSearch({ className }: AdminSearchProps) {
         onClick={() => setOpen(true)}
         aria-label="Buscar en el panel"
         className={cn(
-          "hidden h-9 items-center gap-2 rounded-full border-[1.5px] border-line bg-page pr-2 pl-3 text-[13px] text-slate-400 transition-colors duration-150 hover:border-navy-700/40 hover:text-slate-500 md:flex md:w-[260px] lg:w-[320px]",
+          "hidden h-9 items-center gap-2 rounded-full border-[1.5px] border-line bg-cream-50 pr-2 pl-3 type-meta text-ink-subtle transition-colors duration-150 hover:border-tostado-700/40 hover:text-ink-muted md:flex md:w-[260px] lg:w-[320px]",
           className
         )}
       >
         <Search className="h-4 w-4 flex-none" strokeWidth={1.9} />
         <span className="min-w-0 flex-1 truncate text-left">Buscar pedidos, clientes, productos…</span>
-        <kbd className="hidden rounded-md border border-line bg-canvas px-1.5 py-0.5 font-sans text-[10.5px] font-semibold text-slate-400 lg:inline-block">
+        <kbd className="hidden rounded-md border border-line bg-canvas px-1.5 py-0.5 font-sans type-micro font-semibold text-ink-subtle lg:inline-block">
           {shortcut}
         </kbd>
       </button>
@@ -298,9 +299,9 @@ export function AdminSearch({ className }: AdminSearchProps) {
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Buscar en el panel"
-        className="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 transition-colors duration-150 hover:bg-hover hover:text-navy-700 md:hidden"
+        className="touch-target flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:bg-hover hover:text-tostado-700 md:hidden"
       >
-        <Search className="h-5 w-5" strokeWidth={2} />
+        <Search className="h-5 w-5" strokeWidth={1.9} />
       </button>
 
       <Modal isOpen={open} onOpenChange={handleOpenChange}>
@@ -309,9 +310,12 @@ export function AdminSearch({ className }: AdminSearchProps) {
             <Modal.Dialog aria-label="Buscar en el panel" className="overflow-hidden bg-canvas p-0">
               <div className="field-shell flex h-14 items-center gap-3 border-b border-line px-4">
                 {loading ? (
-                  <LoaderCircle className="h-[18px] w-[18px] flex-none animate-spin text-navy-700" strokeWidth={2} />
+                  <>
+                    <LoaderCircle className="h-[18px] w-[18px] flex-none animate-spin text-tostado-700" strokeWidth={1.9} aria-hidden />
+                    <LoadingStatus label="Buscando" />
+                  </>
                 ) : (
-                  <Search className="h-[18px] w-[18px] flex-none text-slate-400" strokeWidth={1.9} />
+                  <Search className="h-[18px] w-[18px] flex-none text-ink-subtle" strokeWidth={1.9} />
                 )}
                 <input
                   ref={inputRef}
@@ -330,7 +334,8 @@ export function AdminSearch({ className }: AdminSearchProps) {
                   autoComplete="off"
                   autoCorrect="off"
                   spellCheck={false}
-                  className="min-w-0 flex-1 bg-transparent text-[15px] text-ink outline-none placeholder:text-slate-400"
+                  // 16px en móvil: por debajo, Safari de iOS amplía la página al enfocar.
+                  className="min-w-0 flex-1 bg-transparent text-base text-ink outline-none placeholder:text-ink-subtle md:text-[15px]"
                 />
                 {term ? (
                   <button
@@ -340,15 +345,15 @@ export function AdminSearch({ className }: AdminSearchProps) {
                       inputRef.current?.focus();
                     }}
                     aria-label="Borrar búsqueda"
-                    className="flex h-7 w-7 flex-none items-center justify-center rounded-full text-slate-400 hover:bg-hover hover:text-navy-700"
+                    className="flex h-7 w-7 flex-none items-center justify-center rounded-full text-ink-subtle hover:bg-hover hover:text-tostado-700"
                   >
-                    <X className="h-4 w-4" strokeWidth={2} />
+                    <X className="h-4 w-4" strokeWidth={1.9} />
                   </button>
                 ) : (
                   <button
                     type="button"
                     onClick={close}
-                    className="flex-none rounded-md border border-line bg-page px-1.5 py-0.5 font-sans text-[10.5px] font-semibold text-slate-400 hover:text-navy-700"
+                    className="flex-none rounded-md border border-line bg-cream-50 px-1.5 py-0.5 font-sans type-micro font-semibold text-ink-subtle hover:text-tostado-700"
                   >
                     Esc
                   </button>
@@ -361,9 +366,9 @@ export function AdminSearch({ className }: AdminSearchProps) {
                 aria-label="Resultados"
                 className="no-scrollbar max-h-[min(60dvh,440px)] overflow-y-auto px-2 py-2"
               >
-                {error && <p className="px-3 py-6 text-center text-[13px] text-danger">{error}</p>}
+                {error && <p className="px-3 py-6 text-center type-meta text-danger">{error}</p>}
                 {showEmpty && (
-                  <p className="px-3 py-8 text-center text-[13px] text-slate-400">
+                  <p className="px-3 py-8 text-center type-meta text-ink-subtle">
                     Sin resultados para «{trimmed}»
                   </p>
                 )}
@@ -390,26 +395,26 @@ export function AdminSearch({ className }: AdminSearchProps) {
                             onClick={() => go(item)}
                             className={cn(
                               "flex cursor-pointer items-center gap-3 rounded-field px-3 py-2.5 transition-colors duration-100",
-                              active ? "bg-tint text-navy-700" : "text-ink"
+                              active ? "bg-crema-100 text-tostado-700" : "text-ink"
                             )}
                           >
                             <span
                               className={cn(
                                 "flex h-8 w-8 flex-none items-center justify-center rounded-[10px]",
-                                active ? "bg-canvas text-navy-700" : "bg-page text-slate-500"
+                                active ? "bg-canvas text-tostado-700" : "bg-cream text-ink-muted"
                               )}
                             >
                               <Icon className="h-4 w-4" strokeWidth={1.9} />
                             </span>
                             <span className="min-w-0 flex-1">
-                              <span className="block truncate text-[13.5px] font-semibold">{item.title}</span>
+                              <span className="block truncate type-body font-semibold">{item.title}</span>
                               {item.subtitle && (
-                                <span className="block truncate text-[12px] text-slate-400">{item.subtitle}</span>
+                                <span className="block truncate type-caption text-ink-subtle">{item.subtitle}</span>
                               )}
                             </span>
                             {item.trailing && <span className="hidden flex-none sm:inline-flex">{item.trailing}</span>}
                             {active && (
-                              <CornerDownLeft className="hidden h-3.5 w-3.5 flex-none text-slate-400 md:block" strokeWidth={2} />
+                              <CornerDownLeft className="hidden h-3.5 w-3.5 flex-none text-ink-subtle md:block" strokeWidth={1.9} />
                             )}
                           </div>
                         );
@@ -419,7 +424,7 @@ export function AdminSearch({ className }: AdminSearchProps) {
                 })}
               </div>
 
-              <div className="hidden items-center gap-4 border-t border-line px-4 py-2 text-[11px] text-slate-400 md:flex">
+              <div className="hidden items-center gap-4 border-t border-line px-4 py-2 type-micro text-ink-subtle md:flex">
                 <span>
                   <kbd className="font-sans font-semibold">↑↓</kbd> moverse
                 </span>

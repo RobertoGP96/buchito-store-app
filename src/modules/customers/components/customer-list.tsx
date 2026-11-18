@@ -43,14 +43,14 @@ export function CustomerList({ rows, query }: CustomerListProps) {
       isRowHeader: true,
       cell: (r) => (
         <div className="min-w-0">
-          <Link href={`/admin/clientes/${r.customerId}`} className="font-semibold text-navy-700 hover:underline">
+          <Link href={`/admin/clientes/${r.customerId}`} className="font-semibold text-tostado-700 hover:underline">
             {r.name}
           </Link>
-          <p className="tabular text-[12px] text-slate-400">{r.phone}</p>
+          <p className="tabular type-caption text-ink-subtle">{r.phone}</p>
         </div>
       ),
     },
-    { id: "email", header: "Correo", cell: (r) => r.email ?? <span className="text-slate-400">—</span> },
+    { id: "email", header: "Correo", cell: (r) => r.email ?? <span className="text-ink-subtle">—</span> },
     { id: "account", header: "Cuenta", cell: (r) => <AccountChip hasAccount={r.hasAccount} /> },
     { id: "orders", header: "Pedidos", align: "right", cell: (r) => <span className="tabular">{r.orderCount}</span> },
     { id: "spent", header: "Total comprado", align: "right", cell: (r) => <Money value={r.totalSpent} className="font-semibold" /> },
@@ -58,7 +58,7 @@ export function CustomerList({ rows, query }: CustomerListProps) {
       id: "last",
       header: "Último pedido",
       cell: (r) => (
-        <span className="tabular text-slate-500">{r.lastOrderAt ? fmtDate(r.lastOrderAt) : "—"}</span>
+        <span className="tabular text-ink-muted">{r.lastOrderAt ? fmtDate(r.lastOrderAt) : "—"}</span>
       ),
     },
   ];
@@ -70,14 +70,15 @@ export function CustomerList({ rows, query }: CustomerListProps) {
         role="search"
         className="field-shell flex h-10 items-center gap-2 rounded-full border-[1.5px] border-line bg-canvas pr-1.5 pl-4 md:w-[320px]"
       >
-        <Search className="h-4 w-4 flex-none text-slate-400" strokeWidth={1.9} />
+        <Search className="h-4 w-4 flex-none text-ink-subtle" strokeWidth={1.9} />
         <input
           type="search"
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder="Nombre, teléfono o correo"
           aria-label="Buscar clientes"
-          className="min-w-0 flex-1 bg-transparent text-[13.5px] text-ink outline-none placeholder:text-slate-400"
+          // 16px en móvil: por debajo, Safari de iOS amplía la página al enfocar.
+          className="min-w-0 flex-1 bg-transparent text-base text-ink outline-none placeholder:text-ink-subtle md:type-body"
         />
         {value && (
           <button
@@ -87,9 +88,9 @@ export function CustomerList({ rows, query }: CustomerListProps) {
               go("");
             }}
             aria-label="Limpiar búsqueda"
-            className="flex h-7 w-7 items-center justify-center rounded-full text-slate-400 hover:bg-hover hover:text-navy-700"
+            className="flex h-7 w-7 items-center justify-center rounded-full text-ink-subtle hover:bg-hover hover:text-tostado-700"
           >
-            <X className="h-3.5 w-3.5" strokeWidth={2} />
+            <X className="h-3.5 w-3.5" strokeWidth={1.9} />
           </button>
         )}
       </form>
@@ -98,6 +99,7 @@ export function CustomerList({ rows, query }: CustomerListProps) {
         rows={rows}
         rowKey={(r) => r.customerId}
         columns={columns}
+        rowHref={(r) => `/admin/clientes/${r.customerId}`}
         ariaLabel="Clientes"
         empty={
           <div className="rounded-card bg-canvas shadow-card">

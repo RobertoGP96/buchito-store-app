@@ -17,6 +17,7 @@ import { PRODUCT_STATUS_META } from "../lib/labels";
 import { fmtQty } from "../lib/units";
 import type { AdminVariantRow } from "../queries/product-queries";
 import type { InventoryRow } from "../queries/inventory-queries";
+import { ScrollFadeRow } from "@/components/scroll-fade-row";
 
 const StockAdjustForm = lazyDialog(() => import("./stock-adjust-form").then((m) => m.StockAdjustForm));
 
@@ -69,8 +70,8 @@ function StockCell({ row }: { row: InventoryRow }) {
   return (
     <span className={cn("tabular font-semibold", out ? "text-danger" : low ? "text-warn" : "text-ink")}>
       {fmtQty(row.stock, row.unit)}
-      {out && <span className="ml-1.5 text-[11px] font-medium">Agotado</span>}
-      {low && <span className="ml-1.5 text-[11px] font-medium">Bajo</span>}
+      {out && <span className="ml-1.5 type-micro font-medium">Agotado</span>}
+      {low && <span className="ml-1.5 type-micro font-medium">Bajo</span>}
     </span>
   );
 }
@@ -98,17 +99,17 @@ export function InventoryList({ rows, query, lowOnly }: InventoryListProps) {
       isRowHeader: true,
       cell: (r) => (
         <div className="min-w-0">
-          <Link href={`/admin/productos/${r.productId}`} className="font-semibold text-navy-700 hover:underline">
+          <Link href={`/admin/productos/${r.productId}`} className="font-semibold text-tostado-700 hover:underline">
             {r.productName}
           </Link>
-          <div className="flex flex-wrap items-center gap-1.5 text-[12px] text-slate-400">
+          <div className="flex flex-wrap items-center gap-1.5 type-caption text-ink-subtle">
             <span>{r.variantName ?? "Variante única"}</span>
             {r.productStatus !== "active" && <StatusChip {...PRODUCT_STATUS_META[r.productStatus]} />}
           </div>
         </div>
       ),
     },
-    { id: "sku", header: "SKU", cell: (r) => <span className="tabular text-slate-500">{r.sku}</span> },
+    { id: "sku", header: "SKU", cell: (r) => <span className="tabular text-ink-muted">{r.sku}</span> },
     {
       id: "price",
       header: "Precio",
@@ -122,14 +123,14 @@ export function InventoryList({ rows, query, lowOnly }: InventoryListProps) {
       align: "right",
       cell: (r) => (
         <div className="flex justify-end gap-1">
-          <Button variant="ghost" size="sm" className="rounded-full" onPress={() => openStock(r)}>
+          <Button variant="ghost" size="sm" onPress={() => openStock(r)}>
             <Boxes className="h-4 w-4" strokeWidth={1.9} />
             Stock
           </Button>
           <Link
             href={`/admin/inventario/movimientos?variantId=${r.variantId}`}
             aria-label={`Movimientos de ${r.sku}`}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-slate-500 hover:bg-hover hover:text-navy-700"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-ink-muted hover:bg-hover hover:text-tostado-700"
           >
             <History className="h-4 w-4" strokeWidth={1.9} />
           </Link>
@@ -141,7 +142,7 @@ export function InventoryList({ rows, query, lowOnly }: InventoryListProps) {
   return (
     <>
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="no-scrollbar -mx-1 flex snap-x gap-2 overflow-x-auto px-1 py-1">
+        <ScrollFadeRow>
           <Link href={inventoryHref(query, false)} scroll={false} className={cn(CHIP_BASE, !lowOnly ? CHIP_ON : CHIP_OFF)}>
             Todo
             <LinkPending />
@@ -151,25 +152,25 @@ export function InventoryList({ rows, query, lowOnly }: InventoryListProps) {
             <LinkPending />
           </Link>
           <Link href="/admin/inventario/movimientos" className={cn(CHIP_BASE, CHIP_OFF)}>
-            <History className="mr-1.5 h-3.5 w-3.5" strokeWidth={2} />
+            <History className="mr-1.5 h-3.5 w-3.5" strokeWidth={1.9} />
             Movimientos
             <LinkPending />
           </Link>
-        </div>
+        </ScrollFadeRow>
 
         <form
           onSubmit={submit}
           role="search"
           className="field-shell flex h-10 items-center gap-2 rounded-full border-[1.5px] border-line bg-canvas pr-1.5 pl-4 md:w-[280px]"
         >
-          <Search className="h-4 w-4 flex-none text-slate-400" strokeWidth={1.9} />
+          <Search className="h-4 w-4 flex-none text-ink-subtle" strokeWidth={1.9} />
           <input
             type="search"
             value={value}
             onChange={(e) => setValue(e.target.value)}
             placeholder="SKU o nombre"
             aria-label="Buscar por SKU o nombre"
-            className="min-w-0 flex-1 bg-transparent text-[13.5px] text-ink outline-none placeholder:text-slate-400"
+            className="min-w-0 flex-1 bg-transparent type-body text-ink outline-none placeholder:text-ink-subtle"
           />
           {value && (
             <button
@@ -179,9 +180,9 @@ export function InventoryList({ rows, query, lowOnly }: InventoryListProps) {
                 router.push(inventoryHref("", lowOnly));
               }}
               aria-label="Limpiar búsqueda"
-              className="flex h-7 w-7 items-center justify-center rounded-full text-slate-400 hover:bg-hover hover:text-navy-700"
+              className="flex h-7 w-7 items-center justify-center rounded-full text-ink-subtle hover:bg-hover hover:text-tostado-700"
             >
-              <X className="h-3.5 w-3.5" strokeWidth={2} />
+              <X className="h-3.5 w-3.5" strokeWidth={1.9} />
             </button>
           )}
         </form>
@@ -223,12 +224,12 @@ export function InventoryList({ rows, query, lowOnly }: InventoryListProps) {
               <>
                 <Link
                   href={`/admin/inventario/movimientos?variantId=${r.variantId}`}
-                  className="inline-flex items-center gap-1.5 rounded-full border-[1.5px] border-line px-3 py-1.5 text-[13px] font-semibold text-navy-700 hover:bg-tint"
+                  className="inline-flex items-center gap-1.5 rounded-full border-[1.5px] border-line px-3 py-1.5 type-meta font-semibold text-tostado-700 hover:bg-crema-100"
                 >
                   <History className="h-3.5 w-3.5" strokeWidth={1.9} />
                   Movimientos
                 </Link>
-                <Button variant="outline" size="sm" className="rounded-full" onPress={() => openStock(r)}>
+                <Button variant="outline" size="sm" onPress={() => openStock(r)}>
                   <Boxes className="h-3.5 w-3.5" strokeWidth={1.9} />
                   Stock
                 </Button>

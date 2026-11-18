@@ -23,15 +23,15 @@ export function PhotoLightbox({ open, onOpenChange, src, alt, title, caption }: 
             <Modal.CloseTrigger />
             {title && (
               <Modal.Header>
-                <Modal.Heading className="font-display text-[20px] text-navy-900">{title}</Modal.Heading>
+                <Modal.Heading className="font-display text-[20px] text-espresso-900">{title}</Modal.Heading>
               </Modal.Header>
             )}
             <Modal.Body className="flex flex-col items-center gap-3">
-              <div className="flex w-full items-center justify-center overflow-hidden rounded-field bg-page">
+              <div className="flex w-full items-center justify-center overflow-hidden rounded-field bg-cream">
                 {/* eslint-disable-next-line @next/next/no-img-element -- foto del bucket servida por /media, sin optimizar */}
                 <img src={src} alt={alt} className="max-h-[75dvh] w-auto max-w-full object-contain" />
               </div>
-              {caption && <p className="tabular text-[12.5px] text-slate-500">{caption}</p>}
+              {caption && <p className="tabular type-meta text-ink-muted">{caption}</p>}
             </Modal.Body>
           </Modal.Dialog>
         </Modal.Container>

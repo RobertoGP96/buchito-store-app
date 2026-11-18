@@ -10,7 +10,19 @@ import { getStoreSettingsSafe } from "@/modules/settings/queries/settings-querie
 import { BottomNav } from "@/components/layout/store/bottom-nav";
 import { SiteFooter } from "@/components/layout/store/site-footer";
 import { TopNav } from "@/components/layout/store/top-nav";
+import { MAIN_CONTENT_ID, SkipLink } from "@/components/skip-link";
 import type { NavUser } from "@/components/layout/store/user-menu";
+import type { Viewport } from "next";
+
+// La barra del navegador toma el color de la cabecera de la tienda (`--c-nav`
+// en claro y en oscuro) para que no quede una franja de otro color encima.
+export const viewport: Viewport = {
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#6b3f24" },
+    { media: "(prefers-color-scheme: dark)", color: "#4e2d19" },
+  ],
+};
 
 export default async function StoreLayout({
   children,
@@ -42,10 +54,13 @@ export default async function StoreLayout({
             para sobrevivir a las navegaciones y usar carrito y moneda. */}
         <ProductDrawerProvider>
           <div className="flex min-h-dvh flex-col">
+            <SkipLink />
             <TopNav user={user} />
             {/* El hueco para la BottomNav flotante lo reserva el SiteFooter con
                 su padding inferior: así el footer llega hasta el borde. */}
-            <main className="flex flex-1 flex-col">{children}</main>
+            <main id={MAIN_CONTENT_ID} tabIndex={-1} className="flex flex-1 flex-col outline-none">
+              {children}
+            </main>
             <SiteFooter
               contact={{
                 phone: settings?.phone ?? null,

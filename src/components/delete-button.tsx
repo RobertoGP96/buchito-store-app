@@ -103,17 +103,16 @@ export function DeleteButton({
         footer={
           <div className="flex w-full items-center justify-end gap-2">
             {blocked ? (
-              <Button variant="primary" className="rounded-full" onPress={() => setOpen(false)}>
+              <Button variant="primary" onPress={() => setOpen(false)}>
                 Entendido
               </Button>
             ) : (
               <>
-                <Button variant="ghost" className="rounded-full" isDisabled={pending} onPress={() => setOpen(false)}>
+                <Button variant="ghost" isDisabled={pending} onPress={() => setOpen(false)}>
                   Cancelar
                 </Button>
                 <Button
                   variant="danger"
-                  className="rounded-full"
                   isPending={pending}
                   isDisabled={pending}
                   onPress={() => void confirm()}
@@ -126,11 +125,11 @@ export function DeleteButton({
         }
       >
         {blocked ? (
-          <p className="text-[13px] leading-[1.6] text-slate-500">
+          <p className="type-meta leading-[1.6] text-ink-muted">
             Si ya no quieres usarlo, desactívalo: los registros que lo referencian conservan su historial.
           </p>
         ) : (
-          <div className="flex flex-col gap-2 text-[13px] leading-[1.6] text-slate-500">
+          <div className="flex flex-col gap-2 type-meta leading-[1.6] text-ink-muted">
             {children}
             <p>Esta acción no se puede deshacer y queda registrada en la auditoría.</p>
           </div>

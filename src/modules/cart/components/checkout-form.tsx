@@ -10,6 +10,7 @@ import { ClipboardList } from "lucide-react";
 import { ChoiceChips } from "@/components/choice-chips";
 import { EmptyState } from "@/components/empty-state";
 import { FormSelect, FormTextArea, FormTextField } from "@/components/form/fields";
+import { StepHeading } from "@/components/section-card";
 import { useCurrency } from "@/modules/currency/store/currency-provider";
 import type { ZoneRow } from "@/modules/deliveries/queries/zone-queries";
 import { createOrder } from "@/modules/orders/actions/order-actions";
@@ -20,7 +21,7 @@ import { RecipientPicker } from "@/modules/recipients/components/recipient-picke
 import type { RecipientRow } from "@/modules/recipients/queries/recipient-queries";
 import { computeCartTotals } from "../cart-totals";
 import { cartIsEmpty, cartPriceLines, useCart } from "../store";
-import { CartSummary } from "./cart-summary";
+import { CartSummary, CartSummaryItems } from "./cart-summary";
 
 export interface CheckoutCustomer {
   name: string;
@@ -203,20 +204,20 @@ export function CheckoutForm({
     <form onSubmit={handleSubmit(onSubmit, onInvalid)} noValidate className="grid gap-6 md:grid-cols-[minmax(0,1fr)_340px] md:items-start">
       <div className="flex flex-col gap-6">
         <section className="rounded-card bg-canvas p-5 shadow-card">
-          <div className="flex items-start justify-between gap-3">
-            <p className="eyebrow">Tus datos</p>
-            <Link href="/perfil" className="text-[12.5px] font-semibold text-navy-700 hover:underline">
+          <div className="flex items-center justify-between gap-3">
+            <StepHeading step={1}>Tus datos</StepHeading>
+            <Link href="/perfil" className="type-meta font-semibold text-tostado-700 hover:underline">
               Editar en mi perfil
             </Link>
           </div>
-          <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-[13.5px]">
-            <dt className="text-slate-400">Nombre</dt>
+          <dl className="type-body mt-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5">
+            <dt className="text-ink-subtle">Nombre</dt>
             <dd className="font-medium text-ink">{customer.name}</dd>
-            <dt className="text-slate-400">Teléfono</dt>
+            <dt className="text-ink-subtle">Teléfono</dt>
             <dd className="tabular font-medium text-ink">{customer.phone}</dd>
             {customer.email && (
               <>
-                <dt className="text-slate-400">Correo</dt>
+                <dt className="text-ink-subtle">Correo</dt>
                 <dd className="font-medium text-ink">{customer.email}</dd>
               </>
             )}
@@ -224,9 +225,9 @@ export function CheckoutForm({
         </section>
 
         <section className="rounded-card bg-canvas p-5 shadow-card">
-          <p id="fulfillment-label" className="eyebrow">
+          <StepHeading step={2} id="fulfillment-label">
             Entrega
-          </p>
+          </StepHeading>
           <div className="mt-4">
             <Controller
               control={control}
@@ -243,7 +244,7 @@ export function CheckoutForm({
           </div>
           {fulfillment !== "pickup" && (
             <>
-              <p id="recipient-label" className="mt-5 text-[13.5px] font-semibold text-ink">
+              <p id="recipient-label" className="type-body mt-5 font-semibold text-ink">
                 ¿A quién se lo entregamos?
               </p>
               {recipients.length > 0 && (
@@ -265,7 +266,7 @@ export function CheckoutForm({
                           labelledBy="recipient-label"
                         />
                         {fieldState.error && (
-                          <p className="mt-2 text-[12.5px] text-danger">{fieldState.error.message}</p>
+                          <p className="type-meta mt-2 text-danger">{fieldState.error.message}</p>
                         )}
                       </>
                     )}
@@ -280,7 +281,7 @@ export function CheckoutForm({
                   <FormTextField control={control} name="newRecipient.line2" label="Apto / piso (opcional)" autoComplete="address-line2" />
                   <FormTextField control={control} name="newRecipient.neighborhood" label="Barrio / reparto (opcional)" />
                   <FormTextField control={control} name="newRecipient.reference" label="Referencia (opcional)" placeholder="Edificio azul, timbre 3" />
-                  <p className="text-[12px] leading-[1.6] text-slate-400 sm:col-span-2">
+                  <p className="type-caption leading-[1.6] text-ink-subtle sm:col-span-2">
                     Se guarda en tus destinatarios para la próxima compra.
                   </p>
                 </div>
@@ -303,9 +304,9 @@ export function CheckoutForm({
         </section>
 
         <section className="rounded-card bg-canvas p-5 shadow-card">
-          <p id="payment-label" className="eyebrow">
+          <StepHeading step={3} id="payment-label">
             Pago
-          </p>
+          </StepHeading>
           <div className="mt-4">
             <Controller
               control={control}
@@ -322,7 +323,7 @@ export function CheckoutForm({
                     labelledBy="payment-label"
                   />
                   {fieldState.error && (
-                    <p className="mt-2 text-[12.5px] text-danger">{fieldState.error.message}</p>
+                    <p className="mt-2 type-meta text-danger">{fieldState.error.message}</p>
                   )}
                 </>
               )}
@@ -339,32 +340,36 @@ export function CheckoutForm({
             </div>
           )}
           {whatsappEnabled && (
-            <p className="mt-4 text-[12.5px] leading-[1.6] text-slate-500">
+            <p className="mt-4 type-meta leading-[1.6] text-ink-muted">
               Después de confirmar verás cómo coordinar el pago por WhatsApp con la tienda y enviar el comprobante.
             </p>
           )}
         </section>
 
         <section className="rounded-card bg-canvas p-5 shadow-card">
-          <p className="eyebrow">Notas</p>
+          <StepHeading step={4}>Notas</StepHeading>
           <div className="mt-4">
             <FormTextArea control={control} name="notes" label="Indicaciones para la entrega (opcional)" rows={2} />
           </div>
         </section>
       </div>
 
-      <CartSummary totals={totals} paymentCurrency={method?.currency ?? null}>
+      <CartSummary
+        totals={totals}
+        paymentCurrency={method?.currency ?? null}
+        items={<CartSummaryItems lines={state.lines} combos={state.combos} />}
+      >
         <Button
           type="submit"
           variant="primary"
           size="lg"
           isPending={isSubmitting}
           isDisabled={isSubmitting}
-          className="w-full rounded-full"
+          className="w-full"
         >
           Confirmar pedido
         </Button>
-        <p className="mt-3 text-center text-[12px] leading-[1.6] text-slate-400">
+        <p className="type-caption mt-3 text-center text-ink-subtle">
           Los precios se recalculan a la tasa vigente al confirmar.
         </p>
       </CartSummary>

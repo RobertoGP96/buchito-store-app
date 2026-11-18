@@ -17,10 +17,14 @@ import { PRODUCT_STATUS_META } from "../lib/labels";
 import { fmtQtyNumber } from "../lib/units";
 import type { AdminProductRow, AdminVariantSummary } from "../queries/product-queries";
 import { VariantChips, VariantPriceCell, VariantStockCell } from "./variant-list";
+import type { ReactNode } from "react";
+import { PageHeaderRow } from "@/components/page-header";
 
 const VariantForm = lazyDialog(() => import("./variant-form").then((m) => m.VariantForm));
 
 interface ProductListProps {
+  /** Cabecera de la página, ya renderizada en el servidor. */
+  heading?: ReactNode;
   rows: AdminProductRow[];
   currencies: CurrencyInfo[];
   lowStockThreshold: number;
@@ -54,16 +58,16 @@ function StockCell({ row, threshold }: { row: AdminProductRow; threshold: number
 function PriceCell({ row }: { row: AdminProductRow }) {
   if (row.hasMissingRate && row.minPrice == null) {
     return (
-      <span className="inline-flex items-center gap-1 text-[12.5px] font-medium text-warn">
-        <AlertTriangle className="h-3.5 w-3.5" strokeWidth={2} />
+      <span className="inline-flex items-center gap-1 type-meta font-medium text-warn">
+        <AlertTriangle className="h-3.5 w-3.5" strokeWidth={1.9} />
         Sin tasa
       </span>
     );
   }
-  if (row.minPrice == null) return <span className="text-slate-400">—</span>;
+  if (row.minPrice == null) return <span className="text-ink-subtle">—</span>;
   return (
     <span>
-      {row.variantCount > 1 && <span className="mr-1 text-[11px] text-slate-400">desde</span>}
+      {row.variantCount > 1 && <span className="mr-1 type-micro text-ink-subtle">desde</span>}
       <Money value={row.minPrice} />
     </span>
   );
@@ -101,7 +105,7 @@ function ExpandToggle({
     >
       <ChevronRight
         className={cn("h-4 w-4 transition-transform duration-150", expanded && "rotate-90")}
-        strokeWidth={2}
+        strokeWidth={1.9}
       />
     </Button>
   );
@@ -122,7 +126,7 @@ function EditProductLink({ product, label }: { product: AdminProductRow; label?:
   );
 }
 
-export function ProductList({ rows, currencies, lowStockThreshold }: ProductListProps) {
+export function ProductList({ rows, currencies, lowStockThreshold, heading }: ProductListProps) {
   const [expanded, setExpanded] = useState<ReadonlySet<number>>(() => new Set());
   const [editing, setEditing] = useState<EditingVariant | null>(null);
   const [formOpen, setFormOpen] = useState(false);
@@ -166,10 +170,10 @@ export function ProductList({ rows, currencies, lowStockThreshold }: ProductList
               <span aria-hidden className="-ml-2 h-8 w-8 flex-none" />
             )}
             <div className="min-w-0">
-              <Link href={productHref(r.product)} className="font-semibold text-navy-700 hover:underline">
+              <Link href={productHref(r.product)} className="font-semibold text-tostado-700 hover:underline">
                 {r.product.name}
               </Link>
-              <p className="text-[12px] text-slate-400">
+              <p className="type-caption text-ink-subtle">
                 {r.product.typeName}
                 {r.product.categoryName ? ` · ${r.product.categoryName}` : ""}
               </p>
@@ -177,10 +181,10 @@ export function ProductList({ rows, currencies, lowStockThreshold }: ProductList
           </div>
         ) : (
           <div className="flex min-w-0 items-center gap-2 pl-7">
-            <CornerDownRight className="h-3.5 w-3.5 flex-none text-slate-400" strokeWidth={2} />
+            <CornerDownRight className="h-3.5 w-3.5 flex-none text-ink-subtle" strokeWidth={1.9} />
             <div className="min-w-0">
               <p className="font-medium text-ink">{variantDisplayName(r.variant, r.product.attributeSchema)}</p>
-              <p className="tabular text-[12px] text-slate-400">{r.variant.sku}</p>
+              <p className="tabular type-caption text-ink-subtle">{r.variant.sku}</p>
             </div>
           </div>
         ),
@@ -239,18 +243,18 @@ export function ProductList({ rows, currencies, lowStockThreshold }: ProductList
 
   return (
     <>
-      <div className="flex justify-end">
+      <PageHeaderRow heading={heading}>
         <ButtonLink href="/admin/productos/nuevo" variant="solid">
           <Plus className="h-4 w-4" strokeWidth={2.2} />
           Nuevo producto
         </ButtonLink>
-      </div>
+      </PageHeaderRow>
 
       <ResponsiveList
         rows={productRows}
         tableRows={tableRows}
         rowKey={rowKey}
-        rowClassName={(r) => (r.kind === "variant" ? "bg-tint/40" : undefined)}
+        rowClassName={(r) => (r.kind === "variant" ? "bg-crema-100/40" : undefined)}
         columns={columns}
         ariaLabel="Productos"
         empty={
@@ -272,7 +276,7 @@ export function ProductList({ rows, currencies, lowStockThreshold }: ProductList
           return (
             <ListCard
               title={
-                <Link href={productHref(product)} className="text-navy-700 hover:underline">
+                <Link href={productHref(product)} className="text-tostado-700 hover:underline">
                   {product.name}
                 </Link>
               }
@@ -296,23 +300,23 @@ export function ProductList({ rows, currencies, lowStockThreshold }: ProductList
                   >
                     <ChevronRight
                       className={cn("h-4 w-4 transition-transform duration-150", open && "rotate-90")}
-                      strokeWidth={2}
+                      strokeWidth={1.9}
                     />
                     {open ? "Ocultar variantes" : `Ver variantes (${product.variants.length})`}
                   </Button>
                   {open && (
-                    <ul className="mt-2 flex flex-col divide-y divide-line rounded-field bg-tint/40">
+                    <ul className="mt-2 flex flex-col divide-y divide-line rounded-field bg-crema-100/40">
                       {product.variants.map((variant) => (
                         <li key={variant.variantId} className="flex items-start justify-between gap-3 px-3 py-2.5">
-                          <div className="min-w-0 text-[13px]">
+                          <div className="min-w-0 type-meta">
                             <p className="font-medium text-ink">
                               {variantDisplayName(variant, product.attributeSchema)}
                             </p>
-                            <p className="tabular text-[12px] text-slate-400">{variant.sku}</p>
+                            <p className="tabular type-caption text-ink-subtle">{variant.sku}</p>
                             <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
                               <VariantPriceCell variant={variant} />
-                              <span className="text-[12.5px]">
-                                <span className="text-slate-400">Stock </span>
+                              <span className="type-meta">
+                                <span className="text-ink-subtle">Stock </span>
                                 <VariantStockCell variant={variant} threshold={lowStockThreshold} />
                               </span>
                               <VariantChips variant={variant} />

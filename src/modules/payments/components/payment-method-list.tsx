@@ -12,6 +12,8 @@ import { StatusChip } from "@/components/status-chip";
 import { deletePaymentMethod } from "../actions/payment-method-actions";
 import { PAYMENT_KIND_LABELS } from "../lib/labels";
 import type { PaymentMethodRow } from "../queries/payment-queries";
+import type { ReactNode } from "react";
+import { PageHeaderRow } from "@/components/page-header";
 
 const PaymentMethodForm = lazyDialog(() => import("./payment-method-form").then((m) => m.PaymentMethodForm));
 
@@ -34,11 +36,13 @@ function DeleteMethodButton({ row, appearance }: { row: PaymentMethodRow; appear
 }
 
 interface PaymentMethodListProps {
+  /** Cabecera de la página, ya renderizada en el servidor. */
+  heading?: ReactNode;
   rows: PaymentMethodRow[];
   currencies: SelectOption[];
 }
 
-export function PaymentMethodList({ rows, currencies }: PaymentMethodListProps) {
+export function PaymentMethodList({ rows, currencies, heading }: PaymentMethodListProps) {
   const [editing, setEditing] = useState<PaymentMethodRow | null>(null);
   const [open, setOpen] = useState(false);
 
@@ -59,7 +63,7 @@ export function PaymentMethodList({ rows, currencies }: PaymentMethodListProps) 
       cell: (r) => (
         <div className="min-w-0">
           <p className="font-semibold text-ink">{r.name}</p>
-          <p className="text-[12px] text-slate-400">{r.code}</p>
+          <p className="type-caption text-ink-subtle">{r.code}</p>
         </div>
       ),
     },
@@ -94,12 +98,12 @@ export function PaymentMethodList({ rows, currencies }: PaymentMethodListProps) 
 
   return (
     <>
-      <div className="flex justify-end">
-        <Button variant="primary" className="rounded-full" onPress={openNew}>
+      <PageHeaderRow heading={heading}>
+        <Button variant="primary" onPress={openNew}>
           <Plus className="h-4 w-4" strokeWidth={2.2} />
           Nuevo método
         </Button>
-      </div>
+      </PageHeaderRow>
 
       <ResponsiveList
         rows={rows}
@@ -123,7 +127,7 @@ export function PaymentMethodList({ rows, currencies }: PaymentMethodListProps) 
             ]}
             actions={
               <>
-                <Button variant="outline" size="sm" className="rounded-full" onPress={() => openEdit(r)}>
+                <Button variant="outline" size="sm" onPress={() => openEdit(r)}>
                   <Pencil className="h-3.5 w-3.5" strokeWidth={1.9} />
                   Editar
                 </Button>

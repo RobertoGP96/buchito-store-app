@@ -82,7 +82,7 @@ export function BottomNav({ isLoggedIn }: { isLoggedIn: boolean }) {
           <span
             aria-hidden
             className={cn(
-              "absolute rounded-full bg-navy-700 transition-[transform,opacity] duration-[380ms] motion-reduce:transition-none",
+              "absolute rounded-full bg-tostado-700 transition-[transform,opacity] duration-[380ms] motion-reduce:transition-none",
               shownIndex < 0 && "opacity-0"
             )}
             style={{
@@ -103,12 +103,17 @@ export function BottomNav({ isLoggedIn }: { isLoggedIn: boolean }) {
                 key={item.href}
                 href={href}
                 onNavigate={() => startTransition(() => setShownIndex(index))}
-                aria-label={item.label}
+                // La píldora del contador es solo visual: el número va en el nombre.
+                aria-label={
+                  item.href === "/carrito" && count > 0
+                    ? `${item.label}, ${count} ${count === 1 ? "artículo" : "artículos"}`
+                    : item.label
+                }
                 // Lo accesible dice dónde se está, no adónde se va.
                 aria-current={item.isActive(pathname) ? "page" : undefined}
                 className={cn(
                   "relative z-10 flex items-center justify-center rounded-full py-2.5 transition-colors duration-[380ms] motion-reduce:transition-none",
-                  active ? "text-on-brand" : "text-slate-400 hover:text-navy-700"
+                  active ? "text-on-tostado" : "text-ink-subtle hover:text-tostado-700"
                 )}
                 style={{ transitionTimingFunction: EASE }}
               >
@@ -121,7 +126,7 @@ export function BottomNav({ isLoggedIn }: { isLoggedIn: boolean }) {
                 >
                   <Icon className="h-5 w-5" strokeWidth={active ? 2.2 : 1.8} />
                   {item.href === "/carrito" && count > 0 && (
-                    <span className="pop-in tabular absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-navy-700 px-1 text-[9px] leading-none font-bold text-on-brand ring-2 ring-canvas">
+                    <span className="pop-in tabular absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-tostado-700 px-1 text-[9px] leading-none font-bold text-on-tostado ring-2 ring-canvas">
                       {count > 99 ? "99+" : count}
                     </span>
                   )}

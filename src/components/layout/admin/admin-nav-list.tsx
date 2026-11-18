@@ -40,13 +40,13 @@ export function AdminNavList({ exclude = [], layout = "list", onNavigate }: Admi
                     onClick={onNavigate}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "flex items-center gap-3 rounded-field border-[1.5px] px-3.5 py-3 text-[13px] font-semibold transition-colors duration-150",
+                      "flex items-center gap-3 rounded-field border-[1.5px] px-3.5 py-3 type-meta font-semibold transition-colors duration-150",
                       layout === "list" && "border-transparent py-2.5",
                       active
-                        ? "border-navy-700 bg-tint text-navy-700"
+                        ? "border-tostado-700 bg-crema-100 text-tostado-700"
                         : layout === "grid"
-                          ? "border-line text-slate-500 hover:border-navy-700 hover:text-navy-700"
-                          : "text-slate-500 hover:bg-hover hover:text-navy-700"
+                          ? "border-line text-ink-muted hover:border-tostado-700 hover:text-tostado-700"
+                          : "text-ink-muted hover:bg-hover hover:text-tostado-700"
                     )}
                   >
                     <Icon className="h-4 w-4 flex-none" strokeWidth={1.9} />

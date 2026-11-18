@@ -62,7 +62,7 @@ export function RegisterPaymentForm({
 
   return (
     <>
-      <Button variant="secondary" size="sm" className="rounded-full" onPress={() => setOpen(true)}>
+      <Button variant="secondary" size="sm" onPress={() => setOpen(true)}>
         <Wallet className="h-3.5 w-3.5" strokeWidth={1.9} />
         Registrar cobro
       </Button>

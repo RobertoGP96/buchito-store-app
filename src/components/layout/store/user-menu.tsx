@@ -65,7 +65,7 @@ function manageLinksFor(user: NavUser): MenuLink[] {
   return [];
 }
 
-const ITEM = "flex items-center gap-3 text-[13px] font-medium";
+const ITEM = "flex items-center gap-3 type-meta font-medium";
 
 interface UserMenuProps {
   user: NavUser | null;
@@ -100,7 +100,7 @@ export function UserMenu({ user, triggerClassName }: UserMenuProps) {
       <Dropdown.Trigger
         aria-label={user ? `Cuenta de ${user.fullName}` : "Tu cuenta"}
         className={cn(
-          "nav-label inline-flex h-9 min-w-9 items-center justify-center gap-1.5 rounded-full px-2 text-slate-500 transition-colors duration-150 hover:bg-hover hover:text-navy-700 data-[pressed]:bg-tint data-[pressed]:text-navy-700",
+          "nav-label inline-flex h-9 min-w-9 items-center justify-center gap-1.5 rounded-full px-2 text-ink-muted transition-colors duration-150 hover:bg-hover hover:text-tostado-700 data-[pressed]:bg-crema-100 data-[pressed]:text-tostado-700",
           firstName && "lg:px-3",
           triggerClassName
         )}
@@ -109,16 +109,16 @@ export function UserMenu({ user, triggerClassName }: UserMenuProps) {
         {firstName && (
           <span className="hidden max-w-[92px] truncate lg:inline">{firstName}</span>
         )}
-        <ChevronDown className="hidden h-3.5 w-3.5 flex-none md:block" strokeWidth={2} />
+        <ChevronDown className="hidden h-3.5 w-3.5 flex-none md:block" strokeWidth={1.9} />
       </Dropdown.Trigger>
       <Dropdown.Popover placement="bottom end" className="w-[256px]">
         {/* La cabecera va fuera del Menu: React Aria solo admite ítems dentro
             de una sección y descartaba el bloque junto con los enlaces. */}
         <div className="border-b border-line px-4 pt-3.5 pb-3">
-          <p className="truncate text-[14px] font-semibold text-ink">
+          <p className="truncate type-body font-semibold text-ink">
             {user ? user.fullName : "Cliente invitado"}
           </p>
-          <p className="mt-0.5 truncate text-[12px] text-slate-400">
+          <p className="mt-0.5 truncate type-caption text-ink-subtle">
             {user ? user.email : "Inicia sesión o crea tu cuenta"}
           </p>
           {!user && (

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { ScrollFadeRow } from "@/components/scroll-fade-row";
 import { cn } from "@/lib/utils";
 
 export type ChoiceChipSize = "sm" | "md";
@@ -8,15 +9,15 @@ export type ChoiceChipSize = "sm" | "md";
 const CHIP_CORE =
   "tabular flex flex-none snap-start items-center rounded-full border-[1.5px] font-semibold whitespace-nowrap motion-safe:transition-colors motion-safe:duration-150";
 const CHIP_SIZE: Record<ChoiceChipSize, string> = {
-  md: "min-h-10 px-4 text-[13px]",
+  md: "min-h-10 px-4 type-meta",
   // Dentro de la card (dos columnas en móvil) el chip pleno no cabe.
-  sm: "min-h-9 px-3 text-[12px]",
+  sm: "min-h-9 px-3 type-caption",
 };
 
 export const CHIP_BASE = cn(CHIP_CORE, CHIP_SIZE.md);
-export const CHIP_ON = "border-navy-700 bg-navy-700 text-on-brand";
+export const CHIP_ON = "border-tostado-700 bg-tostado-700 text-on-tostado";
 export const CHIP_OFF =
-  "border-line bg-canvas text-slate-500 hover:border-navy-700 hover:text-navy-700";
+  "border-line bg-canvas text-ink-muted hover:border-tostado-700 hover:text-tostado-700";
 export const CHIP_DISABLED =
   "cursor-not-allowed border-line-soft bg-canvas text-disabled line-through";
 
@@ -106,16 +107,10 @@ export function ChoiceChips({
   };
 
   return (
-    <div
+    <ScrollFadeRow
       role="radiogroup"
       aria-labelledby={labelledBy}
-      // overflow-x recorta el anillo de foco (outline 2px + offset, fuera de
-      // la caja del chip): el padding de 4px le da sitio y los márgenes
-      // negativos lo compensan para que el layout no cambie.
-      className={cn(
-        "no-scrollbar -mx-1 -mb-1 flex min-w-0 max-w-full snap-x gap-2 overflow-x-auto px-1 py-1",
-        className
-      )}
+      className={cn("-mb-1 min-w-0 max-w-full", className)}
     >
       {options.map((option, index) => {
         const checked = option.value === value;
@@ -143,6 +138,6 @@ export function ChoiceChips({
           </button>
         );
       })}
-    </div>
+    </ScrollFadeRow>
   );
 }

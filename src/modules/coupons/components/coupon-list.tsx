@@ -13,6 +13,8 @@ import { fmtDate } from "@/lib/format";
 import { deleteCoupon } from "../actions/coupon-actions";
 import { COUPON_STATE_META } from "../lib/labels";
 import type { CouponRow } from "../queries/coupon-queries";
+import type { ReactNode } from "react";
+import { PageHeaderRow } from "@/components/page-header";
 
 const CouponForm = lazyDialog(() => import("./coupon-form").then((m) => m.CouponForm));
 
@@ -22,7 +24,7 @@ function Discount({ row }: { row: CouponRow }) {
 }
 
 function Validity({ row }: { row: CouponRow }) {
-  if (!row.startsAt && !row.endsAt) return <span className="text-slate-400">Siempre</span>;
+  if (!row.startsAt && !row.endsAt) return <span className="text-ink-subtle">Siempre</span>;
   return (
     <span className="tabular whitespace-nowrap">
       {row.startsAt ? fmtDate(row.startsAt) : "…"} – {row.endsAt ? fmtDate(row.endsAt) : "…"}
@@ -34,7 +36,7 @@ function Uses({ row }: { row: CouponRow }) {
   return (
     <span className="tabular">
       {row.usedCount}
-      <span className="text-slate-400"> / {row.maxUses ?? "∞"}</span>
+      <span className="text-ink-subtle"> / {row.maxUses ?? "∞"}</span>
     </span>
   );
 }
@@ -57,7 +59,7 @@ function DeleteCouponButton({ row, appearance }: { row: CouponRow; appearance: "
   );
 }
 
-export function CouponList({ rows }: { rows: CouponRow[] }) {
+export function CouponList({ rows, heading }: { rows: CouponRow[]; heading?: ReactNode }) {
   const [editing, setEditing] = useState<CouponRow | null>(null);
   const [open, setOpen] = useState(false);
 
@@ -82,7 +84,7 @@ export function CouponList({ rows }: { rows: CouponRow[] }) {
       id: "min",
       header: "Compra mínima",
       align: "right",
-      cell: (r) => (r.minSubtotal == null ? <span className="text-slate-400">—</span> : <Money value={r.minSubtotal} />),
+      cell: (r) => (r.minSubtotal == null ? <span className="text-ink-subtle">—</span> : <Money value={r.minSubtotal} />),
     },
     { id: "uses", header: "Usos", align: "right", cell: (r) => <Uses row={r} /> },
     { id: "validity", header: "Vigencia", cell: (r) => <Validity row={r} /> },
@@ -104,12 +106,12 @@ export function CouponList({ rows }: { rows: CouponRow[] }) {
 
   return (
     <>
-      <div className="flex justify-end">
-        <Button variant="primary" className="rounded-full" onPress={openNew}>
+      <PageHeaderRow heading={heading}>
+        <Button variant="primary" onPress={openNew}>
           <Plus className="h-4 w-4" strokeWidth={2.2} />
           Nuevo cupón
         </Button>
-      </div>
+      </PageHeaderRow>
 
       <ResponsiveList
         rows={rows}
@@ -138,7 +140,7 @@ export function CouponList({ rows }: { rows: CouponRow[] }) {
             ]}
             actions={
               <>
-                <Button variant="outline" size="sm" className="rounded-full" onPress={() => openEdit(r)}>
+                <Button variant="outline" size="sm" onPress={() => openEdit(r)}>
                   <Pencil className="h-3.5 w-3.5" strokeWidth={1.9} />
                   Editar
                 </Button>

@@ -48,7 +48,6 @@ export function OrderActionsBar({ orderId, version, status, fulfillment, deliver
           key={to}
           variant={to === "cancelled" ? "danger-soft" : "primary"}
           size="sm"
-          className="rounded-full"
           isPending={pending === to}
           isDisabled={pending !== null}
           onPress={() => (to === "cancelled" ? setAskingCancel(true) : void run(to, null))}

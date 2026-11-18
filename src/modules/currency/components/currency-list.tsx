@@ -11,6 +11,8 @@ import { StatusChip } from "@/components/status-chip";
 import { deleteCurrency } from "../actions/currency-actions";
 import { SetBaseCurrencyButton } from "./set-base-currency-button";
 import type { CurrencyRow } from "../queries/currency-queries";
+import type { ReactNode } from "react";
+import { PageHeaderRow } from "@/components/page-header";
 
 const CurrencyForm = lazyDialog(() => import("./currency-form").then((m) => m.CurrencyForm));
 
@@ -40,16 +42,16 @@ function DeleteCurrencyButton({ row, appearance }: { row: CurrencyRow; appearanc
 }
 
 function RateCell({ row, baseCode }: { row: CurrencyRow; baseCode: string | null }) {
-  if (row.isBase) return <span className="text-slate-400">Base</span>;
+  if (row.isBase) return <span className="text-ink-subtle">Base</span>;
   if (row.rateToBase == null) return <span className="font-medium text-warn">Sin tasa</span>;
   return (
-    <span className="tabular">
+    <span className="tabular whitespace-nowrap">
       1 {row.code} = {row.rateToBase.toLocaleString("es-MX", { maximumFractionDigits: 4 })} {baseCode}
     </span>
   );
 }
 
-export function CurrencyList({ rows }: { rows: CurrencyRow[] }) {
+export function CurrencyList({ rows, heading }: { rows: CurrencyRow[]; heading?: ReactNode }) {
   const [editing, setEditing] = useState<CurrencyRow | null>(null);
   const [open, setOpen] = useState(false);
   const baseCode = rows.find((r) => r.isBase)?.code ?? null;
@@ -97,12 +99,12 @@ export function CurrencyList({ rows }: { rows: CurrencyRow[] }) {
 
   return (
     <>
-      <div className="flex justify-end">
-        <Button variant="primary" className="rounded-full" onPress={openNew}>
+      <PageHeaderRow heading={heading}>
+        <Button variant="primary" onPress={openNew}>
           <Plus className="h-4 w-4" strokeWidth={2.2} />
           Nueva moneda
         </Button>
-      </div>
+      </PageHeaderRow>
 
       <ResponsiveList
         rows={rows}
@@ -129,7 +131,7 @@ export function CurrencyList({ rows }: { rows: CurrencyRow[] }) {
             actions={
               <>
                 {!r.isBase && r.isActive && <SetBaseCurrencyButton currency={r} currentBaseCode={baseCode} />}
-                <Button variant="outline" size="sm" className="rounded-full" onPress={() => openEdit(r)}>
+                <Button variant="outline" size="sm" onPress={() => openEdit(r)}>
                   <Pencil className="h-3.5 w-3.5" strokeWidth={1.9} />
                   Editar
                 </Button>

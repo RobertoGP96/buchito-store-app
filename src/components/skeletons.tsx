@@ -1,6 +1,7 @@
 "use client";
 
 import { Skeleton } from "@heroui/react";
+import { LoadingStatus } from "@/components/loading-status";
 import { cn } from "@/lib/utils";
 
 /* Esqueletos de carga de las rutas (`loading.tsx`) y de los Suspense internos.
@@ -9,15 +10,17 @@ import { cn } from "@/lib/utils";
 
 export function ProductCardSkeleton() {
   return (
-    <div className="flex flex-col gap-3.5 rounded-card bg-canvas p-3 pb-4 shadow-card sm:p-4 sm:pb-5">
+    <div className="flex flex-col overflow-hidden rounded-card bg-canvas shadow-card">
       {/* Solo la foto lleva shimmer: cada barra animada es una capa más del
           compositor y una retícula de 8 cards sumaba 40. */}
-      <Skeleton className="aspect-square w-full rounded-field" />
-      <Skeleton animationType="none" className="h-2.5 w-16 rounded-full" />
-      <Skeleton animationType="none" className="h-3.5 w-3/4 rounded-full" />
-      <div className="mt-1 flex items-center justify-between border-t border-line pt-3">
+      <Skeleton className="aspect-square w-full rounded-none" />
+      <div className="flex flex-col gap-2.5 px-3 pt-3.5 sm:px-4">
+        <Skeleton animationType="none" className="h-2.5 w-16 rounded-full" />
+        <Skeleton animationType="none" className="h-3.5 w-3/4 rounded-full" />
+      </div>
+      <div className="flex flex-col gap-2.5 p-3 pt-4 sm:p-4">
         <Skeleton animationType="none" className="h-4 w-20 rounded-full" />
-        <Skeleton animationType="none" className="h-9 w-9 rounded-full sm:w-16" />
+        <Skeleton animationType="none" className="h-10 w-full rounded-full pointer-coarse:h-11" />
       </div>
     </div>
   );
@@ -33,20 +36,31 @@ export function ProductGridSkeleton({ count = 8, className }: { count?: number; 
   );
 }
 
-/** Home de la tienda: hero centrado más la retícula de destacados. */
+/** Home de la tienda: hero en banda crema, franja de beneficios y la primera
+ *  retícula. */
 export function HomeSkeleton() {
   return (
     <>
-      <section className="flex flex-col items-center border-b border-line bg-canvas px-5 pt-14 pb-12 md:px-10 md:pt-[72px] md:pb-16">
-        <Skeleton className="h-2.5 w-36 rounded-full" />
-        <Skeleton className="mt-5 h-8 w-[min(640px,90%)] rounded-full md:h-12" />
-        <Skeleton className="mt-5 h-3.5 w-[min(470px,80%)] rounded-full" />
-        <div className="mt-8 flex gap-3.5">
-          <Skeleton className="h-12 w-36 rounded-full" />
-          <Skeleton className="h-12 w-32 rounded-full" />
+      <LoadingStatus />
+      <section className="-mt-7 bg-cream pt-7">
+        <div className="mx-auto grid w-full max-w-[1120px] items-center gap-10 px-5 pt-10 pb-16 md:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] md:px-6 md:pt-14 md:pb-20">
+          <div className="flex flex-col items-center md:items-start">
+            <Skeleton className="h-2.5 w-36 rounded-full" />
+            <Skeleton className="mt-5 h-8 w-[min(420px,90%)] rounded-full md:h-11" />
+            <Skeleton className="mt-3 h-8 w-[min(340px,70%)] rounded-full md:h-11" />
+            <Skeleton className="mt-5 h-3.5 w-[min(400px,80%)] rounded-full" />
+            <div className="mt-7 flex gap-3">
+              <Skeleton className="h-12 w-40 rounded-full" />
+              <Skeleton className="h-12 w-32 rounded-full" />
+            </div>
+          </div>
+          <Skeleton className="hidden aspect-[5/4] w-full rounded-sheet md:block" />
         </div>
       </section>
-      <div className="mx-auto flex w-full max-w-[1120px] flex-1 flex-col px-5 py-10 md:px-6 md:py-11">
+      <div className="mx-auto -mt-9 w-full max-w-[1120px] px-5 md:px-6">
+        <div className="h-[88px] rounded-card bg-canvas shadow-card sm:h-[76px]" />
+      </div>
+      <div className="mx-auto flex w-full max-w-[1120px] flex-1 flex-col px-5 py-10 md:px-6 md:py-12">
         <Skeleton className="h-2.5 w-24 rounded-full" />
         <Skeleton className="mt-3 h-6 w-40 rounded-full" />
         <ProductGridSkeleton className="mt-5" />
@@ -55,10 +69,12 @@ export function HomeSkeleton() {
   );
 }
 
-/** Resultados del catálogo: contador más retícula. */
-export function CatalogResultsSkeleton() {
+/** Resultados del catálogo: contador más retícula. `announce` se apaga cuando
+ *  va dentro de otra silueta que ya anuncia la carga. */
+export function CatalogResultsSkeleton({ announce = true }: { announce?: boolean }) {
   return (
     <div className="flex flex-col gap-6">
+      {announce && <LoadingStatus />}
       <Skeleton className="h-3 w-24 rounded-full" />
       <ProductGridSkeleton />
     </div>
@@ -75,6 +91,7 @@ export function StoreScreenSkeleton({
 }) {
   return (
     <>
+      <LoadingStatus />
       <div className="mx-auto w-full max-w-[1120px] px-5 pt-7 pb-5 md:px-6 md:pt-9 md:pb-6">
         {back && <Skeleton className="mb-4 h-4 w-16 rounded-full" />}
         <Skeleton className="h-2.5 w-20 rounded-full" />
@@ -147,9 +164,10 @@ export function ComboDetailSkeleton() {
 
 /** Panel admin y app del mensajero: PageHeader más lista (cards en móvil,
  *  tabla en desktop) o ficha de detalle en dos columnas. */
-export function AdminPageSkeleton({ variant = "list" }: { variant?: "list" | "detail" }) {
+export function AdminPageSkeleton({ variant = "list" }: { variant?: "list" | "detail" | "dashboard" }) {
   return (
     <>
+      <LoadingStatus />
       <div className="flex items-start gap-3.5">
         <Skeleton className="h-11 w-11 flex-none rounded-field" />
         <div className="flex flex-1 flex-col gap-2 pt-1">
@@ -157,7 +175,36 @@ export function AdminPageSkeleton({ variant = "list" }: { variant?: "list" | "de
           <Skeleton className="h-3 w-64 max-w-full rounded-full" />
         </div>
       </div>
-      {variant === "list" ? (
+      {variant === "dashboard" ? (
+        <>
+          {[0, 1].map((group) => (
+            <div key={group}>
+              <Skeleton className="mb-3 h-2.5 w-20 rounded-full" />
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="flex min-h-[128px] flex-col justify-between rounded-card bg-canvas p-4 shadow-card">
+                    <Skeleton className="h-9 w-9 rounded-chip" />
+                    <div>
+                      <Skeleton className="h-6 w-24 rounded-full" />
+                      <Skeleton animationType="none" className="mt-3 h-3 w-28 rounded-full" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
+            <div className="rounded-card bg-canvas p-5 shadow-card">
+              <Skeleton className="h-4 w-40 rounded-full" />
+              <Skeleton className="mt-5 h-[180px] w-full rounded-field" />
+            </div>
+            <div className="rounded-card bg-canvas p-5 shadow-card">
+              <Skeleton className="h-4 w-32 rounded-full" />
+              <CardLinesSkeleton lines={5} />
+            </div>
+          </div>
+        </>
+      ) : variant === "list" ? (
         <>
           <div className="flex gap-2">
             <Skeleton className="h-10 w-20 rounded-full" />
@@ -177,7 +224,7 @@ export function AdminPageSkeleton({ variant = "list" }: { variant?: "list" | "de
             ))}
           </div>
           <div className="hidden overflow-hidden rounded-card bg-canvas shadow-card md:block">
-            <div className="flex gap-6 border-b border-line px-5 py-3.5">
+            <div className="flex gap-6 border-b border-line bg-cream-50 px-5 py-3.5">
               {Array.from({ length: 5 }).map((_, i) => (
                 <Skeleton key={i} className="h-3 w-20 rounded-full" />
               ))}
@@ -194,7 +241,7 @@ export function AdminPageSkeleton({ variant = "list" }: { variant?: "list" | "de
           </div>
         </>
       ) : (
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
           <div className="flex flex-col gap-4">
             <div className="rounded-card bg-canvas p-5 shadow-card">
               <Skeleton className="h-4 w-32 rounded-full" />

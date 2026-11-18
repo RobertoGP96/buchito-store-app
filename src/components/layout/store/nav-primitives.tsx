@@ -8,8 +8,12 @@ import { cn } from "@/lib/utils";
 export const NAV_CONTROL =
   "text-nav-muted transition-colors duration-150 hover:bg-nav-hover hover:text-nav-fg data-[pressed]:bg-nav-active data-[pressed]:text-nav-fg";
 
-/** Acción de icono del header: círculo de 36px que se tiñe al hover. */
-export const ICON_ACTION = cn("relative inline-flex h-9 w-9 items-center justify-center rounded-full", NAV_CONTROL);
+/** Acción de icono del header: círculo de 36px que se tiñe al hover. En táctil
+ *  `touch-target` amplía el área pulsable a 44px sin agrandar el círculo. */
+export const ICON_ACTION = cn(
+  "touch-target relative inline-flex h-9 w-9 items-center justify-center rounded-full",
+  NAV_CONTROL
+);
 
 /** El contador se ancla al icono, no al flujo: en píldora caramelo con un anillo
  *  del color de la barra se lee como marca sobre el icono y no desplaza la fila.
@@ -22,7 +26,7 @@ export function CountBadge({ count, className }: { count: number; className?: st
       key={count}
       aria-hidden
       className={cn(
-        "pop-in tabular absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-gold-500 px-1 text-[9.5px] leading-none font-bold text-navy-950 ring-2 ring-nav",
+        "pop-in tabular absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-caramelo-500 px-1 text-[9.5px] leading-none font-bold text-on-caramelo ring-2 ring-nav",
         className
       )}
     >

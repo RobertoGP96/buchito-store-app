@@ -17,6 +17,7 @@ import { DELIVERY_STATUS_META, DELIVERY_TRANSITION_LABELS, type DeliveryStatus }
 import { nextDeliveryStates, type DeliveryActor } from "../lib/state-machine";
 import type { DeliveryDetailData } from "../queries/delivery-queries";
 import { DeliveryProofDialog, type DeliveryProofResult } from "./delivery-proof-dialog";
+import { SectionCard, Timeline } from "@/components/section-card";
 
 interface DeliveryDetailProps {
   delivery: DeliveryDetailData;
@@ -25,25 +26,13 @@ interface DeliveryDetailProps {
 
 type Asking = "delivered" | "failed" | "proof" | null;
 
-function Section({ title, hint, children, className }: { title: string; hint?: React.ReactNode; children: React.ReactNode; className?: string }) {
-  return (
-    <section className={cn("rounded-card bg-canvas p-5 shadow-card", className)}>
-      <div className="flex items-center justify-between gap-3">
-        <p className="eyebrow">{title}</p>
-        {hint}
-      </div>
-      <div className="mt-3">{children}</div>
-    </section>
-  );
-}
-
 function PhoneLink({ phone }: { phone: string }) {
   return (
     <a
       href={`tel:${phone.replace(/\s+/g, "")}`}
-      className="inline-flex items-center gap-2 rounded-full bg-tint px-4 py-2 text-[14px] font-semibold text-navy-900 transition-colors duration-150 hover:bg-tint-strong"
+      className="inline-flex items-center gap-2 rounded-full bg-crema-100 px-4 py-2 type-body font-semibold text-espresso-900 transition-colors duration-150 hover:bg-crema-200"
     >
-      <Phone className="h-4 w-4" strokeWidth={2} />
+      <Phone className="h-4 w-4" strokeWidth={1.9} />
       <span className="tabular">{phone}</span>
     </a>
   );
@@ -135,16 +124,16 @@ export function DeliveryDetail({ delivery, isAssignedCourier }: DeliveryDetailPr
 
   return (
     <div className="flex flex-col gap-4">
-      <Section
+      <SectionCard
         title="Siguiente paso"
-        hint={delivery.attempts > 0 ? <span className="text-[12.5px] text-slate-400">{delivery.attempts} intento(s) fallido(s)</span> : undefined}
+        aside={delivery.attempts > 0 ? <span className="type-meta text-ink-subtle">{delivery.attempts} intento(s) fallido(s)</span> : undefined}
       >
         <div className="flex items-center gap-3">
           <StatusChip {...DELIVERY_STATUS_META[delivery.status]} size="md" />
-          <p className="text-[13.5px] leading-[1.55] text-slate-500">{STEP_HINT[delivery.status]}</p>
+          <p className="type-body leading-[1.55] text-ink-muted">{STEP_HINT[delivery.status]}</p>
         </div>
         {delivery.failedReason && delivery.status === "failed" && (
-          <p className="mt-3 rounded-field bg-danger-soft px-3 py-2 text-[12.5px] text-danger">{delivery.failedReason}</p>
+          <p className="mt-3 rounded-field bg-danger-soft px-3 py-2 type-meta text-danger">{delivery.failedReason}</p>
         )}
         {targets.length > 0 && (
           <div className="mt-4 grid gap-2 sm:grid-cols-2">
@@ -153,42 +142,41 @@ export function DeliveryDetail({ delivery, isAssignedCourier }: DeliveryDetailPr
                 key={to}
                 variant={to === "failed" ? "danger-soft" : "primary"}
                 size="lg"
-                className="rounded-full"
                 isPending={pending === to}
                 isDisabled={pending !== null}
                 onPress={() => press(to)}
               >
-                {to === "delivered" && <Camera className="h-4 w-4" strokeWidth={2} />}
+                {to === "delivered" && <Camera className="h-4 w-4" strokeWidth={1.9} />}
                 {DELIVERY_TRANSITION_LABELS[to]}
               </Button>
             ))}
           </div>
         )}
-      </Section>
+      </SectionCard>
 
-      <Section title="Destinatario">
-        <p className="text-[17px] font-semibold text-ink">{delivery.recipientName}</p>
+      <SectionCard title="Destinatario">
+        <p className="type-subheading font-semibold text-ink">{delivery.recipientName}</p>
         <div className="mt-2.5">
           <PhoneLink phone={delivery.recipientPhone} />
         </div>
         {(delivery.customerName !== delivery.recipientName || delivery.customerPhone !== delivery.recipientPhone) && (
-          <p className="mt-3 text-[12.5px] text-slate-500">
+          <p className="mt-3 type-meta text-ink-muted">
             Pedido de {delivery.customerName} · <span className="tabular">{delivery.customerPhone}</span>
           </p>
         )}
-      </Section>
+      </SectionCard>
 
-      <Section
+      <SectionCard
         title="Dirección"
-        hint={
+        aside={
           mapsQuery ? (
             <a
               href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapsQuery)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-navy-700 hover:underline"
+              className="inline-flex items-center gap-1.5 type-meta font-semibold text-tostado-700 hover:underline"
             >
-              <Navigation className="h-3.5 w-3.5" strokeWidth={2} />
+              <Navigation className="h-3.5 w-3.5" strokeWidth={1.9} />
               Cómo llegar
             </a>
           ) : undefined
@@ -196,47 +184,47 @@ export function DeliveryDetail({ delivery, isAssignedCourier }: DeliveryDetailPr
       >
         {delivery.address ? (
           <address className="flex items-start gap-2 text-[15px] not-italic leading-[1.6] text-ink">
-            <MapPin className="mt-1 h-4 w-4 flex-none text-navy-700" strokeWidth={2} />
+            <MapPin className="mt-1 h-4 w-4 flex-none text-tostado-700" strokeWidth={1.9} />
             <span>
               {delivery.address.line1}
               {delivery.address.line2 && <>, {delivery.address.line2}</>}
               {delivery.address.neighborhood && <>, {delivery.address.neighborhood}</>}
-              {delivery.zoneName && <span className="block text-[13.5px] text-slate-500">Zona: {delivery.zoneName}</span>}
+              {delivery.zoneName && <span className="block type-body text-ink-muted">Zona: {delivery.zoneName}</span>}
               {delivery.address.reference && (
-                <span className="block text-[13.5px] text-slate-500">Ref.: {delivery.address.reference}</span>
+                <span className="block type-body text-ink-muted">Ref.: {delivery.address.reference}</span>
               )}
             </span>
           </address>
         ) : (
-          <p className="text-[13.5px] text-slate-500">Sin dirección registrada.</p>
+          <p className="type-body text-ink-muted">Sin dirección registrada.</p>
         )}
         {delivery.orderNotes && (
-          <p className="mt-3 rounded-field bg-page px-3 py-2 text-[12.5px] leading-[1.55] text-slate-500">
+          <p className="mt-3 rounded-field bg-cream-50 px-3 py-2 type-meta leading-[1.55] text-ink-muted">
             <span className="font-semibold text-ink">Nota del cliente: </span>
             {delivery.orderNotes}
           </p>
         )}
-      </Section>
+      </SectionCard>
 
-      <Section title="Artículos" hint={<span className="tabular text-[12.5px] text-slate-400">{delivery.lines.length}</span>}>
+      <SectionCard title="Artículos" aside={<span className="tabular type-meta text-ink-subtle">{delivery.lines.length}</span>}>
         <ul className="divide-y divide-line-soft">
           {delivery.lines.map((line, i) => (
-            <li key={i} className="flex items-center justify-between gap-3 py-2 text-[14px]">
+            <li key={i} className="flex items-center justify-between gap-3 py-2 type-body">
               <span className="text-ink">
                 {line.productName}
-                {line.variantName && <span className="text-slate-400"> · {line.variantName}</span>}
+                {line.variantName && <span className="text-ink-subtle"> · {line.variantName}</span>}
               </span>
-              <span className="tabular font-semibold text-navy-900">× {fmtQty(line.qty, line.unit)}</span>
+              <span className="tabular font-semibold text-espresso-900">× {fmtQty(line.qty, line.unit)}</span>
             </li>
           ))}
         </ul>
-      </Section>
+      </SectionCard>
 
-      <Section title="Cobro">
+      <SectionCard title="Cobro">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-[13px] text-slate-500">{delivery.paymentMethodName}</p>
-            <p className="font-display mt-1 text-[24px] leading-none text-navy-900">
+            <p className="type-meta text-ink-muted">{delivery.paymentMethodName}</p>
+            <p className="num-display mt-1 text-[24px] leading-none text-espresso-900">
               {mustCollect ? (
                 <Money value={delivery.amountToCollect} currency={delivery.paymentCurrency} />
               ) : (
@@ -247,21 +235,20 @@ export function DeliveryDetail({ delivery, isAssignedCourier }: DeliveryDetailPr
           <StatusChip {...PAYMENT_STATUS_META[delivery.paymentStatus as PaymentStatus]} />
         </div>
         {mustCollect && delivery.status !== "delivered" && (
-          <p className="mt-3 text-[12.5px] leading-[1.55] text-slate-500">
+          <p className="mt-3 type-meta leading-[1.55] text-ink-muted">
             Cobra este monto al entregar y regístralo al marcar la entrega como entregada.
           </p>
         )}
-      </Section>
+      </SectionCard>
 
       {(delivery.status === "delivered" || proofSrc) && (
-        <Section
+        <SectionCard
           title="Prueba de entrega"
-          hint={
+          aside={
             canEditProof ? (
               <Button
                 variant="outline"
                 size="sm"
-                className="rounded-full"
                 isDisabled={pending !== null}
                 onPress={() => setAsking("proof")}
               >
@@ -275,39 +262,37 @@ export function DeliveryDetail({ delivery, isAssignedCourier }: DeliveryDetailPr
             <button
               type="button"
               onClick={() => setViewingProof(true)}
-              className="block w-full overflow-hidden rounded-field bg-page"
+              className="block w-full overflow-hidden rounded-field bg-cream"
               aria-label="Ver la foto de prueba en grande"
             >
               {/* eslint-disable-next-line @next/next/no-img-element -- foto del bucket servida por /media, sin optimizar */}
-              <img src={proofSrc} alt={`Prueba de entrega de ${delivery.orderNo}`} className="max-h-[360px] w-full object-cover" loading="lazy" />
+              <img src={proofSrc} alt={`Prueba de entrega de ${delivery.orderNo}`} className="aspect-[4/3] max-h-[360px] w-full object-cover" loading="lazy" />
             </button>
           ) : (
-            <p className="flex items-center gap-2 text-[13.5px] text-slate-500">
-              <ImageOff className="h-4 w-4 text-slate-400" strokeWidth={1.9} />
+            <p className="flex items-center gap-2 type-body text-ink-muted">
+              <ImageOff className="h-4 w-4 text-ink-subtle" strokeWidth={1.9} />
               Esta entrega se cerró sin foto de prueba.
             </p>
           )}
           {delivery.deliveredAt && (
-            <p className="tabular mt-3 text-[12.5px] text-slate-500">Entregada {fmtDateTime(delivery.deliveredAt)}</p>
+            <p className="tabular mt-3 type-meta text-ink-muted">Entregada {fmtDateTime(delivery.deliveredAt)}</p>
           )}
-        </Section>
+        </SectionCard>
       )}
 
       {delivery.events.length > 0 && (
-        <Section title="Historial">
-          <ol className="flex flex-col gap-2 text-[12.5px]">
-            {delivery.events.map((e) => (
-              <li key={e.eventId} className="flex items-start justify-between gap-3">
-                <span className="text-slate-500">
-                  <span className="font-semibold text-ink">{DELIVERY_STATUS_META[e.toStatus].label}</span>
-                  {e.actor ? ` · ${e.actor}` : ""}
-                  {e.note ? ` · ${e.note}` : ""}
-                </span>
-                <span className="tabular flex-none text-slate-500">{fmtDateTime(e.createdAt)}</span>
-              </li>
-            ))}
-          </ol>
-        </Section>
+        <SectionCard title="Historial">
+          <Timeline
+            // Llegan del más reciente al más antiguo; la línea se lee hacia abajo.
+            steps={[...delivery.events].reverse().map((e) => ({
+              id: e.eventId,
+              label: DELIVERY_STATUS_META[e.toStatus].label,
+              note: [e.actor, e.note].filter(Boolean).join(" · ") || undefined,
+              at: fmtDateTime(e.createdAt),
+              tone: e.toStatus === "failed" || e.toStatus === "cancelled" ? "danger" : "default",
+            }))}
+          />
+        </SectionCard>
       )}
 
       <DeliveryProofDialog

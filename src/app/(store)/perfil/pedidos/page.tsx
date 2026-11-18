@@ -36,21 +36,21 @@ export default async function MyOrdersPage() {
               <li key={order.orderId}>
                 <Link
                   href={`/pedido-confirmado/${encodeURIComponent(order.orderNo)}`}
-                  className="flex items-center gap-4 rounded-card bg-canvas p-4 shadow-card transition-shadow duration-200 hover:shadow-float"
+                  className="flex items-center gap-4 rounded-card bg-canvas p-4 shadow-card transition-[box-shadow,transform] duration-200 hover:shadow-float motion-safe:hover:-translate-y-0.5 motion-safe:active:scale-[.995]"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-semibold text-ink">{order.orderNo}</p>
+                      <p className="tabular type-subheading font-bold text-espresso-900">{order.orderNo}</p>
                       <StatusChip {...ORDER_STATUS_META[order.status]} />
                       <StatusChip {...PAYMENT_STATUS_META[order.paymentStatus]} />
                     </div>
-                    <p className="tabular mt-1 text-[12.5px] text-slate-400">
+                    <p className="tabular mt-1 type-meta text-ink-subtle">
                       {fmtDateTime(order.createdAt)} · {FULFILLMENT_LABELS[order.fulfillment]} · {order.lineCount}{" "}
                       {order.lineCount === 1 ? "artículo" : "artículos"}
                     </p>
                   </div>
-                  <Money value={order.total} className="font-semibold text-navy-900" />
-                  <ChevronRight className="h-4 w-4 flex-none text-slate-300" strokeWidth={2} />
+                  <Money value={order.total} className="num-display text-[16px] text-espresso-900" />
+                  <ChevronRight className="h-4 w-4 flex-none text-ink-faint" strokeWidth={1.9} />
                 </Link>
               </li>
             ))}

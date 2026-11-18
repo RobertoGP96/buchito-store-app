@@ -6,6 +6,7 @@ import { KpiTiles } from "@/modules/dashboard/components/kpi-tiles";
 import { LowStock } from "@/modules/dashboard/components/low-stock";
 import { OrdersByStatus } from "@/modules/dashboard/components/orders-by-status";
 import { RecentOrders } from "@/modules/dashboard/components/recent-orders";
+import { SalesChart } from "@/modules/dashboard/components/sales-chart";
 import { getDashboardData } from "@/modules/dashboard/queries/dashboard-queries";
 
 export const metadata: Metadata = { title: "Panel" };
@@ -20,8 +21,9 @@ export default async function AdminHomePage() {
 
       <KpiTiles kpis={data.kpis} />
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
         <div className="flex flex-col gap-4">
+          <SalesChart series={data.salesSeries} />
           <RecentOrders rows={data.recentOrders} />
           <ActiveDeliveries
             rows={data.activeDeliveries}

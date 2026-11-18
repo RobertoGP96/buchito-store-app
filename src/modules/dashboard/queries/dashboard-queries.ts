@@ -6,14 +6,19 @@ import { ORDER_STATUSES, type OrderStatus } from "@/modules/orders/lib/labels";
 import type { PaymentStatus } from "@/modules/payments/lib/labels";
 import type { SaleUnit } from "@/modules/products/lib/units";
 import { getStoreSettings } from "@/modules/settings/queries/settings-queries";
+import { buildDailySeries, pctChange, type SalesDay } from "../lib/sales-series";
 
 export interface DashboardKpis {
   /** Σ total (base) de pedidos creados hoy con status ≠ cancelled. */
   salesToday: number;
   ordersToday: number;
+  /** Variación (%) frente a ayer; `null` si ayer no hubo ventas. */
+  salesTodayDelta: number | null;
   /** Σ total (base) de los últimos 7 días (hoy incluido), status ≠ cancelled. */
   salesLast7Days: number;
   ordersLast7Days: number;
+  /** Variación (%) frente a los 7 días anteriores. */
+  salesLast7DaysDelta: number | null;
   /** Σ (total − paidBase) de pedidos no cancelados y no pagados. */
   receivable: number;
   receivableOrders: number;
@@ -64,6 +69,9 @@ export interface LowStockVariantRow {
 
 export interface DashboardData {
   kpis: DashboardKpis;
+  /** Ventas por día (base), el más antiguo primero. Trae el doble del rango
+   *  mayor de la gráfica para poder comparar con el periodo anterior. */
+  salesSeries: SalesDay[];
   ordersByStatus: OrderStatusCount[];
   totalOrders: number;
   recentOrders: RecentOrderRow[];
@@ -72,6 +80,8 @@ export interface DashboardData {
 }
 
 const RECENT_LIMIT = 8;
+/** Rango mayor de la gráfica de ventas, en días. */
+export const SALES_CHART_MAX_DAYS = 30;
 const ACTIVE_DELIVERY_STATUSES: DeliveryStatus[] = ["pending", "assigned", "in_transit"];
 
 /** Medianoche local del proceso: el "día" del panel es el del servidor. */
@@ -84,10 +94,13 @@ export async function getDashboardData(): Promise<DashboardData> {
   const todayStart = startOfLocalDay(now);
   const weekStart = new Date(todayStart);
   weekStart.setDate(weekStart.getDate() - 6);
+  const seriesDays = SALES_CHART_MAX_DAYS * 2;
+  const seriesStart = new Date(todayStart);
+  seriesStart.setDate(seriesStart.getDate() - (seriesDays - 1));
 
   const notCancelled = { status: { not: "cancelled" as const } };
 
-  const [settings, today, week, receivable, orderGroups, deliveryGroups, recentOrders, activeDeliveries] =
+  const [settings, today, week, receivable, orderGroups, deliveryGroups, recentOrders, activeDeliveries, seriesOrders] =
     await Promise.all([
       getStoreSettings(),
       db.order.aggregate({
@@ -137,7 +150,20 @@ export async function getDashboardData(): Promise<DashboardData> {
           courier: { select: { user: { select: { fullName: true } } } },
         },
       }),
+      // Los días se agrupan en la app y no con `date_trunc`: el día del panel
+      // es el local del servidor, no el UTC de la base.
+      db.order.findMany({
+        where: { ...notCancelled, createdAt: { gte: seriesStart } },
+        select: { createdAt: true, total: true },
+      }),
     ]);
+
+  const salesSeries = buildDailySeries(
+    seriesOrders.map((o) => ({ createdAt: o.createdAt, total: decimalToNumber(o.total) })),
+    seriesDays,
+    now
+  );
+  const sumDays = (from: number, to?: number) => salesSeries.slice(from, to).reduce((acc, day) => acc + day.total, 0);
 
   // El umbral viene de la configuración, por eso va en una segunda tanda.
   const lowStockWhere = {
@@ -181,8 +207,10 @@ export async function getDashboardData(): Promise<DashboardData> {
     kpis: {
       salesToday: decimalToNumber(today._sum.total),
       ordersToday: today._count._all,
+      salesTodayDelta: pctChange(sumDays(-1), sumDays(-2, -1)),
       salesLast7Days: decimalToNumber(week._sum.total),
       ordersLast7Days: week._count._all,
+      salesLast7DaysDelta: pctChange(sumDays(-7), sumDays(-14, -7)),
       receivable: Math.max(0, receivableTotal),
       receivableOrders: receivable._count._all,
       pendingOrders: byStatus.pending,
@@ -192,6 +220,7 @@ export async function getDashboardData(): Promise<DashboardData> {
       lowStockVariants: lowStockCount,
       lowStockThreshold: settings.lowStockThreshold,
     },
+    salesSeries,
     ordersByStatus: ORDER_STATUSES.map((status) => ({ status, count: byStatus[status] })),
     totalOrders: ORDER_STATUSES.reduce((sum, status) => sum + byStatus[status], 0),
     recentOrders: recentOrders.map((o) => ({

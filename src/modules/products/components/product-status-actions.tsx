@@ -68,7 +68,6 @@ export function ProductStatusActions({ productId, status, hasActiveVariants }: P
           key={transition.to}
           variant={transition.variant}
           size="sm"
-          className="rounded-full"
           isPending={pending === transition.to}
           isDisabled={pending !== null}
           onPress={() => void run(transition)}

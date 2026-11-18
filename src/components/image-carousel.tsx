@@ -1,6 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useRef, type KeyboardEvent, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type ReactNode,
+} from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ProductImage } from "@/components/product-image";
 import { cn } from "@/lib/utils";
@@ -32,7 +40,7 @@ interface ImageCarouselProps {
 }
 
 const ARROW =
-  "absolute top-1/2 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-canvas/90 text-navy-900 shadow-card transition-[opacity,background-color] duration-150 hover:bg-canvas disabled:pointer-events-none disabled:opacity-0 pointer-fine:flex";
+  "absolute top-1/2 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-canvas/90 text-espresso-900 shadow-card transition-[opacity,background-color] duration-150 hover:bg-canvas disabled:pointer-events-none disabled:opacity-0 pointer-fine:flex";
 
 function reducedMotion(): ScrollBehavior {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
@@ -66,6 +74,14 @@ export function ImageCarousel({
   // un scrollTo pelearía con el dedo que sigue arrastrando).
   const reportedRef = useRef<number | null>(null);
   const firstSync = useRef(true);
+  // El salto inicial a la foto controlada no es un cambio que anunciar.
+  const silentSettle = useRef(false);
+  const prevRef = useRef<HTMLButtonElement>(null);
+  const nextRef = useRef<HTMLButtonElement>(null);
+  // Foto que se anuncia al lector de pantalla: solo cuando el scroll se ha
+  // detenido (a mitad de un gesto leería cada foto por la que pasa) y vacío
+  // hasta el primer cambio, para no interrumpir la carga de la página.
+  const [announced, setAnnounced] = useState<number | null>(null);
   const onIndexChangeRef = useRef(onIndexChange);
   const count = images.length;
   const clamp = useCallback((i: number) => Math.min(Math.max(i, 0), Math.max(count - 1, 0)), [count]);
@@ -103,9 +119,45 @@ export function ImageCarousel({
     firstSync.current = false;
     if (Math.abs(el.scrollLeft - target) < 2) return;
     pendingRef.current = clamp(index);
+    silentSettle.current = instant;
     window.clearTimeout(settleTimer.current);
     el.scrollTo({ left: target, behavior: instant ? "auto" : reducedMotion() });
   }, [index, count, clamp]);
+
+  // Un único punto donde el scroll «se asienta»: resuelve el desplazamiento
+  // programado y anuncia la foto. Lo dispara `scrollend`; donde no existe,
+  // el cese de eventos de scroll.
+  const settle = useCallback(() => {
+    const node = scrollerRef.current;
+    if (!node || node.clientWidth === 0) return;
+    const landed = Math.round(node.scrollLeft / node.clientWidth);
+    const pending = pendingRef.current;
+    pendingRef.current = null;
+    // Si no paró en la foto pedida (alguien lo interrumpió), se avisa al padre.
+    if (pending !== null && landed !== pending) report(landed);
+    if (silentSettle.current) {
+      silentSettle.current = false;
+      return;
+    }
+    setAnnounced(landed);
+  }, [report]);
+
+  const hasPhotos = count > 0;
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    // `null` donde existe el evento, `undefined` donde no.
+    if (window.onscrollend !== undefined) {
+      el.addEventListener("scrollend", settle);
+      return () => el.removeEventListener("scrollend", settle);
+    }
+    const onScroll = () => {
+      window.clearTimeout(settleTimer.current);
+      settleTimer.current = window.setTimeout(settle, 150);
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, [settle, hasPhotos]);
 
   // La miniatura activa se centra en su tira.
   useEffect(() => {
@@ -119,26 +171,23 @@ export function ImageCarousel({
   const handleScroll = () => {
     const el = scrollerRef.current;
     if (!el || el.clientWidth === 0) return;
-    if (pendingRef.current !== null) {
-      // Mientras dura el desplazamiento programado solo importa dónde para:
-      // cuando cesan los eventos de scroll se mira la foto alcanzada y, si no
-      // es la pedida (alguien lo interrumpió), se avisa al padre.
-      window.clearTimeout(settleTimer.current);
-      settleTimer.current = window.setTimeout(() => {
-        const pending = pendingRef.current;
-        pendingRef.current = null;
-        const node = scrollerRef.current;
-        if (pending === null || !node || node.clientWidth === 0) return;
-        const landed = Math.round(node.scrollLeft / node.clientWidth);
-        if (landed !== pending) report(landed);
-      }, 150);
-      return;
-    }
+    // Mientras dura el desplazamiento programado solo importa dónde para: lo
+    // resuelve `settle` cuando el scroll se detiene.
+    if (pendingRef.current !== null) return;
     const current = Math.round(el.scrollLeft / el.clientWidth);
     if (current !== index) report(current);
   };
 
   const go = (delta: number) => onIndexChange(clamp(index + delta));
+
+  // Al llegar a un extremo (con la flecha, un punto o deslizando) la flecha de
+  // ese lado se deshabilita; si tenía el foco, caería en <body>. Se pasa a la
+  // contraria en el mismo commit, antes de que el navegador lo retire.
+  useLayoutEffect(() => {
+    const active = document.activeElement;
+    if (active === prevRef.current && index <= 0) nextRef.current?.focus();
+    else if (active === nextRef.current && index >= count - 1) prevRef.current?.focus();
+  }, [index, count]);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (count < 2) return;
@@ -195,7 +244,7 @@ export function ImageCarousel({
                 <ProductImage src={image.url} alt={image.alt} sizes={sizes} priority={priority && i === 0} />
               </span>
               {image.caption && (
-                <span className="pointer-events-none absolute bottom-3 left-3 max-w-[55%] truncate rounded-full bg-canvas/90 px-2.5 py-1.5 text-[11px] leading-none font-semibold text-ink shadow-card">
+                <span className="pointer-events-none absolute bottom-3 left-3 max-w-[55%] truncate rounded-full bg-canvas/90 px-2.5 py-1.5 type-micro leading-none font-semibold text-ink shadow-card">
                   {image.caption}
                 </span>
               )}
@@ -208,6 +257,7 @@ export function ImageCarousel({
         {count > 1 && (
           <>
             <button
+              ref={prevRef}
               type="button"
               onClick={() => go(-1)}
               disabled={index <= 0}
@@ -217,6 +267,7 @@ export function ImageCarousel({
               <ChevronLeft className="h-[18px] w-[18px]" strokeWidth={2.2} aria-hidden />
             </button>
             <button
+              ref={nextRef}
               type="button"
               onClick={() => go(1)}
               disabled={index >= count - 1}
@@ -234,11 +285,11 @@ export function ImageCarousel({
                     onClick={() => onIndexChange(i)}
                     aria-label={`Ir a la foto ${i + 1}`}
                     aria-current={i === index ? "true" : undefined}
-                    className="flex h-5 min-w-4 items-center justify-center px-0.5"
+                    className="flex h-6 min-w-6 items-center justify-center"
                   >
                     <span
                       className={cn(
-                        "block h-1.5 rounded-full bg-on-brand transition-[width,opacity] duration-200",
+                        "block h-1.5 rounded-full bg-on-media transition-[width,opacity] duration-200",
                         i === index ? "w-4" : "w-1.5 opacity-50"
                       )}
                     />
@@ -248,8 +299,8 @@ export function ImageCarousel({
             )}
           </>
         )}
-        <span className="sr-only" aria-live="polite">
-          Foto {index + 1} de {count}
+        <span className="sr-only" role="status" aria-live="polite">
+          {announced !== null ? `Foto ${announced + 1} de ${count}` : ""}
         </span>
       </div>
 
@@ -264,7 +315,7 @@ export function ImageCarousel({
               aria-current={i === index ? "true" : undefined}
               className={cn(
                 "relative h-16 w-16 flex-none overflow-hidden rounded-field border-2 bg-cream transition-colors duration-150",
-                i === index ? "border-navy-700" : "border-transparent hover:border-rule"
+                i === index ? "border-tostado-700" : "border-transparent hover:border-rule"
               )}
             >
               <span className="absolute inset-0 flex items-center justify-center">

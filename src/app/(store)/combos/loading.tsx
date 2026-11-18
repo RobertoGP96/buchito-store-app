@@ -3,7 +3,7 @@ import { CatalogResultsSkeleton, StoreScreenSkeleton } from "@/components/skelet
 export default function Loading() {
   return (
     <StoreScreenSkeleton>
-      <CatalogResultsSkeleton />
+      <CatalogResultsSkeleton announce={false} />
     </StoreScreenSkeleton>
   );
 }

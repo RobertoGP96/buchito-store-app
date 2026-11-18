@@ -40,18 +40,18 @@ export function VariantPriceCell({ variant }: { variant: AdminVariantSummary }) 
         <Money value={variant.price} currency={variant.priceCurrency} />
       </span>
       {variant.compareAtPrice != null && variant.compareAtPrice > variant.price && (
-        <span className="text-[11.5px] text-slate-400 line-through">
+        <span className="type-caption text-ink-subtle line-through">
           <Money value={variant.compareAtPrice} currency={variant.priceCurrency} />
         </span>
       )}
       {foreign &&
         (variant.priceBase != null ? (
-          <span className="text-[11.5px] text-slate-400">
+          <span className="type-caption text-ink-subtle">
             ≈ <Money value={variant.priceBase} />
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1 text-[11.5px] font-medium text-warn">
-            <AlertTriangle className="h-3 w-3" strokeWidth={2} />
+          <span className="inline-flex items-center gap-1 type-caption font-medium text-warn">
+            <AlertTriangle className="h-3 w-3" strokeWidth={1.9} />
             Sin tasa
           </span>
         ))}
@@ -63,10 +63,10 @@ export function VariantPriceCell({ variant }: { variant: AdminVariantSummary }) 
 /** Costo de compra y margen bajo el precio; "Sin costo" invita a registrarlo. */
 export function VariantCostLine({ variant }: { variant: AdminVariantSummary }) {
   if (variant.cost == null || !variant.costCurrency) {
-    return <span className="text-[11px] text-slate-400">Sin costo</span>;
+    return <span className="type-micro text-ink-subtle">Sin costo</span>;
   }
   return (
-    <span className="text-[11px] text-slate-400">
+    <span className="type-micro text-ink-subtle">
       Costo <Money value={variant.cost} currency={variant.costCurrency} />
       {variant.marginPct != null && (
         <span className={cn("ml-1 font-semibold", variant.marginPct < 0 ? "text-danger" : "text-ok")}>
@@ -83,8 +83,8 @@ export function VariantStockCell({ variant, threshold }: { variant: AdminVariant
   return (
     <span className={cn("tabular font-semibold", out ? "text-danger" : low ? "text-warn" : "text-ink")}>
       {fmtQty(variant.stock, variant.unit)}
-      {out && <span className="ml-1.5 text-[11px] font-medium">Agotado</span>}
-      {low && <span className="ml-1.5 text-[11px] font-medium">Bajo</span>}
+      {out && <span className="ml-1.5 type-micro font-medium">Agotado</span>}
+      {low && <span className="ml-1.5 type-micro font-medium">Bajo</span>}
     </span>
   );
 }
@@ -170,7 +170,7 @@ export function VariantList({ productId, productStatus, variants, attributeSchem
       cell: (v) => (
         <div className="min-w-0">
           <p className="font-semibold text-ink">{variantDisplayName(v, attributeSchema)}</p>
-          <p className="tabular text-[12px] text-slate-400">{v.sku}</p>
+          <p className="tabular type-caption text-ink-subtle">{v.sku}</p>
         </div>
       ),
     },
@@ -183,7 +183,7 @@ export function VariantList({ productId, productStatus, variants, attributeSchem
       align: "right",
       cell: (v) => (
         <div className="flex justify-end gap-1">
-          <Button variant="ghost" size="sm" className="rounded-full" onPress={() => openStock(v)}>
+          <Button variant="ghost" size="sm" onPress={() => openStock(v)}>
             <Boxes className="h-4 w-4" strokeWidth={1.9} />
             Stock
           </Button>
@@ -197,7 +197,7 @@ export function VariantList({ productId, productStatus, variants, attributeSchem
   ];
 
   const newButton = (
-    <Button variant="primary" size="sm" className="rounded-full" onPress={openNew}>
+    <Button variant="primary" size="sm" onPress={openNew}>
       <Plus className="h-4 w-4" strokeWidth={2.2} />
       Nueva variante
     </Button>
@@ -237,11 +237,11 @@ export function VariantList({ productId, productStatus, variants, attributeSchem
             ]}
             actions={
               <>
-                <Button variant="outline" size="sm" className="rounded-full" onPress={() => openStock(v)}>
+                <Button variant="outline" size="sm" onPress={() => openStock(v)}>
                   <Boxes className="h-3.5 w-3.5" strokeWidth={1.9} />
                   Stock
                 </Button>
-                <Button variant="outline" size="sm" className="rounded-full" onPress={() => openEdit(v)}>
+                <Button variant="outline" size="sm" onPress={() => openEdit(v)}>
                   <Pencil className="h-3.5 w-3.5" strokeWidth={1.9} />
                   Editar
                 </Button>

@@ -9,6 +9,8 @@ interface DashboardCardProps {
   description?: string;
   /** Contador o chip junto al título (`DashboardCount`). */
   badge?: React.ReactNode;
+  /** Control propio en la cabecera (p. ej. selector de rango), en vez del enlace. */
+  aside?: React.ReactNode;
   /** Enlace a la pantalla completa del módulo. */
   href?: string;
   hrefLabel?: string;
@@ -25,6 +27,7 @@ export function DashboardCard({
   title,
   description,
   badge,
+  aside,
   href,
   hrefLabel = "Ver todo",
   footer,
@@ -34,25 +37,26 @@ export function DashboardCard({
   return (
     <section className={cn("flex flex-col rounded-card bg-canvas shadow-card", className)}>
       <header className="flex items-center gap-3 px-5 pt-5 pb-3">
-        <span className="flex h-9 w-9 flex-none items-center justify-center rounded-chip bg-tint text-navy-700">
-          <Icon className="h-4 w-4" strokeWidth={1.9} />
+        <span className="flex h-9 w-9 flex-none items-center justify-center rounded-chip bg-crema-100 text-tostado-700">
+          <Icon className="h-[18px] w-[18px]" strokeWidth={1.9} />
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-[14.5px] leading-tight font-semibold text-navy-900">{title}</h2>
+            <h2 className="font-display type-subheading leading-tight text-espresso-900">{title}</h2>
             {badge}
           </div>
-          {description && <p className="mt-0.5 hidden truncate text-[12px] text-slate-400 sm:block">{description}</p>}
+          {description && <p className="type-caption mt-0.5 hidden truncate text-ink-subtle sm:block">{description}</p>}
         </div>
+        {aside}
         {href && (
           <Link
             href={href}
-            className="group inline-flex flex-none items-center gap-1 rounded-full bg-tint px-3 py-1.5 text-[12.5px] font-semibold text-navy-700 transition-colors hover:bg-tint-strong"
+            className="group inline-flex flex-none items-center gap-1 type-meta rounded-full px-2.5 py-1.5 font-semibold text-tostado-700 transition-colors hover:bg-crema-100"
           >
             {hrefLabel}
             <ArrowRight
               className="h-3.5 w-3.5 transition-transform motion-safe:group-hover:translate-x-0.5"
-              strokeWidth={2}
+              strokeWidth={1.9}
             />
           </Link>
         )}
@@ -72,12 +76,12 @@ export function DashboardCount({ value, tone }: { value: number; tone?: "warn" |
   return (
     <span
       className={cn(
-        "tabular inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[11.5px] font-semibold",
+        "tabular inline-flex h-5 min-w-5 items-center justify-center type-caption rounded-full px-1.5 font-semibold",
         tone === "danger"
           ? "bg-danger-soft text-danger"
           : tone === "warn"
-            ? "bg-gold-100 text-gold-600"
-            : "bg-tint text-navy-700"
+            ? "bg-warn-soft text-warn"
+            : "bg-crema-100 text-tostado-700"
       )}
     >
       {value}

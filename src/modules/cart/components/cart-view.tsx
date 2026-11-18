@@ -13,6 +13,7 @@ import { maxSellable, perUnitSuffix, roundQty } from "@/modules/products/lib/uni
 import { computeCartTotals } from "../cart-totals";
 import { cartIsEmpty, cartPriceLines, useCart, useCartActions, type CartCombo, type CartLine } from "../store";
 import { CartSummary } from "./cart-summary";
+import { Badge } from "@/components/badge";
 
 interface CartViewProps {
   defaultShippingFee: number;
@@ -25,13 +26,13 @@ interface CartViewProps {
 const CHECKOUT_LOGIN_HREF = "/login?callbackUrl=%2Fcheckout";
 
 const REMOVE_BUTTON =
-  "-mt-1 -mr-1 flex h-8 w-8 flex-none items-center justify-center rounded-full text-slate-400 transition-colors duration-150 hover:bg-danger-soft hover:text-danger";
+  "-mt-1 -mr-1 flex h-8 w-8 flex-none items-center justify-center rounded-full text-ink-subtle transition-colors duration-150 hover:bg-danger-soft hover:text-danger";
 
 function LineItem({ line }: { line: CartLine }) {
   const { setQty, removeLine } = useCartActions();
   const href = `/producto/${encodeURIComponent(line.slug)}`;
   return (
-    <li className="flex gap-4 rounded-card bg-canvas p-3.5 shadow-card sm:p-4">
+    <li className="flex gap-4 p-3.5 sm:p-4">
       <Link href={href} className="relative h-[84px] w-[84px] flex-none overflow-hidden rounded-field bg-cream">
         <span className="absolute inset-0 flex items-center justify-center">
           <ProductImage src={line.imageUrl} alt="" sizes="84px" />
@@ -40,10 +41,10 @@ function LineItem({ line }: { line: CartLine }) {
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <Link href={href} className="line-clamp-2 text-[14px] font-semibold text-ink hover:text-navy-700">
+            <Link href={href} className="type-body line-clamp-2 leading-snug font-semibold text-ink hover:text-tostado-700">
               {line.name}
             </Link>
-            {line.variantName && <p className="mt-0.5 text-[12.5px] text-slate-400">{line.variantName}</p>}
+            {line.variantName && <p className="mt-0.5 type-meta text-ink-subtle">{line.variantName}</p>}
           </div>
           <button type="button" onClick={() => removeLine(line.variantId)} aria-label={`Quitar ${line.name}`} className={REMOVE_BUTTON}>
             <Trash2 className="h-4 w-4" strokeWidth={1.9} />
@@ -59,11 +60,11 @@ function LineItem({ line }: { line: CartLine }) {
             unit={line.unit}
           />
           <div className="text-right">
-            <p className="text-[14.5px] font-bold text-navy-900">
+            <p className="num-display text-[15px] text-espresso-900">
               <Money value={line.unitPrice * line.qty} />
             </p>
             {(line.qty !== 1 || line.unit !== "unit") && (
-              <p className="text-[11.5px] text-slate-400">
+              <p className="type-caption mt-1 text-ink-subtle">
                 <Money value={line.unitPrice} /> {perUnitSuffix(line.unit) ?? "c/u"}
               </p>
             )}
@@ -79,7 +80,7 @@ function ComboItem({ combo }: { combo: CartCombo }) {
   const href = `/combos/${encodeURIComponent(combo.slug)}`;
   const savings = combo.regularPrice - combo.unitPrice;
   return (
-    <li className="flex gap-4 rounded-card bg-canvas p-3.5 shadow-card sm:p-4">
+    <li className="flex gap-4 p-3.5 sm:p-4">
       <Link href={href} className="relative h-[84px] w-[84px] flex-none overflow-hidden rounded-field bg-cream">
         <span className="absolute inset-0 flex items-center justify-center">
           <ProductImage src={combo.imageUrl} alt="" sizes="84px" />
@@ -88,13 +89,13 @@ function ComboItem({ combo }: { combo: CartCombo }) {
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <Link href={href} className="line-clamp-2 text-[14px] font-semibold text-ink hover:text-navy-700">
-              <span className="mr-1.5 rounded-full bg-tint px-2 py-0.5 text-[10.5px] font-semibold tracking-[.02em] text-navy-700 uppercase">
+            <Link href={href} className="type-body line-clamp-2 leading-snug font-semibold text-ink hover:text-tostado-700">
+              <Badge variant="combo" className="mr-1.5 align-middle">
                 Combo
-              </span>
+              </Badge>
               {combo.name}
             </Link>
-            <p className="mt-0.5 line-clamp-2 text-[12.5px] text-slate-400">
+            <p className="mt-0.5 line-clamp-2 type-meta text-ink-subtle">
               {comboItemsSummary(combo.items)}
             </p>
           </div>
@@ -110,10 +111,10 @@ function ComboItem({ combo }: { combo: CartCombo }) {
             max={combo.available}
           />
           <div className="text-right">
-            <p className="text-[14.5px] font-bold text-navy-900">
+            <p className="num-display text-[15px] text-espresso-900">
               <Money value={combo.unitPrice * combo.qty} />
             </p>
-            <p className="text-[11.5px] text-slate-400">
+            <p className="type-caption mt-1 text-ink-subtle">
               {combo.qty > 1 && (
                 <>
                   <Money value={combo.unitPrice} /> c/u
@@ -161,7 +162,7 @@ export function CartView({ defaultShippingFee, freeShippingThreshold, isLoggedIn
 
   return (
     <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_340px] md:items-start">
-      <ul className="flex flex-col gap-3">
+      <ul className="divide-y divide-line-soft rounded-card bg-canvas shadow-card">
         {state.combos.map((combo) => (
           <ComboItem key={`c-${combo.comboId}`} combo={combo} />
         ))}
@@ -180,7 +181,7 @@ export function CartView({ defaultShippingFee, freeShippingThreshold, isLoggedIn
             <ButtonLink href={CHECKOUT_LOGIN_HREF} variant="solid" size="lg" className="w-full">
               Inicia sesión para comprar
             </ButtonLink>
-            <p className="mt-3 text-center text-[12px] leading-[1.6] text-slate-400">
+            <p className="type-caption mt-3 text-center text-ink-subtle">
               Entra o crea tu cuenta para finalizar la compra. El carrito te espera.
             </p>
           </>
