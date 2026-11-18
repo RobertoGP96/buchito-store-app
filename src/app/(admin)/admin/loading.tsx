@@ -1,5 +1,5 @@
 import { AdminPageSkeleton } from "@/components/skeletons";
 
 export default function Loading() {
-  return <AdminPageSkeleton />;
+  return <AdminPageSkeleton variant="dashboard" />;
 }

@@ -37,6 +37,7 @@ export function KpiTiles({ kpis }: { kpis: DashboardKpis }) {
           icon: Banknote,
           href: "/admin/pedidos",
           tone: "featured",
+          delta: kpis.salesTodayDelta,
         },
         {
           label: "Ventas últimos 7 días",
@@ -44,6 +45,7 @@ export function KpiTiles({ kpis }: { kpis: DashboardKpis }) {
           hint: plural(kpis.ordersLast7Days, "pedido", "pedidos"),
           icon: CalendarRange,
           href: "/admin/pedidos",
+          delta: kpis.salesLast7DaysDelta,
         },
         {
           label: "Por cobrar",
