@@ -746,6 +746,9 @@ html {
    aspecto por defecto de HeroUI. Sin capa, porque sus reglas de radio y fondo
    por celda tienen más especificidad dentro de la suya. */
 .data-table .table__content {
+  /* Por debajo de este ancho la tabla se desplaza en horizontal dentro de la
+     card en vez de partir cada celda en cuatro líneas. */
+  min-width: 44rem;
   font-size: 0.8125rem;
 }
 
@@ -753,8 +756,9 @@ html {
   border-radius: 0;
   border-bottom: 1px solid var(--c-line);
   background: var(--c-cream-50);
-  padding: 0.75rem 1.25rem;
+  padding: 0.75rem 1rem;
   font-size: 0.6875rem;
+  white-space: nowrap;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -769,9 +773,19 @@ html {
   border-radius: 0;
   border-bottom: 1px solid var(--c-line-soft);
   background: transparent;
-  padding: 0.875rem 1.25rem;
+  padding: 0.875rem 1rem;
   font-size: 0.8125rem;
   transition: background-color 120ms ease;
+}
+
+/* El aire de la card lo ponen la primera y la última columna; entre columnas
+   basta con 16px, o una tabla de siete columnas no cabe a 1024px. */
+.data-table :is(.table__column, .table__cell):first-child {
+  padding-inline-start: 1.25rem;
+}
+
+.data-table :is(.table__column, .table__cell):last-child {
+  padding-inline-end: 1.25rem;
 }
 
 .data-table .table__row:last-child .table__cell {

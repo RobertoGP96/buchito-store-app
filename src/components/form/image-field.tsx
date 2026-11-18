@@ -45,7 +45,7 @@ export function FormImageField<T extends FieldValues>({
                 <ImageUploader scope={scope} label={url ? "Cambiar" : "Subir foto"} onUploaded={(next) => field.onChange(next)} />
                 {url && (
                   <Button variant="ghost" size="sm" onPress={() => field.onChange("")}>
-                    <X className="h-3.5 w-3.5" strokeWidth={2} />
+                    <X className="h-3.5 w-3.5" strokeWidth={1.9} />
                     Quitar
                   </Button>
                 )}

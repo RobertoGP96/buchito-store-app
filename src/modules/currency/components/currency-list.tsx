@@ -45,7 +45,7 @@ function RateCell({ row, baseCode }: { row: CurrencyRow; baseCode: string | null
   if (row.isBase) return <span className="text-ink-subtle">Base</span>;
   if (row.rateToBase == null) return <span className="font-medium text-warn">Sin tasa</span>;
   return (
-    <span className="tabular">
+    <span className="tabular whitespace-nowrap">
       1 {row.code} = {row.rateToBase.toLocaleString("es-MX", { maximumFractionDigits: 4 })} {baseCode}
     </span>
   );

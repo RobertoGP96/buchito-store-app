@@ -99,7 +99,7 @@ export function ImageUploader({
           )}
         >
           {uploading ? (
-            <Loader2 className="h-5 w-5 animate-spin text-tostado-700" strokeWidth={2} />
+            <Loader2 className="h-5 w-5 animate-spin text-tostado-700" strokeWidth={1.9} />
           ) : (
             <ImagePlus className="h-5 w-5 text-tostado-700" strokeWidth={1.9} />
           )}

@@ -92,7 +92,7 @@ export function CourierHistory({ rows, activeStatus }: CourierHistoryProps) {
                     </span>
                   </div>
                 )}
-                <ChevronRight className="h-4 w-4 flex-none text-ink-faint" strokeWidth={2} />
+                <ChevronRight className="h-4 w-4 flex-none text-ink-faint" strokeWidth={1.9} />
               </Link>
             </li>
           ))}

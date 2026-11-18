@@ -81,7 +81,7 @@ export function AdminUserMenu({ userName, role, className }: AdminUserMenuProps)
           {initials || "U"}
         </span>
         <span className="hidden max-w-[120px] truncate type-meta font-semibold text-ink lg:inline">{userName}</span>
-        <ChevronDown className="hidden h-3.5 w-3.5 flex-none sm:block" strokeWidth={2} />
+        <ChevronDown className="hidden h-3.5 w-3.5 flex-none sm:block" strokeWidth={1.9} />
       </Dropdown.Trigger>
       <Dropdown.Popover placement="bottom end" className="w-[248px]">
         {/* Fuera del Menu: React Aria solo admite ítems dentro de una sección

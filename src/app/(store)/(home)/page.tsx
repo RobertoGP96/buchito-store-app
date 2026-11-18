@@ -213,7 +213,7 @@ export default async function HomePage() {
                 </span>
                 <ArrowRight
                   className="h-4 w-4 flex-none text-ink-faint transition-[transform,color] group-hover:text-tostado-700 motion-safe:group-hover:translate-x-0.5"
-                  strokeWidth={2}
+                  strokeWidth={1.9}
                 />
               </Link>
             );

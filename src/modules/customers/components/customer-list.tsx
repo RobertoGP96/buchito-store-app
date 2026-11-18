@@ -90,7 +90,7 @@ export function CustomerList({ rows, query }: CustomerListProps) {
             aria-label="Limpiar búsqueda"
             className="flex h-7 w-7 items-center justify-center rounded-full text-ink-subtle hover:bg-hover hover:text-tostado-700"
           >
-            <X className="h-3.5 w-3.5" strokeWidth={2} />
+            <X className="h-3.5 w-3.5" strokeWidth={1.9} />
           </button>
         )}
       </form>

@@ -56,7 +56,7 @@ export function DashboardCard({
             {hrefLabel}
             <ArrowRight
               className="h-3.5 w-3.5 transition-transform motion-safe:group-hover:translate-x-0.5"
-              strokeWidth={2}
+              strokeWidth={1.9}
             />
           </Link>
         )}

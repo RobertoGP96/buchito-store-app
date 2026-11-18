@@ -67,7 +67,7 @@ export default async function AdminComboPage({ params }: AdminComboPageProps) {
           role="status"
           className="flex items-start gap-2.5 rounded-field bg-warn-soft px-4 py-3 type-meta leading-[1.5] text-warn"
         >
-          <AlertTriangle className="mt-0.5 h-4 w-4 flex-none" strokeWidth={2} />
+          <AlertTriangle className="mt-0.5 h-4 w-4 flex-none" strokeWidth={1.9} />
           <span>
             <span className="font-semibold">El combo no se muestra en la tienda:</span>{" "}
             {unsellable.map((i) => i.productName).join(", ")} no se {unsellable.length === 1 ? "vende" : "venden"} ahora

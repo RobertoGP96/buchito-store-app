@@ -18,7 +18,7 @@ interface WhatsappLinkProps {
 export function WhatsappLink({ href, children, variant = "solid", size = "default", className }: WhatsappLinkProps) {
   return (
     <a href={href} target="_blank" rel="noopener noreferrer" className={buttonLinkClasses(variant, size, className)}>
-      <MessageCircle className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+      <MessageCircle className="h-4 w-4" strokeWidth={1.9} aria-hidden="true" />
       {children}
       <span className="sr-only"> (se abre en una pestaña nueva)</span>
     </a>

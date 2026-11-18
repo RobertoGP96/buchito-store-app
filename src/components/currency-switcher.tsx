@@ -26,7 +26,7 @@ export function CurrencySwitcher({ className }: CurrencySwitcherProps) {
       >
         <Coins className="h-[18px] w-[18px] flex-none" strokeWidth={1.9} />
         <span className="tabular">{display.code}</span>
-        <ChevronDown className="hidden h-3.5 w-3.5 flex-none sm:block" strokeWidth={2} />
+        <ChevronDown className="hidden h-3.5 w-3.5 flex-none sm:block" strokeWidth={1.9} />
       </Dropdown.Trigger>
       <Dropdown.Popover placement="bottom end">
         <Dropdown.Menu

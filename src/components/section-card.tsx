@@ -75,7 +75,11 @@ export function DetailRow({ label, value, className }: { label: ReactNode; value
 }
 
 export interface TimelineStep {
+  /** Clave propia cuando una etiqueta puede repetirse (historial de eventos). */
+  id?: string | number;
   label: string;
+  /** Línea secundaria bajo la etiqueta: quién lo hizo, motivo. */
+  note?: ReactNode;
   /** Texto ya formateado (fecha y hora); sin él, el paso aún no ocurrió. */
   at?: string | null;
   tone?: "default" | "danger";
@@ -92,7 +96,7 @@ export function Timeline({ steps, className }: { steps: TimelineStep[]; classNam
         const current = i === lastDone;
         const danger = step.tone === "danger";
         return (
-          <li key={step.label} className="relative flex gap-3 pb-4 last:pb-0">
+          <li key={step.id ?? step.label} className="relative flex gap-3 pb-4 last:pb-0">
             {i < steps.length - 1 && (
               <span
                 aria-hidden
@@ -111,16 +115,20 @@ export function Timeline({ steps, className }: { steps: TimelineStep[]; classNam
               )}
             />
             <div className="type-meta flex min-w-0 flex-1 items-baseline justify-between gap-3">
-              <span
-                className={cn(
-                  done ? "text-ink" : "text-ink-subtle",
-                  current && "font-semibold",
-                  done && danger && "text-danger"
-                )}
-              >
-                {step.label}
+              <span className="min-w-0">
+                <span
+                  className={cn(
+                    "block",
+                    done ? "text-ink" : "text-ink-subtle",
+                    current && "font-semibold",
+                    done && danger && "text-danger"
+                  )}
+                >
+                  {step.label}
+                </span>
+                {step.note && <span className="type-caption block text-ink-subtle">{step.note}</span>}
               </span>
-              <span className="tabular type-caption text-ink-subtle">{step.at ?? "Pendiente"}</span>
+              <span className="tabular type-caption flex-none text-ink-subtle">{step.at ?? "Pendiente"}</span>
             </div>
           </li>
         );

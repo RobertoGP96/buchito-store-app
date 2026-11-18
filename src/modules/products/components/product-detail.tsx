@@ -22,14 +22,14 @@ export function ProductDetail({ product }: { product: CatalogProduct }) {
   const { variant, soldOut } = selection;
 
   return (
-    <div className="mx-auto w-full max-w-[1120px] px-5 pt-6 pb-12 md:px-6 md:pt-8">
+    <div className="mx-auto w-full max-w-[1120px] px-5 pt-7 pb-10 md:px-6 md:pt-9">
       <nav aria-label="Ruta" className="type-meta flex flex-wrap items-center gap-1 text-ink-subtle">
         <Link href="/catalogo" className="font-medium transition-colors duration-150 hover:text-tostado-700">
           Catálogo
         </Link>
         {product.categoryName && (
           <>
-            <ChevronRight className="h-3.5 w-3.5 text-ink-faint" strokeWidth={2} aria-hidden />
+            <ChevronRight className="h-3.5 w-3.5 text-ink-faint" strokeWidth={1.9} aria-hidden />
             <Link
               href={`/catalogo?cat=${product.categorySlug}`}
               className="font-medium transition-colors duration-150 hover:text-tostado-700"
@@ -39,7 +39,7 @@ export function ProductDetail({ product }: { product: CatalogProduct }) {
           </>
         )}
         {/* El nombre ya es el h1 justo debajo: en móvil la miga se queda en la ruta. */}
-        <ChevronRight className="hidden h-3.5 w-3.5 text-ink-faint sm:block" strokeWidth={2} aria-hidden />
+        <ChevronRight className="hidden h-3.5 w-3.5 text-ink-faint sm:block" strokeWidth={1.9} aria-hidden />
         <span aria-current="page" className="hidden min-w-0 truncate text-ink-muted sm:inline">
           {product.name}
         </span>

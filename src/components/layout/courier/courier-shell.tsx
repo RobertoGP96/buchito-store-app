@@ -32,7 +32,7 @@ export function CourierShell({ userName, children }: CourierShellProps) {
       <SkipLink />
       <header className="sticky top-0 z-40 border-b border-line bg-canvas/95 md:bg-canvas/90 md:backdrop-blur-md">
         <div className="mx-auto flex h-14 w-full max-w-[720px] items-center gap-3 px-4">
-          <BrandLogo size="sm" href="/mensajero" />
+          <BrandLogo size="sm" href="/mensajero" compact />
           <span className="eyebrow text-tostado-700">Mensajero</span>
 
           <nav aria-label="Secciones" className="ml-4 hidden items-center gap-5 md:flex">
@@ -45,13 +45,15 @@ export function CourierShell({ userName, children }: CourierShellProps) {
                   href={item.href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "nav-label inline-flex items-center gap-1.5 border-b-2 pt-1 pb-1 transition-colors duration-150",
+                    // Alto completo de la cabecera: el subrayado del activo cae sobre
+                    // su borde inferior en vez de flotar bajo el texto.
+                    "nav-label -mb-px inline-flex h-14 items-center gap-1.5 border-y-2 border-t-transparent transition-colors duration-150",
                     active
-                      ? "border-tostado-700 font-bold text-tostado-700"
-                      : "border-transparent font-medium text-ink-muted hover:text-tostado-700"
+                      ? "border-b-tostado-700 text-tostado-700"
+                      : "border-b-transparent text-ink-muted hover:text-tostado-700"
                   )}
                 >
-                  <Icon className="h-[15px] w-[15px] flex-none" strokeWidth={1.9} />
+                  <Icon className="h-4 w-4 flex-none" strokeWidth={1.9} />
                   {item.label}
                 </Link>
               );
@@ -80,7 +82,7 @@ export function CourierShell({ userName, children }: CourierShellProps) {
       <main
         id={MAIN_CONTENT_ID}
         tabIndex={-1}
-        className="mx-auto flex w-full max-w-[720px] flex-1 flex-col gap-5 px-4 pt-5 pb-[calc(76px+env(safe-area-inset-bottom))] outline-none md:pb-10"
+        className="mx-auto flex w-full max-w-[720px] flex-1 flex-col gap-6 px-4 pt-5 pb-[calc(76px+env(safe-area-inset-bottom))] outline-none md:pb-10"
       >
         {children}
       </main>

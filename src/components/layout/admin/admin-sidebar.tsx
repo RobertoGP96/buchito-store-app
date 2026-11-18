@@ -152,9 +152,9 @@ export function AdminSidebar() {
             className="flex h-9 w-9 items-center justify-center rounded-full text-footer-muted transition-colors duration-150 hover:bg-footer-active hover:text-footer-fg"
           >
             {collapsed ? (
-              <ChevronsRight className="h-4 w-4" strokeWidth={2} />
+              <ChevronsRight className="h-4 w-4" strokeWidth={1.9} />
             ) : (
-              <ChevronsLeft className="h-4 w-4" strokeWidth={2} />
+              <ChevronsLeft className="h-4 w-4" strokeWidth={1.9} />
             )}
           </button>
         </div>

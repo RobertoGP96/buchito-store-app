@@ -42,7 +42,7 @@ export function AdminTopbar({ userName, role }: AdminTopbarProps) {
             aria-expanded={sheetOpen}
             className="touch-target flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:bg-hover hover:text-tostado-700 md:hidden"
           >
-            <Menu className="h-5 w-5" strokeWidth={2} />
+            <Menu className="h-5 w-5" strokeWidth={1.9} />
           </button>
           <BrandLogo size="sm" href="/admin" className="md:hidden" />
 
@@ -52,13 +52,13 @@ export function AdminTopbar({ userName, role }: AdminTopbarProps) {
             </Link>
             {section?.label && (
               <>
-                <ChevronRight className="h-3.5 w-3.5 text-ink-faint" strokeWidth={2} />
+                <ChevronRight className="h-3.5 w-3.5 text-ink-faint" strokeWidth={1.9} />
                 <span className="text-ink-subtle">{section.label}</span>
               </>
             )}
             {entry && entry.href !== "/admin" && (
               <>
-                <ChevronRight className="h-3.5 w-3.5 text-ink-faint" strokeWidth={2} />
+                <ChevronRight className="h-3.5 w-3.5 text-ink-faint" strokeWidth={1.9} />
                 <span className="truncate font-semibold text-ink">{entry.label}</span>
               </>
             )}

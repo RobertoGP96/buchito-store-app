@@ -50,7 +50,7 @@ export default async function MyOrdersPage() {
                     </p>
                   </div>
                   <Money value={order.total} className="num-display text-[16px] text-espresso-900" />
-                  <ChevronRight className="h-4 w-4 flex-none text-ink-faint" strokeWidth={2} />
+                  <ChevronRight className="h-4 w-4 flex-none text-ink-faint" strokeWidth={1.9} />
                 </Link>
               </li>
             ))}

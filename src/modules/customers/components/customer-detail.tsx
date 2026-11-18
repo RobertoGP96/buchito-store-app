@@ -52,7 +52,7 @@ export function CustomerDetail({ customer }: { customer: CustomerDetailData }) {
   ];
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
+    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
       <div className="flex flex-col gap-4 lg:order-2">
         <SectionCard title="Datos">
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 type-body">
@@ -107,7 +107,7 @@ export function CustomerDetail({ customer }: { customer: CustomerDetailData }) {
             <ul className="flex flex-col gap-3">
               {customer.addresses.map((a) => (
                 <li key={a.addressId} className="flex items-start gap-2 type-body leading-[1.6] text-ink">
-                  <MapPin className="mt-1 h-4 w-4 flex-none text-tostado-700" strokeWidth={2} />
+                  <MapPin className="mt-1 h-4 w-4 flex-none text-tostado-700" strokeWidth={1.9} />
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       {a.label && <span className="font-semibold">{a.label}</span>}

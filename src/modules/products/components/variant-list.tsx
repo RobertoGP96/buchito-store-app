@@ -51,7 +51,7 @@ export function VariantPriceCell({ variant }: { variant: AdminVariantSummary }) 
           </span>
         ) : (
           <span className="inline-flex items-center gap-1 type-caption font-medium text-warn">
-            <AlertTriangle className="h-3 w-3" strokeWidth={2} />
+            <AlertTriangle className="h-3 w-3" strokeWidth={1.9} />
             Sin tasa
           </span>
         ))}

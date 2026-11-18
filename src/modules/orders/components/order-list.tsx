@@ -3,17 +3,18 @@
 import Link from "next/link";
 import { Inbox } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
-import { CHIP_BASE, CHIP_OFF, CHIP_ON } from "@/components/choice-chips";
 import { Money } from "@/components/money";
-import { LinkPending } from "@/components/nav-icon";
 import { ListCard, ResponsiveList, type ListColumn } from "@/components/responsive-list";
 import { StatusChip } from "@/components/status-chip";
 import { fmtDateTime } from "@/lib/format";
 import { PAYMENT_STATUS_META } from "@/modules/payments/lib/labels";
 import { FULFILLMENT_LABELS, ORDER_STATUS_META, ORDER_STATUSES, type OrderStatus } from "../lib/labels";
 import type { OrderSummaryRow } from "../queries/order-queries";
-import { cn } from "@/lib/utils";
-import { ScrollFadeRow } from "@/components/scroll-fade-row";
+import { StatusFilter } from "@/components/status-filter";
+
+const ORDER_STATUS_LABELS = Object.fromEntries(
+  ORDER_STATUSES.map((status) => [status, ORDER_STATUS_META[status].label])
+) as Record<OrderStatus, string>;
 
 interface OrderListProps {
   rows: OrderSummaryRow[];
@@ -74,24 +75,16 @@ export function OrderList({ rows, activeStatus, counts }: OrderListProps) {
 
   return (
     <>
-      <ScrollFadeRow>
-        <Link href="/admin/pedidos" scroll={false} className={cn(CHIP_BASE, activeStatus === null ? CHIP_ON : CHIP_OFF)}>
-          Todos
-          <LinkPending />
-        </Link>
-        {ORDER_STATUSES.map((status) => (
-          <Link
-            key={status}
-            href={`/admin/pedidos?status=${status}`}
-            scroll={false}
-            className={cn(CHIP_BASE, activeStatus === status ? CHIP_ON : CHIP_OFF)}
-          >
-            {ORDER_STATUS_META[status].label}
-            {counts[status] > 0 && <span className="ml-1.5 type-micro opacity-70">{counts[status]}</span>}
-            <LinkPending />
-          </Link>
-        ))}
-      </ScrollFadeRow>
+      <StatusFilter
+        basePath="/admin/pedidos"
+        allLabel="Todos"
+        statuses={ORDER_STATUSES}
+        labels={ORDER_STATUS_LABELS}
+        counts={counts}
+        active={activeStatus}
+        resultCount={rows.length}
+        noun={["pedido", "pedidos"]}
+      />
 
       <ResponsiveList
         rows={rows}

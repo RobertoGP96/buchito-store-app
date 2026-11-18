@@ -34,7 +34,7 @@ export function PageHeading({
           href={backHref}
           className="nav-label mb-3 -ml-1 inline-flex items-center gap-0.5 text-ink-muted transition-colors duration-150 hover:text-tostado-700"
         >
-          <ChevronLeft className="h-4 w-4" strokeWidth={2} />
+          <ChevronLeft className="h-4 w-4" strokeWidth={1.9} />
           {backLabel}
         </Link>
       )}

@@ -32,12 +32,12 @@ export function ComboDetail({ combo }: { combo: CatalogCombo }) {
   };
 
   return (
-    <div className="mx-auto w-full max-w-[1120px] px-5 pt-6 pb-12 md:px-6 md:pt-8">
+    <div className="mx-auto w-full max-w-[1120px] px-5 pt-7 pb-10 md:px-6 md:pt-9">
       <Link
         href="/combos"
         className="nav-label -ml-1 inline-flex items-center gap-0.5 text-ink-muted transition-colors duration-150 hover:text-tostado-700"
       >
-        <ChevronLeft className="h-4 w-4" strokeWidth={2} />
+        <ChevronLeft className="h-4 w-4" strokeWidth={1.9} />
         Combos
       </Link>
 
@@ -120,7 +120,7 @@ export function ComboDetail({ combo }: { combo: CatalogCombo }) {
               size="lg"
             />
             <Button variant="primary" size="lg" isDisabled={soldOut} onPress={handleAdd}>
-              <ShoppingCart className="h-4 w-4" strokeWidth={2} />
+              <ShoppingCart className="h-4 w-4" strokeWidth={1.9} />
               {soldOut ? "Agotado" : "Añadir al carrito"}
             </Button>
           </div>

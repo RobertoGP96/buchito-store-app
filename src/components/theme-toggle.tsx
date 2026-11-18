@@ -26,8 +26,8 @@ export function ThemeToggle({ showLabel = false, className }: ThemeToggleProps) 
         className
       )}
     >
-      <Sun className="h-4 w-4 dark:hidden" strokeWidth={1.6} />
-      <Moon className="hidden h-4 w-4 dark:block" strokeWidth={1.6} />
+      <Sun className="h-4 w-4 dark:hidden" strokeWidth={1.9} />
+      <Moon className="hidden h-4 w-4 dark:block" strokeWidth={1.9} />
       {showLabel && (
         <>
           <span className="dark:hidden">Claro</span>

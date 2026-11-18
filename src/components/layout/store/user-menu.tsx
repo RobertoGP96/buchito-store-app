@@ -109,7 +109,7 @@ export function UserMenu({ user, triggerClassName }: UserMenuProps) {
         {firstName && (
           <span className="hidden max-w-[92px] truncate lg:inline">{firstName}</span>
         )}
-        <ChevronDown className="hidden h-3.5 w-3.5 flex-none md:block" strokeWidth={2} />
+        <ChevronDown className="hidden h-3.5 w-3.5 flex-none md:block" strokeWidth={1.9} />
       </Dropdown.Trigger>
       <Dropdown.Popover placement="bottom end" className="w-[256px]">
         {/* La cabecera va fuera del Menu: React Aria solo admite ítems dentro

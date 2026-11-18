@@ -105,17 +105,17 @@ export default async function OrderConfirmedPage({ params }: OrderConfirmedPageP
           Seguir comprando
         </ButtonLink>
       </ScreenHeader>
-      <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-4 px-5 pb-12 md:px-6">
+      <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-4 px-5 pb-10 md:px-6">
         {order.status === "pending" && (
           // El momento de éxito: quien acaba de comprar ve primero que el pedido
           // entró, antes que el detalle.
           <div role="status" className="pop-in flex items-center gap-3.5 rounded-card bg-ok-soft px-4 py-3.5">
             <span className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-ok text-on-ok">
-              <Check className="h-5 w-5" strokeWidth={2.6} aria-hidden />
+              <Check className="h-5 w-5" strokeWidth={2.2} aria-hidden />
             </span>
             <div className="min-w-0">
               <p className="type-subheading font-semibold text-ink">Recibimos tu pedido</p>
-              <p className="type-meta text-ink-muted">Te avisaremos en cuanto lo confirmemos.</p>
+              <p className="type-meta text-ink-muted">Sigue su estado aquí o en «Mis pedidos».</p>
             </div>
           </div>
         )}

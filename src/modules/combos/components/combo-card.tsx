@@ -111,7 +111,7 @@ export function ComboCard({ combo, priority = false }: ComboCardProps) {
           aria-disabled={soldOut}
           className={cardCtaClasses(soldOut ? "disabled" : "solid", adding)}
         >
-          {!soldOut && <Plus className="h-4 w-4" strokeWidth={2.4} aria-hidden />}
+          {!soldOut && <Plus className="h-4 w-4" strokeWidth={2.2} aria-hidden />}
           {soldOut ? "Agotado" : "Añadir"}
         </button>
       </div>

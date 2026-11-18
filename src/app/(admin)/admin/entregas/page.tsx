@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/page-header";
 import { DeliveryList } from "@/modules/deliveries/components/delivery-list";
 import { DELIVERY_STATUSES, type DeliveryStatus } from "@/modules/deliveries/lib/labels";
 import { getActiveCouriers } from "@/modules/deliveries/queries/courier-queries";
-import { getDeliveries } from "@/modules/deliveries/queries/delivery-queries";
+import { getDeliveries, getDeliveryStatusCounts } from "@/modules/deliveries/queries/delivery-queries";
 
 export const metadata: Metadata = { title: "Entregas" };
 export const dynamic = "force-dynamic";
@@ -18,11 +18,15 @@ export default async function AdminDeliveriesPage({ searchParams }: AdminDeliver
   const status = (DELIVERY_STATUSES as readonly string[]).includes(params.status ?? "")
     ? (params.status as DeliveryStatus)
     : null;
-  const [rows, couriers] = await Promise.all([getDeliveries({ status: status ?? undefined }), getActiveCouriers()]);
+  const [rows, couriers, counts] = await Promise.all([
+    getDeliveries({ status: status ?? undefined }),
+    getActiveCouriers(),
+    getDeliveryStatusCounts(),
+  ]);
   return (
     <>
       <PageHeader icon={Truck} title="Entregas" description="Asignación y seguimiento de entregas a domicilio." />
-      <DeliveryList rows={rows} couriers={couriers} activeStatus={status} />
+      <DeliveryList rows={rows} couriers={couriers} activeStatus={status} counts={counts} />
     </>
   );
 }

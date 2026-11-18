@@ -81,7 +81,7 @@ export function CatalogFilters({ categories, activeSlug, query }: CatalogFilters
         className="field-shell flex h-10 items-center gap-2 rounded-full border-[1.5px] border-line bg-canvas pr-1.5 pl-4 md:w-[280px]"
       >
         {isPending ? (
-          <LoaderCircle className="nav-spinner h-4 w-4 flex-none text-ink-subtle" strokeWidth={2} aria-hidden />
+          <LoaderCircle className="nav-spinner h-4 w-4 flex-none text-ink-subtle" strokeWidth={1.9} aria-hidden />
         ) : (
           <Search className="h-4 w-4 flex-none text-ink-subtle" strokeWidth={1.9} />
         )}
@@ -101,7 +101,7 @@ export function CatalogFilters({ categories, activeSlug, query }: CatalogFilters
             aria-label="Limpiar búsqueda"
             className="flex h-7 w-7 items-center justify-center rounded-full text-ink-subtle hover:bg-hover hover:text-tostado-700"
           >
-            <X className="h-3.5 w-3.5" strokeWidth={2} />
+            <X className="h-3.5 w-3.5" strokeWidth={1.9} />
           </button>
         )}
       </form>

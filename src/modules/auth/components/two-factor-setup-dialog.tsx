@@ -289,7 +289,7 @@ export function TwoFactorSetupDialog({ open, onOpenChange, emailAvailable }: Two
             Copiar todos
           </Button>
           <p className="flex items-start gap-2 type-meta leading-[1.6] text-ink-muted">
-            <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-tostado-700" strokeWidth={2} />
+            <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-tostado-700" strokeWidth={1.9} />
             Guárdalos en un sitio seguro (gestor de contraseñas, nota impresa). Cada código vale una sola vez.
           </p>
         </div>

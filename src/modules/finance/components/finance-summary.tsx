@@ -139,7 +139,7 @@ export function FinanceSummaryView({ summary, activeRange }: { summary: FinanceS
           role="status"
           className="flex items-start gap-2.5 rounded-field bg-warn-soft px-4 py-3 type-meta leading-[1.5] text-warn"
         >
-          <AlertTriangle className="mt-0.5 h-4 w-4 flex-none" strokeWidth={2} />
+          <AlertTriangle className="mt-0.5 h-4 w-4 flex-none" strokeWidth={1.9} />
           <span>
             <span className="font-semibold">Hay ventas sin costo registrado:</span> la ganancia mostrada es una cota
             superior. Registra el precio de compra en cada variante (o en la entrada de stock) para afinarla.

@@ -17,7 +17,7 @@ import { DELIVERY_STATUS_META, DELIVERY_TRANSITION_LABELS, type DeliveryStatus }
 import { nextDeliveryStates, type DeliveryActor } from "../lib/state-machine";
 import type { DeliveryDetailData } from "../queries/delivery-queries";
 import { DeliveryProofDialog, type DeliveryProofResult } from "./delivery-proof-dialog";
-import { SectionCard } from "@/components/section-card";
+import { SectionCard, Timeline } from "@/components/section-card";
 
 interface DeliveryDetailProps {
   delivery: DeliveryDetailData;
@@ -32,7 +32,7 @@ function PhoneLink({ phone }: { phone: string }) {
       href={`tel:${phone.replace(/\s+/g, "")}`}
       className="inline-flex items-center gap-2 rounded-full bg-crema-100 px-4 py-2 type-body font-semibold text-espresso-900 transition-colors duration-150 hover:bg-crema-200"
     >
-      <Phone className="h-4 w-4" strokeWidth={2} />
+      <Phone className="h-4 w-4" strokeWidth={1.9} />
       <span className="tabular">{phone}</span>
     </a>
   );
@@ -146,7 +146,7 @@ export function DeliveryDetail({ delivery, isAssignedCourier }: DeliveryDetailPr
                 isDisabled={pending !== null}
                 onPress={() => press(to)}
               >
-                {to === "delivered" && <Camera className="h-4 w-4" strokeWidth={2} />}
+                {to === "delivered" && <Camera className="h-4 w-4" strokeWidth={1.9} />}
                 {DELIVERY_TRANSITION_LABELS[to]}
               </Button>
             ))}
@@ -155,7 +155,7 @@ export function DeliveryDetail({ delivery, isAssignedCourier }: DeliveryDetailPr
       </SectionCard>
 
       <SectionCard title="Destinatario">
-        <p className="text-[17px] font-semibold text-ink">{delivery.recipientName}</p>
+        <p className="type-subheading font-semibold text-ink">{delivery.recipientName}</p>
         <div className="mt-2.5">
           <PhoneLink phone={delivery.recipientPhone} />
         </div>
@@ -176,7 +176,7 @@ export function DeliveryDetail({ delivery, isAssignedCourier }: DeliveryDetailPr
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 type-meta font-semibold text-tostado-700 hover:underline"
             >
-              <Navigation className="h-3.5 w-3.5" strokeWidth={2} />
+              <Navigation className="h-3.5 w-3.5" strokeWidth={1.9} />
               Cómo llegar
             </a>
           ) : undefined
@@ -184,7 +184,7 @@ export function DeliveryDetail({ delivery, isAssignedCourier }: DeliveryDetailPr
       >
         {delivery.address ? (
           <address className="flex items-start gap-2 text-[15px] not-italic leading-[1.6] text-ink">
-            <MapPin className="mt-1 h-4 w-4 flex-none text-tostado-700" strokeWidth={2} />
+            <MapPin className="mt-1 h-4 w-4 flex-none text-tostado-700" strokeWidth={1.9} />
             <span>
               {delivery.address.line1}
               {delivery.address.line2 && <>, {delivery.address.line2}</>}
@@ -282,18 +282,16 @@ export function DeliveryDetail({ delivery, isAssignedCourier }: DeliveryDetailPr
 
       {delivery.events.length > 0 && (
         <SectionCard title="Historial">
-          <ol className="flex flex-col gap-2 type-meta">
-            {delivery.events.map((e) => (
-              <li key={e.eventId} className="flex items-start justify-between gap-3">
-                <span className="text-ink-muted">
-                  <span className="font-semibold text-ink">{DELIVERY_STATUS_META[e.toStatus].label}</span>
-                  {e.actor ? ` · ${e.actor}` : ""}
-                  {e.note ? ` · ${e.note}` : ""}
-                </span>
-                <span className="tabular flex-none text-ink-muted">{fmtDateTime(e.createdAt)}</span>
-              </li>
-            ))}
-          </ol>
+          <Timeline
+            // Llegan del más reciente al más antiguo; la línea se lee hacia abajo.
+            steps={[...delivery.events].reverse().map((e) => ({
+              id: e.eventId,
+              label: DELIVERY_STATUS_META[e.toStatus].label,
+              note: [e.actor, e.note].filter(Boolean).join(" · ") || undefined,
+              at: fmtDateTime(e.createdAt),
+              tone: e.toStatus === "failed" || e.toStatus === "cancelled" ? "danger" : "default",
+            }))}
+          />
         </SectionCard>
       )}
 

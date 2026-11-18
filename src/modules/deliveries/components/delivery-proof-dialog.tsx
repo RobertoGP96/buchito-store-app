@@ -137,7 +137,7 @@ export function DeliveryProofDialog({
               <img src={preview} alt="Vista previa de la foto de prueba" className="max-h-[260px] w-full object-cover" />
               {uploading && (
                 <div className="absolute inset-0 flex items-center justify-center bg-canvas/70">
-                  <Loader2 className="h-6 w-6 animate-spin text-tostado-700" strokeWidth={2} />
+                  <Loader2 className="h-6 w-6 animate-spin text-tostado-700" strokeWidth={1.9} />
                 </div>
               )}
               <button
@@ -147,7 +147,7 @@ export function DeliveryProofDialog({
                 aria-label="Quitar la foto"
                 className="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-canvas/90 text-ink shadow-card transition-colors duration-150 hover:bg-canvas"
               >
-                <X className="h-4 w-4" strokeWidth={2} />
+                <X className="h-4 w-4" strokeWidth={1.9} />
               </button>
             </div>
           ) : (

@@ -59,7 +59,7 @@ function PriceCell({ row }: { row: AdminProductRow }) {
   if (row.hasMissingRate && row.minPrice == null) {
     return (
       <span className="inline-flex items-center gap-1 type-meta font-medium text-warn">
-        <AlertTriangle className="h-3.5 w-3.5" strokeWidth={2} />
+        <AlertTriangle className="h-3.5 w-3.5" strokeWidth={1.9} />
         Sin tasa
       </span>
     );
@@ -105,7 +105,7 @@ function ExpandToggle({
     >
       <ChevronRight
         className={cn("h-4 w-4 transition-transform duration-150", expanded && "rotate-90")}
-        strokeWidth={2}
+        strokeWidth={1.9}
       />
     </Button>
   );
@@ -181,7 +181,7 @@ export function ProductList({ rows, currencies, lowStockThreshold, heading }: Pr
           </div>
         ) : (
           <div className="flex min-w-0 items-center gap-2 pl-7">
-            <CornerDownRight className="h-3.5 w-3.5 flex-none text-ink-subtle" strokeWidth={2} />
+            <CornerDownRight className="h-3.5 w-3.5 flex-none text-ink-subtle" strokeWidth={1.9} />
             <div className="min-w-0">
               <p className="font-medium text-ink">{variantDisplayName(r.variant, r.product.attributeSchema)}</p>
               <p className="tabular type-caption text-ink-subtle">{r.variant.sku}</p>
@@ -300,7 +300,7 @@ export function ProductList({ rows, currencies, lowStockThreshold, heading }: Pr
                   >
                     <ChevronRight
                       className={cn("h-4 w-4 transition-transform duration-150", open && "rotate-90")}
-                      strokeWidth={2}
+                      strokeWidth={1.9}
                     />
                     {open ? "Ocultar variantes" : `Ver variantes (${product.variants.length})`}
                   </Button>

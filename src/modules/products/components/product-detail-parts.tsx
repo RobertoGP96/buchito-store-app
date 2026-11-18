@@ -181,7 +181,7 @@ export function ProductDescription({ product, className }: { product: CatalogPro
   );
 }
 
-/** Atributos de producto del tipo más el SKU de la variante elegida. */
+/** Atributos de producto del tipo y, al pie, la referencia (SKU) de la variante elegida. */
 export function ProductSpecs({
   product,
   variant,
@@ -194,24 +194,27 @@ export function ProductSpecs({
   const attributes = product.attributeSchema
     .filter((def) => def.scope === "product" && product.attributes[def.key] !== undefined)
     .map((def) => ({ label: def.label, value: String(product.attributes[def.key]) }));
+  // El SKU es una referencia para soporte, no un dato de compra: va al final y
+  // en pequeño, no como una especificación más.
   return (
-    <dl
-      className={cn(
-        "grid grid-cols-[auto_minmax(0,1fr)] gap-x-6 gap-y-2 border-t border-line pt-6 type-body",
-        className
+    <div className={cn(attributes.length > 0 && "border-t border-line pt-6", className)}>
+      {attributes.length > 0 && (
+        <>
+          <p className="eyebrow">Detalles</p>
+          <dl className="type-body mt-2.5 grid grid-cols-[auto_minmax(0,1fr)] gap-x-6 gap-y-2">
+            {attributes.map((attr) => (
+              <div key={attr.label} className="contents">
+                <dt className="text-ink-subtle">{attr.label}</dt>
+                <dd className="min-w-0 font-medium break-words text-ink">{attr.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </>
       )}
-    >
-      {attributes.map((attr) => (
-        <div key={attr.label} className="contents">
-          <dt className="text-ink-subtle">{attr.label}</dt>
-          <dd className="min-w-0 font-medium break-words text-ink">{attr.value}</dd>
-        </div>
-      ))}
-      <div className="contents">
-        <dt className="text-ink-subtle">SKU</dt>
-        <dd className="tabular min-w-0 font-medium break-words text-ink">{variant.sku}</dd>
-      </div>
-    </dl>
+      <p className={cn("tabular type-caption break-words text-ink-subtle", attributes.length > 0 && "mt-4")}>
+        Ref. {variant.sku}
+      </p>
+    </div>
   );
 }
 
@@ -248,7 +251,7 @@ export function ProductAddControls({
           if (addSelection()) onAdded?.();
         }}
       >
-        <ShoppingCart className="h-4 w-4" strokeWidth={2} />
+        <ShoppingCart className="h-4 w-4" strokeWidth={1.9} />
         {soldOut ? "Agotado" : "Añadir al carrito"}
       </Button>
     </div>

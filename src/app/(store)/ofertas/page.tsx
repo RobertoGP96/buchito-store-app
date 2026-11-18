@@ -26,7 +26,7 @@ export default async function OffersPage() {
         title="Rebajas y combos"
         description="Productos con el precio rebajado y combos que salen más baratos que comprar por separado. Los precios ya están en tu moneda."
       />
-      <div className="mx-auto flex w-full max-w-[1120px] flex-1 flex-col gap-10 px-5 pb-10 md:px-6">
+      <div className="mx-auto flex w-full max-w-[1120px] flex-1 flex-col gap-12 px-5 pb-10 md:px-6">
         {empty ? (
           <EmptyState
             icon={BadgePercent}

@@ -4,11 +4,9 @@ import Link from "next/link";
 import { useState } from "react";
 import { Button, ListBox, Select, toast } from "@heroui/react";
 import { Camera, Truck } from "lucide-react";
-import { CHIP_BASE, CHIP_OFF, CHIP_ON } from "@/components/choice-chips";
 import { EmptyState } from "@/components/empty-state";
 import { Money } from "@/components/money";
 import { PhotoLightbox } from "@/components/photo-lightbox";
-import { LinkPending } from "@/components/nav-icon";
 import { ListCard, ResponsiveList, type ListColumn } from "@/components/responsive-list";
 import { StatusChip } from "@/components/status-chip";
 import { fmtDateTime } from "@/lib/format";
@@ -17,8 +15,7 @@ import { assignCourier, unassignCourier } from "../actions/delivery-actions";
 import { DELIVERY_STATUS_META, DELIVERY_STATUSES, VEHICLE_LABELS, type DeliveryStatus } from "../lib/labels";
 import type { CourierRow } from "../queries/courier-queries";
 import type { DeliveryRow } from "../queries/delivery-queries";
-import { cn } from "@/lib/utils";
-import { ScrollFadeRow } from "@/components/scroll-fade-row";
+import { StatusFilter } from "@/components/status-filter";
 
 /** Abre la foto de prueba en un visor sin salir de la lista. */
 function ProofLink({ url, orderNo, deliveredAt }: { url: string; orderNo: string; deliveredAt: string | null }) {
@@ -45,10 +42,15 @@ function ProofLink({ url, orderNo, deliveredAt }: { url: string; orderNo: string
   );
 }
 
+const DELIVERY_STATUS_LABELS = Object.fromEntries(
+  DELIVERY_STATUSES.map((status) => [status, DELIVERY_STATUS_META[status].label])
+) as Record<DeliveryStatus, string>;
+
 interface DeliveryListProps {
   rows: DeliveryRow[];
   couriers: Pick<CourierRow, "courierId" | "fullName" | "vehicle" | "openDeliveries">[];
   activeStatus: DeliveryStatus | null;
+  counts: Record<DeliveryStatus, number>;
 }
 
 function AssignControl({
@@ -126,7 +128,7 @@ function AssignControl({
   );
 }
 
-export function DeliveryList({ rows, couriers, activeStatus }: DeliveryListProps) {
+export function DeliveryList({ rows, couriers, activeStatus, counts }: DeliveryListProps) {
   const columns: ListColumn<DeliveryRow>[] = [
     {
       id: "order",
@@ -134,7 +136,7 @@ export function DeliveryList({ rows, couriers, activeStatus }: DeliveryListProps
       isRowHeader: true,
       cell: (r) => (
         <div className="min-w-0">
-          <Link href={`/admin/pedidos/${r.orderId}`} className="font-semibold text-tostado-700 hover:underline">
+          <Link href={`/admin/pedidos/${r.orderId}`} className="tabular font-semibold whitespace-nowrap text-tostado-700 hover:underline">
             {r.orderNo}
           </Link>
           <p className="type-caption text-ink-subtle">
@@ -153,23 +155,16 @@ export function DeliveryList({ rows, couriers, activeStatus }: DeliveryListProps
 
   return (
     <>
-      <ScrollFadeRow>
-        <Link href="/admin/entregas" scroll={false} className={cn(CHIP_BASE, activeStatus === null ? CHIP_ON : CHIP_OFF)}>
-          Todas
-          <LinkPending />
-        </Link>
-        {DELIVERY_STATUSES.map((status) => (
-          <Link
-            key={status}
-            href={`/admin/entregas?status=${status}`}
-            scroll={false}
-            className={cn(CHIP_BASE, activeStatus === status ? CHIP_ON : CHIP_OFF)}
-          >
-            {DELIVERY_STATUS_META[status].label}
-            <LinkPending />
-          </Link>
-        ))}
-      </ScrollFadeRow>
+      <StatusFilter
+        basePath="/admin/entregas"
+        allLabel="Todas"
+        statuses={DELIVERY_STATUSES}
+        labels={DELIVERY_STATUS_LABELS}
+        counts={counts}
+        active={activeStatus}
+        resultCount={rows.length}
+        noun={["entrega", "entregas"]}
+      />
 
       <ResponsiveList
         rows={rows}

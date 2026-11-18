@@ -51,7 +51,7 @@ function Delta({ value, featured }: { value: number; featured: boolean }) {
             : "bg-danger-soft text-danger"
       )}
     >
-      <Arrow aria-hidden className="h-3 w-3" strokeWidth={2.4} />
+      <Arrow aria-hidden className="h-3 w-3" strokeWidth={2.2} />
       <span className="sr-only">{up ? "Sube" : "Baja"} </span>
       {Math.abs(value)} %
     </span>
@@ -101,7 +101,7 @@ export function StatTile({
                   "h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100",
                   featured ? "text-brand-tile-fg" : "text-ink-subtle"
                 )}
-                strokeWidth={2}
+                strokeWidth={1.9}
               />
             )
           )}

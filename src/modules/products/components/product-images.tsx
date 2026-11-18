@@ -112,7 +112,7 @@ export function ProductImages({ productId, images }: ProductImagesProps) {
                     isDisabled={index === 0 || busy !== null}
                     onPress={() => move(index, -1)}
                   >
-                    <ChevronLeft className="h-4 w-4" strokeWidth={2} />
+                    <ChevronLeft className="h-4 w-4" strokeWidth={1.9} />
                   </Button>
                   <Button
                     variant="ghost"
@@ -122,7 +122,7 @@ export function ProductImages({ productId, images }: ProductImagesProps) {
                     isDisabled={index === images.length - 1 || busy !== null}
                     onPress={() => move(index, 1)}
                   >
-                    <ChevronRight className="h-4 w-4" strokeWidth={2} />
+                    <ChevronRight className="h-4 w-4" strokeWidth={1.9} />
                   </Button>
                 </div>
                 <Button

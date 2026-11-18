@@ -75,9 +75,9 @@ export function SalesChart({ series }: { series: SalesDay[] }) {
             )}
           >
             {summary.delta >= 0 ? (
-              <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={2.4} aria-hidden />
+              <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={2.2} aria-hidden />
             ) : (
-              <ArrowDownRight className="h-3.5 w-3.5" strokeWidth={2.4} aria-hidden />
+              <ArrowDownRight className="h-3.5 w-3.5" strokeWidth={2.2} aria-hidden />
             )}
             {Math.abs(summary.delta)} % frente a los {range} días anteriores
           </p>

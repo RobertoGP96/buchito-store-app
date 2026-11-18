@@ -301,7 +301,7 @@ export function AdminSearch({ className }: AdminSearchProps) {
         aria-label="Buscar en el panel"
         className="touch-target flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:bg-hover hover:text-tostado-700 md:hidden"
       >
-        <Search className="h-5 w-5" strokeWidth={2} />
+        <Search className="h-5 w-5" strokeWidth={1.9} />
       </button>
 
       <Modal isOpen={open} onOpenChange={handleOpenChange}>
@@ -311,7 +311,7 @@ export function AdminSearch({ className }: AdminSearchProps) {
               <div className="field-shell flex h-14 items-center gap-3 border-b border-line px-4">
                 {loading ? (
                   <>
-                    <LoaderCircle className="h-[18px] w-[18px] flex-none animate-spin text-tostado-700" strokeWidth={2} aria-hidden />
+                    <LoaderCircle className="h-[18px] w-[18px] flex-none animate-spin text-tostado-700" strokeWidth={1.9} aria-hidden />
                     <LoadingStatus label="Buscando" />
                   </>
                 ) : (
@@ -347,7 +347,7 @@ export function AdminSearch({ className }: AdminSearchProps) {
                     aria-label="Borrar búsqueda"
                     className="flex h-7 w-7 flex-none items-center justify-center rounded-full text-ink-subtle hover:bg-hover hover:text-tostado-700"
                   >
-                    <X className="h-4 w-4" strokeWidth={2} />
+                    <X className="h-4 w-4" strokeWidth={1.9} />
                   </button>
                 ) : (
                   <button
@@ -414,7 +414,7 @@ export function AdminSearch({ className }: AdminSearchProps) {
                             </span>
                             {item.trailing && <span className="hidden flex-none sm:inline-flex">{item.trailing}</span>}
                             {active && (
-                              <CornerDownLeft className="hidden h-3.5 w-3.5 flex-none text-ink-subtle md:block" strokeWidth={2} />
+                              <CornerDownLeft className="hidden h-3.5 w-3.5 flex-none text-ink-subtle md:block" strokeWidth={1.9} />
                             )}
                           </div>
                         );

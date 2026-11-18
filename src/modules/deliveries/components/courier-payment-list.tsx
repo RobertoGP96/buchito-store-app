@@ -60,7 +60,7 @@ function Balances({ balances, onPay }: { balances: CourierBalanceRow[]; onPay: (
               isDisabled={b.pendingCount === 0}
               onPress={() => onPay(b.courierId)}
             >
-              <HandCoins className="h-4 w-4" strokeWidth={2} />
+              <HandCoins className="h-4 w-4" strokeWidth={1.9} />
               Pagar
             </Button>
           </div>

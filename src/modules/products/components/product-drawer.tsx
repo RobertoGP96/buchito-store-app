@@ -125,7 +125,7 @@ function ProductDrawerContent({
             className="nav-label mt-6 inline-flex items-center gap-1 self-start text-tostado-700 hover:underline"
           >
             Ver ficha completa
-            <ArrowUpRight className="h-4 w-4" strokeWidth={2} aria-hidden />
+            <ArrowUpRight className="h-4 w-4" strokeWidth={1.9} aria-hidden />
           </Link>
         </div>
       </Drawer.Body>

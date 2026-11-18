@@ -33,7 +33,7 @@ export function QtyStepper({ qty, onInc, onDec, max, step = 1, unit = "unit", si
         aria-label="Disminuir cantidad"
         className={btnClass}
       >
-        <Minus className="h-4 w-4" strokeWidth={2} />
+        <Minus className="h-4 w-4" strokeWidth={1.9} />
       </button>
       <div
         className={cn(
@@ -52,7 +52,7 @@ export function QtyStepper({ qty, onInc, onDec, max, step = 1, unit = "unit", si
         aria-label="Aumentar cantidad"
         className={btnClass}
       >
-        <Plus className="h-4 w-4" strokeWidth={2} />
+        <Plus className="h-4 w-4" strokeWidth={1.9} />
       </button>
     </div>
   );

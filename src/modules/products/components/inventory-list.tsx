@@ -152,7 +152,7 @@ export function InventoryList({ rows, query, lowOnly }: InventoryListProps) {
             <LinkPending />
           </Link>
           <Link href="/admin/inventario/movimientos" className={cn(CHIP_BASE, CHIP_OFF)}>
-            <History className="mr-1.5 h-3.5 w-3.5" strokeWidth={2} />
+            <History className="mr-1.5 h-3.5 w-3.5" strokeWidth={1.9} />
             Movimientos
             <LinkPending />
           </Link>
@@ -182,7 +182,7 @@ export function InventoryList({ rows, query, lowOnly }: InventoryListProps) {
               aria-label="Limpiar búsqueda"
               className="flex h-7 w-7 items-center justify-center rounded-full text-ink-subtle hover:bg-hover hover:text-tostado-700"
             >
-              <X className="h-3.5 w-3.5" strokeWidth={2} />
+              <X className="h-3.5 w-3.5" strokeWidth={1.9} />
             </button>
           )}
         </form>

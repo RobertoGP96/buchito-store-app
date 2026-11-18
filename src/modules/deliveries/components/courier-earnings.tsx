@@ -55,7 +55,7 @@ export function CourierEarnings({ earnings, deliveryFee, unpaid, payments }: Cou
                   </span>
                   <span className="flex items-center gap-2">
                     <Money value={d.courierFee} className="font-semibold text-espresso-900" />
-                    <ChevronRight className="h-4 w-4 text-ink-faint" strokeWidth={2} />
+                    <ChevronRight className="h-4 w-4 text-ink-faint" strokeWidth={1.9} />
                   </span>
                 </Link>
               </li>
