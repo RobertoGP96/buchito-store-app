@@ -8,6 +8,7 @@ import { CHIP_BASE, CHIP_OFF, CHIP_ON } from "@/components/choice-chips";
 import { LinkPending } from "@/components/nav-icon";
 import type { CatalogCategory } from "../queries/catalog-queries";
 import { cn } from "@/lib/utils";
+import { ScrollFadeRow } from "@/components/scroll-fade-row";
 
 interface CatalogFiltersProps {
   categories: CatalogCategory[];
@@ -52,7 +53,7 @@ export function CatalogFilters({ categories, activeSlug, query }: CatalogFilters
 
   return (
     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-      <div className="no-scrollbar -mx-1 flex snap-x gap-2 overflow-x-auto px-1 py-1">
+      <ScrollFadeRow>
         <Link
           href={catalogHref(null, query)}
           scroll={false}
@@ -72,7 +73,7 @@ export function CatalogFilters({ categories, activeSlug, query }: CatalogFilters
             <LinkPending />
           </Link>
         ))}
-      </div>
+      </ScrollFadeRow>
 
       <form
         onSubmit={submit}
@@ -80,9 +81,9 @@ export function CatalogFilters({ categories, activeSlug, query }: CatalogFilters
         className="field-shell flex h-10 items-center gap-2 rounded-full border-[1.5px] border-line bg-canvas pr-1.5 pl-4 md:w-[280px]"
       >
         {isPending ? (
-          <LoaderCircle className="nav-spinner h-4 w-4 flex-none text-slate-400" strokeWidth={2} aria-hidden />
+          <LoaderCircle className="nav-spinner h-4 w-4 flex-none text-ink-subtle" strokeWidth={2} aria-hidden />
         ) : (
-          <Search className="h-4 w-4 flex-none text-slate-400" strokeWidth={1.9} />
+          <Search className="h-4 w-4 flex-none text-ink-subtle" strokeWidth={1.9} />
         )}
         <input
           type="search"
@@ -90,14 +91,15 @@ export function CatalogFilters({ categories, activeSlug, query }: CatalogFilters
           onChange={(e) => setValue(e.target.value)}
           placeholder="Buscar productos"
           aria-label="Buscar productos"
-          className="min-w-0 flex-1 bg-transparent text-[13.5px] text-ink outline-none placeholder:text-slate-400"
+          // 16px en móvil: por debajo, Safari de iOS amplía la página al enfocar.
+          className="min-w-0 flex-1 bg-transparent text-base text-ink outline-none placeholder:text-ink-subtle md:text-[13.5px]"
         />
         {value && (
           <button
             type="button"
             onClick={clear}
             aria-label="Limpiar búsqueda"
-            className="flex h-7 w-7 items-center justify-center rounded-full text-slate-400 hover:bg-hover hover:text-navy-700"
+            className="flex h-7 w-7 items-center justify-center rounded-full text-ink-subtle hover:bg-hover hover:text-tostado-700"
           >
             <X className="h-3.5 w-3.5" strokeWidth={2} />
           </button>

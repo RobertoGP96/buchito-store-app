@@ -75,7 +75,7 @@ export function UserList({ rows, currentUserId }: UserListProps) {
       cell: (r) => (
         <div className="min-w-0">
           <p className="font-semibold text-ink">{r.fullName}</p>
-          <p className="text-[12px] text-slate-400">{r.email}</p>
+          <p className="text-[12px] text-ink-subtle">{r.email}</p>
         </div>
       ),
     },
@@ -89,9 +89,9 @@ export function UserList({ rows, currentUserId }: UserListProps) {
     {
       id: "lastLogin",
       header: "Último acceso",
-      cell: (r) => <span className="tabular text-slate-500">{r.lastLoginAt ? fmtDateTime(r.lastLoginAt) : "Nunca"}</span>,
+      cell: (r) => <span className="tabular text-ink-muted">{r.lastLoginAt ? fmtDateTime(r.lastLoginAt) : "Nunca"}</span>,
     },
-    { id: "created", header: "Alta", cell: (r) => <span className="tabular text-slate-500">{fmtDateTime(r.createdAt)}</span> },
+    { id: "created", header: "Alta", cell: (r) => <span className="tabular text-ink-muted">{fmtDateTime(r.createdAt)}</span> },
     {
       id: "actions",
       header: "",

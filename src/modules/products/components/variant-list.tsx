@@ -40,13 +40,13 @@ export function VariantPriceCell({ variant }: { variant: AdminVariantSummary }) 
         <Money value={variant.price} currency={variant.priceCurrency} />
       </span>
       {variant.compareAtPrice != null && variant.compareAtPrice > variant.price && (
-        <span className="text-[11.5px] text-slate-400 line-through">
+        <span className="text-[11.5px] text-ink-subtle line-through">
           <Money value={variant.compareAtPrice} currency={variant.priceCurrency} />
         </span>
       )}
       {foreign &&
         (variant.priceBase != null ? (
-          <span className="text-[11.5px] text-slate-400">
+          <span className="text-[11.5px] text-ink-subtle">
             ≈ <Money value={variant.priceBase} />
           </span>
         ) : (
@@ -63,10 +63,10 @@ export function VariantPriceCell({ variant }: { variant: AdminVariantSummary }) 
 /** Costo de compra y margen bajo el precio; "Sin costo" invita a registrarlo. */
 export function VariantCostLine({ variant }: { variant: AdminVariantSummary }) {
   if (variant.cost == null || !variant.costCurrency) {
-    return <span className="text-[11px] text-slate-400">Sin costo</span>;
+    return <span className="text-[11px] text-ink-subtle">Sin costo</span>;
   }
   return (
-    <span className="text-[11px] text-slate-400">
+    <span className="text-[11px] text-ink-subtle">
       Costo <Money value={variant.cost} currency={variant.costCurrency} />
       {variant.marginPct != null && (
         <span className={cn("ml-1 font-semibold", variant.marginPct < 0 ? "text-danger" : "text-ok")}>
@@ -170,7 +170,7 @@ export function VariantList({ productId, productStatus, variants, attributeSchem
       cell: (v) => (
         <div className="min-w-0">
           <p className="font-semibold text-ink">{variantDisplayName(v, attributeSchema)}</p>
-          <p className="tabular text-[12px] text-slate-400">{v.sku}</p>
+          <p className="tabular text-[12px] text-ink-subtle">{v.sku}</p>
         </div>
       ),
     },

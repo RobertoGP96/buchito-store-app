@@ -30,14 +30,14 @@ export function TwoFactorCard({ status }: { status: TwoFactorStatus }) {
   return (
     <section className="flex flex-col rounded-card bg-canvas p-5 shadow-card md:p-6">
       <div className="flex items-center gap-3">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-tint text-navy-700">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-crema-100 text-tostado-700">
           <ShieldCheck className="h-5 w-5" strokeWidth={1.9} />
         </span>
         <p className="min-w-0 flex-1 text-[15px] font-semibold text-ink">Verificación en dos pasos</p>
         <StatusChip label={status.enabled ? "Activada" : "Desactivada"} tone={status.enabled ? "success" : "neutral"} />
       </div>
 
-      <p className="mt-3 text-[13px] leading-[1.6] text-slate-500">
+      <p className="mt-3 text-[13px] leading-[1.6] text-ink-muted">
         {status.enabled
           ? status.method === "app"
             ? "Al entrar te pediremos, además de la contraseña, el código de tu app de autenticación."
@@ -47,15 +47,15 @@ export function TwoFactorCard({ status }: { status: TwoFactorStatus }) {
 
       {status.enabled && status.method && (
         <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-[13px]">
-          <dt className="text-slate-400">Método</dt>
+          <dt className="text-ink-subtle">Método</dt>
           <dd className="font-medium text-ink">{TWO_FACTOR_METHOD_LABELS[status.method]}</dd>
           {status.enabledAt && (
             <>
-              <dt className="text-slate-400">Desde</dt>
+              <dt className="text-ink-subtle">Desde</dt>
               <dd className="font-medium text-ink">{fmtDate(status.enabledAt)}</dd>
             </>
           )}
-          <dt className="text-slate-400">Códigos de respaldo</dt>
+          <dt className="text-ink-subtle">Códigos de respaldo</dt>
           <dd className="font-medium text-ink tabular">
             {status.recoveryCodesLeft === 0 ? "Ninguno" : `${status.recoveryCodesLeft} sin usar`}
           </dd>

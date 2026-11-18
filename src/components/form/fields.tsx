@@ -11,16 +11,19 @@ import {
   TextArea,
   TextField,
 } from "@heroui/react";
+import { Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
 import {
   Controller,
   type Control,
   type FieldPath,
   type FieldValues,
 } from "react-hook-form";
+import { cn } from "@/lib/utils";
 
-/** Campos de formulario sobre HeroUI ya cableados a react-hook-form. Todos
- *  los formularios del admin los usan: así el look y los mensajes de error
- *  son los mismos en todas partes. */
+/** Campos de formulario sobre HeroUI ya cableados a react-hook-form. Los usan
+ *  el admin, el acceso y el registro: así el look y los mensajes de error son
+ *  los mismos en todas partes. */
 
 interface BaseProps<T extends FieldValues> {
   control: Control<T>;
@@ -58,13 +61,19 @@ export function FormTextField<T extends FieldValues>({
   min,
   suffix,
 }: TextProps<T>) {
+  const isPassword = type === "password";
+  const [revealed, setRevealed] = useState(false);
+
   return (
     <Controller
       control={control}
       name={name}
       render={({ field, fieldState }) => (
         <TextField
-          type={type}
+          type={isPassword && revealed ? "text" : type}
+          // `name` estable: los gestores de contraseñas y el autocompletado
+          // del navegador identifican el campo por él.
+          name={field.name}
           value={field.value == null ? "" : String(field.value)}
           onChange={field.onChange}
           onBlur={field.onBlur}
@@ -78,16 +87,38 @@ export function FormTextField<T extends FieldValues>({
           <Label>{label}</Label>
           <div className="relative">
             <Input
+              // Con la ref, react-hook-form lleva el foco al primer campo con
+              // error cuando el envío falla.
+              ref={field.ref}
               placeholder={placeholder}
               step={step}
               min={min}
               inputMode={type === "number" ? "decimal" : undefined}
-              className={suffix ? "pr-14" : undefined}
+              // Correo y contraseña son identificadores, no prosa.
+              spellCheck={type === "email" || isPassword ? false : undefined}
+              autoCapitalize={isPassword ? "none" : undefined}
+              className={cn(suffix && "pr-14", isPassword && "pr-12")}
             />
             {suffix && (
-              <span className="tabular pointer-events-none absolute inset-y-0 right-4 flex items-center text-[12px] font-semibold text-slate-400">
+              <span className="tabular pointer-events-none absolute inset-y-0 right-4 flex items-center text-[12px] font-semibold text-ink-subtle">
                 {suffix}
               </span>
+            )}
+            {isPassword && (
+              <button
+                type="button"
+                onClick={() => setRevealed((v) => !v)}
+                aria-pressed={revealed}
+                aria-label="Mostrar contraseña"
+                disabled={isDisabled}
+                className="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-field text-ink-subtle transition-colors duration-150 hover:text-ink disabled:pointer-events-none disabled:opacity-50"
+              >
+                {revealed ? (
+                  <EyeOff className="h-[18px] w-[18px]" strokeWidth={1.7} aria-hidden />
+                ) : (
+                  <Eye className="h-[18px] w-[18px]" strokeWidth={1.7} aria-hidden />
+                )}
+              </button>
             )}
           </div>
           {description && <Description>{description}</Description>}
@@ -120,6 +151,7 @@ export function FormTextArea<T extends FieldValues>({
       name={name}
       render={({ field, fieldState }) => (
         <TextField
+          name={field.name}
           value={field.value ?? ""}
           onChange={field.onChange}
           onBlur={field.onBlur}
@@ -130,7 +162,7 @@ export function FormTextArea<T extends FieldValues>({
           className={className}
         >
           <Label>{label}</Label>
-          <TextArea placeholder={placeholder} rows={rows} />
+          <TextArea ref={field.ref} placeholder={placeholder} rows={rows} />
           {description && <Description>{description}</Description>}
           <FieldError>{fieldState.error?.message}</FieldError>
         </TextField>
@@ -178,7 +210,7 @@ export function FormSelect<T extends FieldValues>({
           className={className}
         >
           <Label>{label}</Label>
-          <Select.Trigger>
+          <Select.Trigger ref={field.ref}>
             <Select.Value />
             <Select.Indicator />
           </Select.Trigger>
@@ -191,7 +223,7 @@ export function FormSelect<T extends FieldValues>({
                   <span className="flex flex-col">
                     <span>{option.label}</span>
                     {option.description && (
-                      <span className="text-[12px] text-slate-400">{option.description}</span>
+                      <span className="text-[12px] text-ink-subtle">{option.description}</span>
                     )}
                   </span>
                   <ListBox.ItemIndicator />

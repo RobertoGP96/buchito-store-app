@@ -51,7 +51,7 @@ export function FormImageField<T extends FieldValues>({
                 )}
               </div>
             </div>
-            {description && <p className="mt-1.5 text-[12px] text-slate-400">{description}</p>}
+            {description && <p className="mt-1.5 text-[12px] text-ink-subtle">{description}</p>}
           </div>
         );
       }}

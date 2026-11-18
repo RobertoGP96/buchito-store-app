@@ -19,7 +19,7 @@ function ProfitCell({ row }: { row: ProductProfitRow }) {
 }
 
 function Margin({ row }: { row: ProductProfitRow }) {
-  if (row.marginPct == null) return <span className="text-slate-400">—</span>;
+  if (row.marginPct == null) return <span className="text-ink-subtle">—</span>;
   return <span className="tabular">{row.marginPct} %</span>;
 }
 
@@ -27,7 +27,7 @@ function Units({ row }: { row: ProductProfitRow }) {
   return (
     <span className="tabular">
       {fmtQtyNumber(row.qty)}
-      {row.inComboQty > 0 && <span className="text-[11.5px] text-slate-400"> · {fmtQtyNumber(row.inComboQty)} en combos</span>}
+      {row.inComboQty > 0 && <span className="text-[11.5px] text-ink-subtle"> · {fmtQtyNumber(row.inComboQty)} en combos</span>}
     </span>
   );
 }
@@ -40,7 +40,7 @@ export function FinanceProducts({ rows }: { rows: ProductProfitRow[] }) {
       header: "Producto",
       isRowHeader: true,
       cell: (r) => (
-        <Link href={`/admin/productos/${r.productId}`} className="font-semibold text-ink hover:text-navy-700">
+        <Link href={`/admin/productos/${r.productId}`} className="font-semibold text-ink hover:text-tostado-700">
           {r.productName}
         </Link>
       ),
@@ -51,7 +51,7 @@ export function FinanceProducts({ rows }: { rows: ProductProfitRow[] }) {
       id: "cost",
       header: "Costo",
       align: "right",
-      cell: (r) => (r.cost == null ? <span className="text-slate-400">—</span> : <Money value={r.cost} />),
+      cell: (r) => (r.cost == null ? <span className="text-ink-subtle">—</span> : <Money value={r.cost} />),
     },
     { id: "profit", header: "Ganancia", align: "right", cell: (r) => <ProfitCell row={r} /> },
     { id: "margin", header: "Margen", align: "right", cell: (r) => <Margin row={r} /> },

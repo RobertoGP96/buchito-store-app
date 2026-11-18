@@ -9,11 +9,11 @@ export type ButtonLinkVariant = "soft" | "solid" | "outline" | "ghost";
 export type ButtonLinkSize = "default" | "sm" | "lg";
 
 const VARIANTS: Record<ButtonLinkVariant, string> = {
-  soft: "bg-tint text-navy-900 hover:bg-tint-strong",
-  solid: "bg-navy-700 text-on-brand hover:bg-navy-600",
+  soft: "bg-crema-100 text-espresso-900 hover:bg-crema-200",
+  solid: "bg-tostado-700 text-on-tostado hover:bg-tostado-600",
   outline:
-    "border-[1.5px] border-line bg-transparent text-navy-700 hover:border-tint-strong hover:bg-tint",
-  ghost: "text-slate-500 hover:text-navy-700",
+    "border-[1.5px] border-line bg-transparent text-tostado-700 hover:border-crema-200 hover:bg-crema-100",
+  ghost: "text-ink-muted hover:text-tostado-700",
 };
 
 const SIZES: Record<ButtonLinkSize, string> = {

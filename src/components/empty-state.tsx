@@ -19,7 +19,7 @@ interface EmptyStateProps {
 
 export function EmptyState({
   icon: Icon,
-  iconColor = "text-navy-700",
+  iconColor = "text-tostado-700",
   eyebrow,
   title,
   description,
@@ -40,7 +40,7 @@ export function EmptyState({
     >
       <span
         className={cn(
-          "flex items-center justify-center rounded-full bg-tint",
+          "flex items-center justify-center rounded-full bg-crema-100",
           compact ? "h-11 w-11" : "h-[52px] w-[52px]"
         )}
       >
@@ -52,13 +52,13 @@ export function EmptyState({
       {eyebrow && <p className="eyebrow mt-5">{eyebrow}</p>}
       <p
         className={cn(
-          "font-display mt-3.5 leading-tight text-navy-900",
+          "font-display mt-3.5 leading-tight text-balance text-espresso-900",
           compact ? "text-[17px]" : "text-[22px]"
         )}
       >
         {title}
       </p>
-      <p className="mt-3 max-w-[380px] text-[13.5px] leading-[1.65] text-pretty text-slate-500">
+      <p className="mt-3 max-w-[380px] text-[13.5px] leading-[1.65] text-pretty text-ink-muted">
         {description}
       </p>
       {ctaLabel && ctaHref && (

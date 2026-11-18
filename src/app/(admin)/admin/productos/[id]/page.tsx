@@ -88,7 +88,7 @@ export default async function AdminProductPage({ params }: AdminProductPageProps
       {!hasActiveVariants && (
         <p
           role="status"
-          className="flex items-start gap-2.5 rounded-field bg-gold-100 px-4 py-3 text-[13px] leading-[1.5] text-gold-600"
+          className="flex items-start gap-2.5 rounded-field bg-warn-soft px-4 py-3 text-[13px] leading-[1.5] text-warn"
         >
           <AlertTriangle className="mt-0.5 h-4 w-4 flex-none" strokeWidth={2} />
           <span>

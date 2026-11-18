@@ -70,7 +70,7 @@ export function SetBaseCurrencyButton({ currency, currentBaseCode, size = "sm" }
           </div>
         }
       >
-        <p className="text-[13px] leading-[1.6] text-slate-500">
+        <p className="text-[13px] leading-[1.6] text-ink-muted">
           Esta acción queda registrada en la auditoría. Puedes volver a cambiarla desde aquí o desde Configuración.
         </p>
       </ResponsiveFormDialog>

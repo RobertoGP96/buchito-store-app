@@ -77,7 +77,7 @@ function Section({ title, children, aside }: { title: string; children: React.Re
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-4 text-[13.5px]">
-      <dt className="text-slate-500">{label}</dt>
+      <dt className="text-ink-muted">{label}</dt>
       <dd className="text-right font-medium text-ink">{value}</dd>
     </div>
   );
@@ -105,7 +105,7 @@ export function OrderDetail({ order, actions, paymentActions, customerActions, d
                 <li key={group.key} className="flex items-center justify-between gap-4 py-2.5 text-[13.5px]">
                   <div className="min-w-0">
                     <p className="font-medium text-ink">{group.line.productName}</p>
-                    <p className="text-[12px] text-slate-400">
+                    <p className="text-[12px] text-ink-subtle">
                       {group.line.variantName ? `${group.line.variantName} · ` : ""}
                       <span className="tabular">{group.line.sku}</span> · {fmtQty(group.line.qty, group.line.unit)} × <Money value={group.line.unitPrice} />
                     </p>
@@ -117,25 +117,25 @@ export function OrderDetail({ order, actions, paymentActions, customerActions, d
                   <div className="flex items-center justify-between gap-4">
                     <div className="min-w-0">
                       <p className="font-medium text-ink">
-                        <span className="mr-1.5 rounded-full bg-tint px-2 py-0.5 text-[10.5px] font-semibold tracking-[.02em] text-navy-700 uppercase">
+                        <span className="mr-1.5 rounded-full bg-crema-100 px-2 py-0.5 text-[10.5px] font-semibold tracking-[.02em] text-tostado-700 uppercase">
                           Combo
                         </span>
                         {group.name}
                       </p>
-                      <p className="text-[12px] text-slate-400">
+                      <p className="text-[12px] text-ink-subtle">
                         {group.qty} × <Money value={group.total / group.qty} />
                       </p>
                     </div>
                     <Money value={group.total} className="font-semibold text-ink" />
                   </div>
-                  <ul className="mt-1.5 flex flex-col gap-0.5 border-l-2 border-line pl-3 text-[12.5px] text-slate-500">
+                  <ul className="mt-1.5 flex flex-col gap-0.5 border-l-2 border-line pl-3 text-[12.5px] text-ink-muted">
                     {group.lines.map((line) => (
                       <li key={line.lineId} className="flex items-center justify-between gap-3">
                         <span className="min-w-0 truncate">
                           {fmtQty(line.qty, line.unit)} × {line.productName}
                           {line.variantName ? ` (${line.variantName})` : ""}
                         </span>
-                        <Money value={line.lineTotal} className="text-slate-400" />
+                        <Money value={line.lineTotal} className="text-ink-subtle" />
                       </li>
                     ))}
                   </ul>
@@ -150,7 +150,7 @@ export function OrderDetail({ order, actions, paymentActions, customerActions, d
             {order.paymentSurcharge > 0 && <Row label="Recargo de pago" value={<Money value={order.paymentSurcharge} />} />}
             <div className="flex items-center justify-between gap-4 border-t border-line pt-2 text-[15px]">
               <dt className="font-semibold text-ink">Total</dt>
-              <dd className="font-display text-navy-900"><Money value={order.total} /></dd>
+              <dd className="font-display text-espresso-900"><Money value={order.total} /></dd>
             </div>
           </dl>
           {profit && (
@@ -195,13 +195,13 @@ export function OrderDetail({ order, actions, paymentActions, customerActions, d
                     <p className="font-medium text-ink">
                       <Money value={p.amountTendered} currency={p.currency} /> · {p.methodName}
                     </p>
-                    <p className="tabular text-slate-400">
+                    <p className="tabular text-ink-subtle">
                       {fmtDateTime(p.paidAt)}
                       {p.receivedBy ? ` · ${p.receivedBy}` : ""}
                       {p.reference ? ` · ref. ${p.reference}` : ""}
                     </p>
                   </div>
-                  <Money value={p.amountBase} className="text-slate-500" />
+                  <Money value={p.amountBase} className="text-ink-muted" />
                 </li>
               ))}
             </ul>
@@ -215,7 +215,7 @@ export function OrderDetail({ order, actions, paymentActions, customerActions, d
           <ol className="mt-3 flex flex-col gap-1.5 text-[12.5px]">
             {timeline.map((t) => (
               <li key={t.label} className="flex items-center justify-between gap-3">
-                <span className="text-slate-500">{t.label}</span>
+                <span className="text-ink-muted">{t.label}</span>
                 <span className="tabular text-ink">{fmtDateTime(t.at!)}</span>
               </li>
             ))}
@@ -227,10 +227,10 @@ export function OrderDetail({ order, actions, paymentActions, customerActions, d
 
         <Section title="Cliente" aside={customerActions}>
           <p className="text-[14px] font-semibold text-ink">{order.customerName}</p>
-          <p className="tabular mt-0.5 text-[13px] text-slate-500">
-            <a href={`tel:${order.customerPhone.replace(/\s+/g, "")}`} className="hover:text-navy-700">{order.customerPhone}</a>
+          <p className="tabular mt-0.5 text-[13px] text-ink-muted">
+            <a href={`tel:${order.customerPhone.replace(/\s+/g, "")}`} className="hover:text-tostado-700">{order.customerPhone}</a>
           </p>
-          {order.customerEmail && <p className="text-[13px] text-slate-500">{order.customerEmail}</p>}
+          {order.customerEmail && <p className="text-[13px] text-ink-muted">{order.customerEmail}</p>}
         </Section>
 
         <Section
@@ -238,7 +238,7 @@ export function OrderDetail({ order, actions, paymentActions, customerActions, d
           aside={
             order.delivery ? (
               deliveryHref ? (
-                <Link href={deliveryHref} className="text-[12.5px] font-semibold text-navy-700 hover:underline">
+                <Link href={deliveryHref} className="text-[12.5px] font-semibold text-tostado-700 hover:underline">
                   Ver entrega
                 </Link>
               ) : (
@@ -257,7 +257,7 @@ export function OrderDetail({ order, actions, paymentActions, customerActions, d
                       {" · "}
                       <a
                         href={`tel:${order.deliveryAddress.recipientPhone.replace(/\s+/g, "")}`}
-                        className="tabular text-slate-500 hover:text-navy-700"
+                        className="tabular text-ink-muted hover:text-tostado-700"
                       >
                         {order.deliveryAddress.recipientPhone}
                       </a>
@@ -270,13 +270,13 @@ export function OrderDetail({ order, actions, paymentActions, customerActions, d
               {order.deliveryAddress.neighborhood && (
                 <span className="block">{order.deliveryAddress.neighborhood}</span>
               )}
-              {order.zoneName && <span className="block text-slate-500">Zona: {order.zoneName}</span>}
+              {order.zoneName && <span className="block text-ink-muted">Zona: {order.zoneName}</span>}
               {order.deliveryAddress.reference && (
-                <span className="block text-slate-500">Ref.: {order.deliveryAddress.reference}</span>
+                <span className="block text-ink-muted">Ref.: {order.deliveryAddress.reference}</span>
               )}
             </address>
           ) : (
-            <p className="text-[13.5px] text-slate-500">El cliente recoge el pedido en la tienda.</p>
+            <p className="text-[13.5px] text-ink-muted">El cliente recoge el pedido en la tienda.</p>
           )}
           {order.delivery && (
             <dl className="mt-3 flex flex-col gap-1.5 border-t border-line pt-3">
@@ -286,7 +286,7 @@ export function OrderDetail({ order, actions, paymentActions, customerActions, d
             </dl>
           )}
           {order.notes && (
-            <p className="mt-3 rounded-field bg-page px-3 py-2 text-[12.5px] text-slate-500">{order.notes}</p>
+            <p className="mt-3 rounded-field bg-page px-3 py-2 text-[12.5px] text-ink-muted">{order.notes}</p>
           )}
         </Section>
       </div>

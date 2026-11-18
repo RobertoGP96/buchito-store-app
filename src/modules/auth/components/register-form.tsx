@@ -2,51 +2,18 @@
 
 import { unstable_rethrow } from "next/navigation";
 import { useState } from "react";
-import { Controller, useForm, type Control, type FieldPath } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button, FieldError, Input, Label, TextField, toast } from "@heroui/react";
+import { Button, toast } from "@heroui/react";
+import { FormTextField } from "@/components/form/fields";
 import { registerCustomer } from "../actions/auth-actions";
 import { registerSchema, type RegisterInput } from "../lib/schemas";
-
-interface FieldProps {
-  control: Control<RegisterInput>;
-  name: FieldPath<RegisterInput>;
-  label: string;
-  type?: string;
-  autoComplete?: string;
-  placeholder?: string;
-}
-
-function Field({ control, name, label, type = "text", autoComplete, placeholder }: FieldProps) {
-  return (
-    <Controller
-      control={control}
-      name={name}
-      render={({ field, fieldState }) => (
-        <TextField
-          type={type}
-          autoComplete={autoComplete}
-          value={field.value}
-          onChange={field.onChange}
-          onBlur={field.onBlur}
-          isInvalid={fieldState.invalid}
-          isRequired
-          fullWidth
-        >
-          <Label>{label}</Label>
-          <Input placeholder={placeholder} />
-          <FieldError>{fieldState.error?.message}</FieldError>
-        </TextField>
-      )}
-    />
-  );
-}
 
 export function RegisterForm({ callbackUrl }: { callbackUrl?: string }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { control, handleSubmit } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { fullName: "", email: "", phone: "", password: "", confirmPassword: "", callbackUrl },
+    defaultValues: { fullName: "", email: "", phone: "", password: "", callbackUrl },
   });
 
   const onSubmit = async (values: RegisterInput) => {
@@ -68,11 +35,21 @@ export function RegisterForm({ callbackUrl }: { callbackUrl?: string }) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
-      <Field control={control} name="fullName" label="Nombre completo" autoComplete="name" placeholder="Ana Pérez" />
-      <Field control={control} name="email" label="Correo" type="email" autoComplete="email" placeholder="tu@correo.com" />
-      <Field control={control} name="phone" label="Teléfono" type="tel" autoComplete="tel" placeholder="+53 5 123 4567" />
-      <Field control={control} name="password" label="Contraseña" type="password" autoComplete="new-password" placeholder="Mínimo 8 caracteres" />
-      <Field control={control} name="confirmPassword" label="Repite la contraseña" type="password" autoComplete="new-password" />
+      <FormTextField control={control} name="fullName" label="Nombre completo" autoComplete="name" placeholder="Ana Pérez" isRequired />
+      <FormTextField control={control} name="email" label="Correo" type="email" autoComplete="email" placeholder="tu@correo.com" isRequired />
+      <FormTextField control={control} name="phone" label="Teléfono" type="tel" autoComplete="tel" placeholder="+53 5 123 4567" isRequired />
+      {/* Una sola contraseña: se comprueba con el botón de mostrarla, no
+          escribiéndola dos veces. La regla va como descripción (queda a la
+          vista y enlazada al campo), no como placeholder. */}
+      <FormTextField
+        control={control}
+        name="password"
+        label="Contraseña"
+        type="password"
+        autoComplete="new-password"
+        description="Mínimo 8 caracteres"
+        isRequired
+      />
       <Button
         type="submit"
         variant="primary"

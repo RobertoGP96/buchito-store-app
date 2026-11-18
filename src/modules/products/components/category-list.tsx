@@ -84,10 +84,10 @@ export function CategoryList({ rows }: { rows: CategoryRow[] }) {
       isRowHeader: true,
       cell: (r) => (
         <div className={cn("flex min-w-0 items-center gap-2", r.depth > 0 && "pl-5")}>
-          {r.depth > 0 && <CornerDownRight className="h-3.5 w-3.5 flex-none text-slate-300" strokeWidth={1.9} />}
+          {r.depth > 0 && <CornerDownRight className="h-3.5 w-3.5 flex-none text-ink-faint" strokeWidth={1.9} />}
           <div className="min-w-0">
             <p className="font-semibold text-ink">{r.name}</p>
-            <p className="text-[12px] text-slate-400">{r.slug}</p>
+            <p className="text-[12px] text-ink-subtle">{r.slug}</p>
           </div>
         </div>
       ),

@@ -94,17 +94,17 @@ export function ProductPrice({ variant, className }: { variant: CatalogVariant; 
   const unitSuffix = perUnitSuffix(variant.unit);
   return (
     <div className={cn("flex flex-wrap items-baseline gap-x-3 gap-y-1", className)} aria-live="polite">
-      <p className="font-display text-[26px] leading-none text-navy-900">
+      <p className="font-display text-[26px] leading-none text-espresso-900">
         <Money value={variant.price} />
-        {unitSuffix && <span className="ml-1.5 text-[14px] font-medium text-slate-400">{unitSuffix}</span>}
+        {unitSuffix && <span className="ml-1.5 text-[14px] font-medium text-ink-subtle">{unitSuffix}</span>}
       </p>
       {variant.compareAtPrice != null && variant.compareAtPrice > variant.price && (
-        <p className="text-[14px] font-medium text-slate-400 line-through">
+        <p className="text-[14px] font-medium text-ink-subtle line-through">
           <Money value={variant.compareAtPrice} />
         </p>
       )}
       {variant.origCurrency.currencyId !== base.currencyId && (
-        <p className="text-[12px] text-slate-400">
+        <p className="text-[12px] text-ink-subtle">
           Precio en <Money value={variant.origPrice} currency={variant.origCurrency} /> a la tasa del día
         </p>
       )}
@@ -117,7 +117,7 @@ export function ProductAvailability({ variant, className }: { variant: CatalogVa
     <div className={cn("flex flex-wrap items-center gap-x-3 gap-y-1", className)}>
       <StockLabel stock={variant.stock} unit={variant.unit} />
       {variant.unit !== "unit" && (
-        <span className="text-[12px] leading-none text-slate-400">
+        <span className="text-[12px] leading-none text-ink-subtle">
           Se vende en pasos de {fmtQty(variant.qtyStep, variant.unit)}
         </span>
       )}
@@ -167,7 +167,7 @@ export function ProductDescription({ product, className }: { product: CatalogPro
   return (
     <div className={cn("border-t border-line pt-6", className)}>
       <p className="eyebrow">Descripción</p>
-      <p className="mt-2.5 text-[14px] leading-[1.7] text-pretty text-slate-500">{product.description}</p>
+      <p className="mt-2.5 text-[14px] leading-[1.7] text-pretty text-ink-muted">{product.description}</p>
     </div>
   );
 }
@@ -194,12 +194,12 @@ export function ProductSpecs({
     >
       {attributes.map((attr) => (
         <div key={attr.label} className="contents">
-          <dt className="text-slate-400">{attr.label}</dt>
+          <dt className="text-ink-subtle">{attr.label}</dt>
           <dd className="min-w-0 font-medium break-words text-ink">{attr.value}</dd>
         </div>
       ))}
       <div className="contents">
-        <dt className="text-slate-400">SKU</dt>
+        <dt className="text-ink-subtle">SKU</dt>
         <dd className="tabular min-w-0 font-medium break-words text-ink">{variant.sku}</dd>
       </div>
     </dl>

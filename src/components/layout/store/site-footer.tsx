@@ -36,7 +36,7 @@ const COLUMNS: FooterColumn[] = [
 ];
 
 const LINK =
-  "text-[13px] text-footer-fg/90 transition-colors duration-150 hover:text-white";
+  "text-[13px] text-footer-fg/90 transition-colors duration-150 hover:text-footer-fg";
 
 export interface FooterContact {
   phone: string | null;
@@ -51,7 +51,7 @@ export function SiteFooter({ contact }: { contact: FooterContact }) {
   const pathname = usePathname();
   const isHome = pathname === "/";
   // En móvil la barra inferior flota sobre el footer: el hueco que necesita
-  // lo pone el propio footer, así el navy llega hasta el borde de la pantalla.
+  // lo pone el propio footer, así el café llega hasta el borde de la pantalla.
   const navVisible = isBottomNavVisible(pathname);
   const hasContact = Boolean(contact.phone || contact.email || contact.address);
 
@@ -69,7 +69,7 @@ export function SiteFooter({ contact }: { contact: FooterContact }) {
 
             {COLUMNS.map((column) => (
               <nav key={column.title} aria-label={column.title}>
-                <p className="eyebrow text-gold-500">{column.title}</p>
+                <p className="eyebrow text-caramelo-500">{column.title}</p>
                 <ul className="mt-4 flex flex-col gap-3">
                   {column.links.map((link) => (
                     <li key={link.href}>

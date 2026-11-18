@@ -16,7 +16,7 @@ interface TwoFactorLoginStepProps {
 
 type Mode = "otp" | "recovery";
 
-const LINK_CLASS = "font-semibold text-navy-700 hover:underline disabled:cursor-not-allowed disabled:text-slate-400 disabled:no-underline";
+const LINK_CLASS = "font-semibold text-tostado-700 hover:underline disabled:cursor-not-allowed disabled:text-ink-subtle disabled:no-underline";
 
 /** Segundo paso del login: código de la app o del correo, con la opción de
  *  usar un código de respaldo. El ticket pendiente vive en una cookie
@@ -37,7 +37,14 @@ export function TwoFactorLoginStep({ challenge, callbackUrl, onBack }: TwoFactor
   }, [cooldown]);
 
   const submit = async (kind: Mode, value: string) => {
-    if (isSubmitting || !value.trim()) return;
+    if (isSubmitting) return;
+    // El botón no se deshabilita por un código incompleto: se deja enviar y se
+    // explica qué falta, en vez de un botón gris sin motivo.
+    if (kind === "otp" ? value.length < 6 : !value.trim()) {
+      setInvalid(true);
+      toast.warning(kind === "otp" ? "Escribe los 6 dígitos del código" : "Escribe tu código de respaldo");
+      return;
+    }
     setIsSubmitting(true);
     setInvalid(false);
     try {
@@ -109,8 +116,8 @@ export function TwoFactorLoginStep({ challenge, callbackUrl, onBack }: TwoFactor
       noValidate
     >
       <div>
-        <p className="eyebrow">Verificación en dos pasos</p>
-        <p className="mt-1 text-[13.5px] leading-[1.65] text-slate-500">{description}</p>
+        <h2 className="eyebrow">Verificación en dos pasos</h2>
+        <p className="mt-1 text-[13.5px] leading-[1.65] text-ink-muted">{description}</p>
       </div>
 
       {mode === "otp" ? (
@@ -144,7 +151,7 @@ export function TwoFactorLoginStep({ challenge, callbackUrl, onBack }: TwoFactor
         variant="primary"
         size="lg"
         isPending={isSubmitting}
-        isDisabled={isSubmitting || (mode === "otp" ? code.length < 6 : recoveryCode.trim().length === 0)}
+        isDisabled={isSubmitting}
         className="mt-2 w-full rounded-full"
       >
         {isSubmitting ? "Verificando…" : "Verificar"}
@@ -163,7 +170,7 @@ export function TwoFactorLoginStep({ challenge, callbackUrl, onBack }: TwoFactor
               ? "Usar el código de la app"
               : "Usar el código del correo"}
         </button>
-        <button type="button" onClick={() => void back()} className="text-slate-500 hover:underline">
+        <button type="button" onClick={() => void back()} className="text-ink-muted hover:underline">
           Volver
         </button>
       </div>

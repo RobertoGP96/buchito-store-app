@@ -31,12 +31,12 @@ export default async function ProfilePage() {
         <section className="rounded-card bg-canvas p-5 shadow-card md:col-span-2 md:p-6">
           <div className="flex items-start justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3">
-              <span className="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-tint text-navy-700">
+              <span className="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-crema-100 text-tostado-700">
                 <UserRound className="h-5 w-5" strokeWidth={1.9} />
               </span>
               <div className="min-w-0">
                 <p className="truncate text-[15px] font-semibold text-ink">{customer?.name ?? user.fullName}</p>
-                <p className="truncate text-[12.5px] text-slate-400">{user.email}</p>
+                <p className="truncate text-[12.5px] text-ink-subtle">{user.email}</p>
               </div>
             </div>
             {/* La clave remonta el botón (y cierra su diálogo) cuando los datos cambian. */}
@@ -50,22 +50,22 @@ export default async function ProfilePage() {
           <dl className="mt-5 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-[13px]">
             {customer && (
               <>
-                <dt className="text-slate-400">Teléfono</dt>
+                <dt className="text-ink-subtle">Teléfono</dt>
                 <dd className="tabular font-medium text-ink">{customer.phone}</dd>
               </>
             )}
-            <dt className="text-slate-400">Rol</dt>
+            <dt className="text-ink-subtle">Rol</dt>
             <dd className="font-medium text-ink">{roleLabel}</dd>
           </dl>
         </section>
         <section className="flex flex-col rounded-card bg-canvas p-5 shadow-card md:p-6">
           <div className="flex items-center gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-tint text-navy-700">
+            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-crema-100 text-tostado-700">
               <Package className="h-5 w-5" strokeWidth={1.9} />
             </span>
             <p className="text-[15px] font-semibold text-ink">Mis pedidos</p>
           </div>
-          <p className="mt-3 text-[13px] leading-[1.6] text-slate-500">
+          <p className="mt-3 text-[13px] leading-[1.6] text-ink-muted">
             Consulta el estado de tus pedidos y el seguimiento de la entrega.
           </p>
           <ButtonLink href="/perfil/pedidos" variant="soft" className="mt-auto self-start pt-3">
@@ -74,12 +74,12 @@ export default async function ProfilePage() {
         </section>
         <section className="flex flex-col rounded-card bg-canvas p-5 shadow-card md:p-6">
           <div className="flex items-center gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-tint text-navy-700">
+            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-crema-100 text-tostado-700">
               <MapPin className="h-5 w-5" strokeWidth={1.9} />
             </span>
             <p className="text-[15px] font-semibold text-ink">Mis destinatarios</p>
           </div>
-          <p className="mt-3 text-[13px] leading-[1.6] text-slate-500">
+          <p className="mt-3 text-[13px] leading-[1.6] text-ink-muted">
             A quién le entregamos tus pedidos: nombre, teléfono y dirección, listos para elegir al comprar.
           </p>
           <ButtonLink href="/perfil/destinatarios" variant="soft" className="mt-auto self-start pt-3">

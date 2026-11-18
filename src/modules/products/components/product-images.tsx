@@ -51,7 +51,7 @@ export function ProductImages({ productId, images }: ProductImagesProps) {
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="eyebrow">Fotos del producto</p>
-          <p className="mt-1 text-[12.5px] text-slate-400">
+          <p className="mt-1 text-[12.5px] text-ink-subtle">
             La primera es la portada en el catálogo. Hasta 10 fotos.
           </p>
         </div>
@@ -89,14 +89,14 @@ export function ProductImages({ productId, images }: ProductImagesProps) {
               <div
                 className={cn(
                   "relative aspect-square overflow-hidden rounded-field bg-cream",
-                  index === 0 && "ring-2 ring-navy-700 ring-offset-2 ring-offset-canvas"
+                  index === 0 && "ring-2 ring-tostado-700 ring-offset-2 ring-offset-canvas"
                 )}
               >
                 <span className="absolute inset-0 flex items-center justify-center">
                   <ProductImage src={image.url} alt={image.alt ?? ""} sizes="(max-width: 640px) 50vw, 200px" />
                 </span>
                 {index === 0 && (
-                  <span className="absolute top-2 left-2 inline-flex items-center gap-1 rounded-full bg-navy-700 px-2 py-1 text-[10.5px] font-semibold text-on-brand">
+                  <span className="absolute top-2 left-2 inline-flex items-center gap-1 rounded-full bg-tostado-700 px-2 py-1 text-[10.5px] font-semibold text-on-tostado">
                     <Star className="h-3 w-3" strokeWidth={2.2} />
                     Portada
                   </span>

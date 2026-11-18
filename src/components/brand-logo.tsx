@@ -101,7 +101,7 @@ export function BrandLogo({
             "font-display leading-none tracking-[.04em] uppercase",
             compact && "hidden sm:inline",
             size === "sm" ? "text-[15px]" : "text-[17px]",
-            tone === "default" ? "text-navy-700" : "text-white"
+            tone === "default" ? "text-tostado-700" : "text-nav-fg"
           )}
         >
           {STORE_NAME}

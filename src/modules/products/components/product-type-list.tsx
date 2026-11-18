@@ -58,11 +58,11 @@ export function ProductTypeList({ rows }: { rows: ProductTypeRow[] }) {
       cell: (r) => (
         <div className="min-w-0">
           <p className="font-semibold text-ink">{r.name}</p>
-          <p className="text-[12px] text-slate-400">{r.slug}</p>
+          <p className="text-[12px] text-ink-subtle">{r.slug}</p>
         </div>
       ),
     },
-    { id: "attributes", header: "Atributos", cell: (r) => <span className="text-[13px] text-slate-500">{attributeSummary(r)}</span> },
+    { id: "attributes", header: "Atributos", cell: (r) => <span className="text-[13px] text-ink-muted">{attributeSummary(r)}</span> },
     { id: "products", header: "Productos", align: "right", cell: (r) => <span className="tabular">{r.productCount}</span> },
     {
       id: "status",

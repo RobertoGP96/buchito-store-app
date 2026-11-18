@@ -47,7 +47,7 @@ export function TopNav({ user }: { user: NavUser | null }) {
       <div className="mx-auto flex h-16 w-full max-w-[1200px] items-center gap-5 px-5 md:h-[68px] md:gap-7 md:px-6">
         <BrandLogo tone="on-brand" compact />
 
-        <nav className="hidden items-center gap-6 md:flex">
+        <nav aria-label="Principal" className="hidden items-center gap-6 md:flex">
           {LINKS.map((link) => {
             const active = link.isActive(pathname);
             const Icon = link.icon;
@@ -59,7 +59,7 @@ export function TopNav({ user }: { user: NavUser | null }) {
                 className={cn(
                   "nav-label inline-flex items-center gap-1.5 border-b-2 pt-1 pb-1 transition-colors duration-150",
                   active
-                    ? "border-gold-500 font-bold text-nav-fg"
+                    ? "border-caramelo-500 font-bold text-nav-fg"
                     : "border-transparent font-medium text-nav-muted hover:text-nav-fg"
                 )}
               >

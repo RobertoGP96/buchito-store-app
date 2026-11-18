@@ -46,7 +46,7 @@ export function NotificationPreferencesCard({ role, muted, inboxHref }: Preferen
   return (
     <section className="flex flex-col rounded-card bg-canvas p-5 shadow-card md:p-6">
       <div className="flex items-center gap-3">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-tint text-navy-700">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-crema-100 text-tostado-700">
           <Bell className="h-5 w-5" strokeWidth={1.9} />
         </span>
         <p className="min-w-0 flex-1 text-[15px] font-semibold text-ink">Notificaciones</p>
@@ -56,15 +56,15 @@ export function NotificationPreferencesCard({ role, muted, inboxHref }: Preferen
         />
       </div>
 
-      <p className="mt-3 text-[13px] leading-[1.6] text-slate-500">
+      <p className="mt-3 text-[13px] leading-[1.6] text-ink-muted">
         Elige qué avisos quieres recibir. Los que silencies no se generan y no aparecerán después en tu bandeja.
       </p>
 
       <dl className="mt-4 grid grid-cols-[1fr_auto] gap-x-6 gap-y-2 text-[13px]">
         {categories.map((category) => (
           <div key={category} className="contents">
-            <dt className="text-slate-500">{categoryCopy(role, category).label}</dt>
-            <dd className={muted.includes(category) ? "font-medium text-slate-400" : "font-medium text-ink"}>
+            <dt className="text-ink-muted">{categoryCopy(role, category).label}</dt>
+            <dd className={muted.includes(category) ? "font-medium text-ink-subtle" : "font-medium text-ink"}>
               {muted.includes(category) ? "Silenciada" : "Activa"}
             </dd>
           </div>

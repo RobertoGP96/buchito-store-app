@@ -22,7 +22,7 @@ export function ThemeToggle({ showLabel = false, className }: ThemeToggleProps) 
       onClick={toggleTheme}
       aria-label="Cambiar entre tema claro y oscuro"
       className={cn(
-        "nav-label inline-flex items-center gap-1.5 text-slate-400 transition-colors duration-150 hover:text-navy-900",
+        "nav-label inline-flex items-center gap-1.5 text-ink-subtle transition-colors duration-150 hover:text-espresso-900",
         className
       )}
     >

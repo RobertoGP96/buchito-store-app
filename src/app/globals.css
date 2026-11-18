@@ -3,20 +3,20 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Sistema "SHOP Tienda Web" (heredado de mareyreg/apps/tienda), en PRUEBA con
-   paleta café: espresso para titulares, café tostado para CTA, caramelo como
-   acento y fondo blanco puro. Los tokens conservan su nombre de ROL
-   (navy-900 sigue siendo "titular / precio", navy-700 "CTA / activo") aunque
-   el valor ya no sea azul, para no tocar ningún componente. Nunca escribir un
+/* Tokens de Buchito Shop. Cada nombre dice lo que es: espresso (titulares y
+   precios), tostado (CTA y activo), crema (tintes), caramelo (promoción), azul
+   (informativo), ink-* (texto). El texto sobre un relleno usa su pareja on-*
+   (on-tostado, on-danger…), que en oscuro pasa a tinta oscura: nunca blanco
+   literal. Todo par texto/fondo cumple 4.5:1 en ambos temas. Nunca escribir un
    hex en un componente. */
 :root {
   /* Marca (café) */
-  --c-navy-950: #2a1a0f;
-  --c-navy-900: #3b2415;
-  --c-navy-700: #6b3f24;
-  --c-navy-600: #80502f;
-  --c-navy-200: #e4d3c3;
-  --c-navy-100: #f1e8de;
+  --c-espresso-950: #2a1a0f;
+  --c-espresso-900: #3b2415;
+  --c-tostado-700: #6b3f24;
+  --c-tostado-600: #80502f;
+  --c-crema-200: #e4d3c3;
+  --c-crema-100: #f1e8de;
 
   /* Fondos: página blanca, superficies latte */
   --c-page: #ffffff;
@@ -26,30 +26,38 @@
   --c-cream-50: #fbf8f4;
 
   /* Caramelo (acento) */
-  --c-gold-600: #b8782a;
-  --c-gold-500: #d4953a;
-  --c-gold-100: #f8ecd6;
+  --c-caramelo-700: #8a5a16;
+  --c-caramelo-500: #d4953a;
+  --c-caramelo-100: #f8ecd6;
+  --c-on-caramelo: #2a1a0f;
+
+  /* Azul jarrito: solo estados informativos, nunca decora. */
+  --c-azul-700: #2c5f8a;
+  --c-azul-100: #e3edf5;
+  --c-on-azul: #ffffff;
 
   /* Tintas y líneas */
   --c-ink: #211814;
-  --c-slate-500: #6b5e55;
-  --c-slate-400: #9a8c82;
-  --c-slate-300: #bfb3a9;
+  --c-ink-muted: #6b5e55;
+  --c-ink-subtle: #74665c;
+  --c-ink-faint: #bfb3a9;
   --c-line: #ece4db;
   --c-line-soft: #f3ede6;
   --c-rule: #ddd2c6;
 
   /* Semánticos */
-  --c-ok: #2e8b57;
+  --c-ok: #1f7a4a;
   --c-ok-soft: #e0f2e7;
-  --c-warn: #b8782a;
-  --c-danger: #c8432b;
+  --c-warn: #8f5b00;
+  --c-warn-soft: #fdf0cf;
+  --c-danger: #b93a24;
   --c-danger-soft: #fbe3de;
-  --c-alert: #c8432b;
-  --c-alert-fg: #ffffff;
+  --c-on-danger: #ffffff;
+  --c-on-ok: #ffffff;
+  --c-on-warn: #ffffff;
   --c-star: #e9a23b;
   --c-disabled: #bdb3aa;
-  --c-on-brand: #ffffff;
+  --c-on-tostado: #ffffff;
   --c-overlay: rgba(42, 26, 15, 0.45);
 
   /* Logo y footer: fijos en ambos temas, son la identidad de la marca. */
@@ -75,12 +83,12 @@
 }
 
 .dark {
-  --c-navy-950: #f5ece3;
-  --c-navy-900: #efe3d7;
-  --c-navy-700: #c98a55;
-  --c-navy-600: #d69c68;
-  --c-navy-200: #4a3526;
-  --c-navy-100: #352519;
+  --c-espresso-950: #f5ece3;
+  --c-espresso-900: #efe3d7;
+  --c-tostado-700: #c98a55;
+  --c-tostado-600: #d69c68;
+  --c-crema-200: #4a3526;
+  --c-crema-100: #352519;
 
   --c-page: #16100c;
   --c-canvas: #1f1711;
@@ -88,28 +96,35 @@
   --c-hover: #241a13;
   --c-cream-50: #1a130e;
 
-  --c-gold-600: #d4953a;
-  --c-gold-500: #dfa552;
-  --c-gold-100: #3d2c13;
+  --c-caramelo-700: #dfa552;
+  --c-caramelo-500: #dfa552;
+  --c-caramelo-100: #3d2c13;
+  --c-on-caramelo: #2a1a0f;
+
+  --c-azul-700: #7fb2dc;
+  --c-azul-100: #14283a;
+  --c-on-azul: #0b1a26;
 
   --c-ink: #f4ede6;
-  --c-slate-500: #b8a99c;
-  --c-slate-400: #8c7d70;
-  --c-slate-300: #65584d;
+  --c-ink-muted: #b8a99c;
+  --c-ink-subtle: #a39486;
+  --c-ink-faint: #65584d;
   --c-line: #352a22;
   --c-line-soft: #2b211a;
   --c-rule: #46382e;
 
   --c-ok: #4cc47f;
   --c-ok-soft: #14331f;
-  --c-warn: #d4953a;
+  --c-warn: #e6b450;
+  --c-warn-soft: #3a2a08;
   --c-danger: #f0654e;
   --c-danger-soft: #3d1a14;
-  --c-alert: #f0654e;
-  --c-alert-fg: #ffffff;
+  --c-on-danger: #2a0d07;
+  --c-on-ok: #0d2416;
+  --c-on-warn: #2a1a0f;
   --c-star: #e9a23b;
   --c-disabled: #5a4c42;
-  --c-on-brand: #ffffff;
+  --c-on-tostado: #2a1a0f;
   --c-overlay: rgba(0, 0, 0, 0.6);
 
   --c-brand-tile: #6b3f24;
@@ -151,19 +166,19 @@
   --overlay-foreground: var(--c-ink);
   --backdrop: var(--c-overlay);
 
-  --muted: var(--c-slate-500);
+  --muted: var(--c-ink-muted);
 
   --background-secondary: var(--c-cream-50);
   --background-tertiary: var(--c-surface);
   --surface-hover: var(--c-hover);
 
-  --default: var(--c-navy-100);
-  --default-foreground: var(--c-navy-900);
-  --default-hover: var(--c-navy-200);
+  --default: var(--c-crema-100);
+  --default-foreground: var(--c-espresso-900);
+  --default-hover: var(--c-crema-200);
 
-  --accent: var(--c-navy-700);
-  --accent-foreground: var(--c-on-brand);
-  --accent-hover: var(--c-navy-600);
+  --accent: var(--c-tostado-700);
+  --accent-foreground: var(--c-on-tostado);
+  --accent-hover: var(--c-tostado-600);
 
   /* Los formularios viven en cards blancas (canvas): el campo toma el crema
      de página para separarse del fondo y recupera el blanco al enfocarse. */
@@ -171,30 +186,36 @@
   --field-hover: var(--c-surface);
   --field-focus: var(--c-canvas);
   --field-foreground: var(--c-ink);
-  --field-placeholder: var(--c-slate-400);
+  --field-placeholder: var(--c-ink-subtle);
   --field-border: var(--c-rule);
-  --field-border-hover: var(--c-navy-700);
-  --field-border-focus: var(--c-navy-700);
+  --field-border-hover: var(--c-tostado-700);
+  --field-border-focus: var(--c-tostado-700);
   --field-shadow: 0 0 0 0 transparent;
   /* HeroUI deriva el radio de los campos de --radius × 1.5; la tienda usa 14px fijos. */
   --field-radius: 14px;
 
   --success: var(--c-ok);
-  --success-foreground: #ffffff;
+  --success-foreground: var(--c-on-ok);
+  --success-soft: var(--c-ok-soft);
+  --success-soft-foreground: var(--c-ok);
   --warning: var(--c-warn);
-  --warning-foreground: #1e1e1c;
+  --warning-foreground: var(--c-on-warn);
+  --warning-soft: var(--c-warn-soft);
+  --warning-soft-foreground: var(--c-warn);
   --danger: var(--c-danger);
-  --danger-foreground: var(--c-alert-fg);
+  --danger-foreground: var(--c-on-danger);
+  --danger-soft: var(--c-danger-soft);
+  --danger-soft-foreground: var(--c-danger);
 
   --segment: var(--c-canvas);
-  --segment-foreground: var(--c-navy-900);
+  --segment-foreground: var(--c-espresso-900);
 
   --border: var(--c-line);
   --border-secondary: var(--c-rule);
   --separator: var(--c-line);
   --separator-secondary: var(--c-rule);
-  --focus: var(--c-navy-700);
-  --link: var(--c-navy-700);
+  --focus: var(--c-tostado-700);
+  --link: var(--c-tostado-700);
 
   --radius: 14px;
 
@@ -203,14 +224,12 @@
 }
 
 @theme inline {
-  --color-navy-950: var(--c-navy-950);
-  --color-navy-900: var(--c-navy-900);
-  --color-navy-700: var(--c-navy-700);
-  --color-navy-600: var(--c-navy-600);
-  --color-navy-200: var(--c-navy-200);
-  --color-navy-100: var(--c-navy-100);
-  --color-tint: var(--c-navy-100);
-  --color-tint-strong: var(--c-navy-200);
+  --color-espresso-950: var(--c-espresso-950);
+  --color-espresso-900: var(--c-espresso-900);
+  --color-tostado-700: var(--c-tostado-700);
+  --color-tostado-600: var(--c-tostado-600);
+  --color-crema-200: var(--c-crema-200);
+  --color-crema-100: var(--c-crema-100);
 
   --color-page: var(--c-page);
   --color-canvas: var(--c-canvas);
@@ -219,14 +238,19 @@
   --color-hover: var(--c-hover);
   --color-cream-50: var(--c-cream-50);
 
-  --color-gold-600: var(--c-gold-600);
-  --color-gold-500: var(--c-gold-500);
-  --color-gold-100: var(--c-gold-100);
+  --color-caramelo-700: var(--c-caramelo-700);
+  --color-caramelo-500: var(--c-caramelo-500);
+  --color-caramelo-100: var(--c-caramelo-100);
+  --color-on-caramelo: var(--c-on-caramelo);
+
+  --color-azul-700: var(--c-azul-700);
+  --color-azul-100: var(--c-azul-100);
+  --color-on-azul: var(--c-on-azul);
 
   --color-ink: var(--c-ink);
-  --color-slate-500: var(--c-slate-500);
-  --color-slate-400: var(--c-slate-400);
-  --color-slate-300: var(--c-slate-300);
+  --color-ink-muted: var(--c-ink-muted);
+  --color-ink-subtle: var(--c-ink-subtle);
+  --color-ink-faint: var(--c-ink-faint);
   --color-line: var(--c-line);
   --color-line-soft: var(--c-line-soft);
   --color-rule: var(--c-rule);
@@ -234,12 +258,14 @@
   --color-ok: var(--c-ok);
   --color-ok-soft: var(--c-ok-soft);
   --color-warn: var(--c-warn);
+  --color-warn-soft: var(--c-warn-soft);
   --color-danger-soft: var(--c-danger-soft);
-  --color-alert: var(--c-alert);
-  --color-alert-fg: var(--c-alert-fg);
+  --color-on-danger: var(--c-on-danger);
+  --color-on-ok: var(--c-on-ok);
+  --color-on-warn: var(--c-on-warn);
   --color-star: var(--c-star);
   --color-disabled: var(--c-disabled);
-  --color-on-brand: var(--c-on-brand);
+  --color-on-tostado: var(--c-on-tostado);
   --color-scrim: var(--c-overlay);
 
   --color-brand-tile: var(--c-brand-tile);
@@ -259,9 +285,9 @@
   --shadow-float: var(--sh-float);
   --shadow-pop: var(--sh-pop);
 
-  --font-sans: var(--font-poppins), "Segoe UI", system-ui, sans-serif;
-  --font-display: var(--font-poppins), "Segoe UI", system-ui, sans-serif;
-  --font-ui: var(--font-poppins), "Segoe UI", system-ui, sans-serif;
+  --font-sans: var(--font-figtree), "Segoe UI", system-ui, sans-serif;
+  --font-display: var(--font-figtree), "Segoe UI", system-ui, sans-serif;
+  --font-ui: var(--font-figtree), "Segoe UI", system-ui, sans-serif;
 
   /* Escala de radios de la tienda bajo nombres propios: HeroUI deriva sus
      tamaños de --radius-sm/md/lg y no hay que pisarlos. */
@@ -273,7 +299,7 @@
 
 /* El foco se ve siempre, nunca se suprime. */
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
-  outline: 2px solid var(--c-navy-700);
+  outline: 2px solid var(--c-tostado-700);
   outline-offset: 2px;
 }
 
@@ -285,8 +311,8 @@
 /* Campos con borde propio: el foco lo marca el borde más un halo tenue, sin
    segundo anillo. */
 .field-shell:focus-within {
-  border-color: var(--c-navy-700);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-navy-700) 16%, transparent);
+  border-color: var(--c-tostado-700);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-tostado-700) 16%, transparent);
 }
 
 .field-shell:focus-visible,
@@ -301,7 +327,7 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: var(--c-slate-400);
+    color: var(--c-ink-subtle);
   }
 
   .nav-label {
@@ -481,7 +507,7 @@
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: var(--c-slate-300);
+  background-color: var(--c-ink-faint);
 }
 
 ::-webkit-scrollbar-corner {
@@ -503,4 +529,121 @@
 
 .no-scrollbar::-webkit-scrollbar {
   display: none;
+}
+
+/* Barras fijas (cabecera pegada arriba, tabs o barra flotante abajo en móvil):
+   al enfocar un campo o saltar a un ancla, el navegador deja ese margen para
+   que el elemento no quede tapado por la barra. */
+html {
+  scroll-padding-top: 5rem;
+  scroll-padding-bottom: 1.5rem;
+}
+
+@media (max-width: 767px) {
+  html {
+    scroll-padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Área táctil de 44px para los iconos de 36px de las cabeceras sin cambiar su
+   tamaño dibujado ni el alto de la barra. Solo en pantallas táctiles; a los
+   lados crece menos para no pisar el área del icono vecino. */
+@media (pointer: coarse) {
+  .touch-target {
+    position: relative;
+  }
+
+  .touch-target::after {
+    content: "";
+    position: absolute;
+    inset: -4px -2px;
+  }
+}
+
+/* Fila con scroll horizontal y barra oculta (chips de filtro): el contenido se
+   desvanece en el borde por donde queda más, única pista de que la fila sigue.
+   La máscara recorta solo las dos bandas, así el anillo de foco no se pierde.
+   El tamaño de cada banda lo mueve el propio scroll; donde no hay animaciones
+   ligadas al scroll, `ScrollFadeRow` marca `more-start`/`more-end`. */
+@property --fade-start {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --fade-end {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+.scroll-fade-x {
+  --fade-size: 2rem;
+  scroll-padding-inline: var(--fade-size);
+  mask:
+    linear-gradient(black, black) no-clip subtract,
+    linear-gradient(to right, black, transparent) 0 0 / var(--fade-start) 100% no-repeat no-clip,
+    linear-gradient(to right, transparent, black) 100% 0 / var(--fade-end) 100% no-repeat no-clip;
+  transition:
+    --fade-start 0.2s,
+    --fade-end 0.2s;
+}
+
+.scroll-fade-x.more-start {
+  --fade-start: var(--fade-size);
+}
+
+.scroll-fade-x.more-end {
+  --fade-end: var(--fade-size);
+}
+
+@supports (animation-timeline: scroll()) {
+  .scroll-fade-x {
+    transition: none;
+    animation:
+      revealFadeStart linear both,
+      hideFadeEnd linear both;
+    animation-timeline: scroll(self inline);
+    animation-range:
+      0 var(--fade-size),
+      calc(100% - var(--fade-size)) 100%;
+  }
+}
+
+@keyframes revealFadeStart {
+  to {
+    --fade-start: var(--fade-size);
+  }
+}
+
+@keyframes hideFadeEnd {
+  from {
+    --fade-end: var(--fade-size);
+  }
+}
+
+/* Listas largas: lo que nace fuera de pantalla no se maqueta ni se pinta hasta
+   acercarse. Va en la card (no en la celda) porque la contención recorta lo
+   que sobresale de los hijos y se comería la sombra; las primeras se excluyen
+   porque en lo visible al cargar solo añade trabajo. El alto es una estimación
+   que el navegador sustituye por el real en cuanto la pinta. */
+.product-grid > :nth-child(n + 9) > article {
+  content-visibility: auto;
+  contain-intrinsic-size: auto none auto 22rem;
+}
+
+.responsive-cards > li:nth-child(n + 9) > article {
+  content-visibility: auto;
+  contain-intrinsic-size: auto none auto 9rem;
+}
+
+/* El asterisco de «obligatorio» de HeroUI es contenido generado: el campo ya
+   se anuncia como requerido, así que se le da texto alternativo vacío para que
+   el lector no lea además «asterisco». La primera línea es para navegadores
+   sin la sintaxis `/`. Mismos selectores que label.css de HeroUI. */
+.label--required::after,
+[data-required="true"]:not([role="group"]):not([role="radiogroup"]):not([role="checkboxgroup"]) > .label::after,
+[data-required="true"]:not([data-slot="radio"]):not([data-slot="checkbox"]) > .label::after {
+  content: "*";
+  content: "*" / "";
 }

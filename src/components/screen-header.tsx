@@ -25,7 +25,7 @@ export function ScreenHeader({
       {backHref && (
         <Link
           href={backHref}
-          className="nav-label -ml-1 inline-flex items-center gap-0.5 text-slate-500 transition-colors duration-150 hover:text-navy-700"
+          className="nav-label -ml-1 inline-flex items-center gap-0.5 text-ink-muted transition-colors duration-150 hover:text-tostado-700"
         >
           <ChevronLeft className="h-4 w-4" strokeWidth={2} />
           Volver
@@ -42,14 +42,14 @@ export function ScreenHeader({
           {eyebrow && <p className="eyebrow">{eyebrow}</p>}
           <h1
             className={cn(
-              "font-display text-[26px] leading-[1.05] text-navy-900 md:text-[32px]",
+              "font-display text-[26px] leading-[1.05] text-balance text-espresso-900 md:text-[32px]",
               eyebrow && "mt-2"
             )}
           >
             {title}
           </h1>
           {description && (
-            <p className="mt-2.5 max-w-[560px] text-[13.5px] leading-[1.65] text-pretty text-slate-500">
+            <p className="mt-2.5 max-w-[560px] text-[13.5px] leading-[1.65] text-pretty text-ink-muted">
               {description}
             </p>
           )}

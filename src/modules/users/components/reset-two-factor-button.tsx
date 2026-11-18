@@ -83,7 +83,7 @@ export function ResetTwoFactorButton({ row, appearance }: ResetTwoFactorButtonPr
           </div>
         }
       >
-        <div className="flex flex-col gap-2 text-[13px] leading-[1.6] text-slate-500">
+        <div className="flex flex-col gap-2 text-[13px] leading-[1.6] text-ink-muted">
           <p>Comprueba antes que la petición viene de la persona titular de la cuenta.</p>
           <p>Podrá activarla de nuevo desde su perfil. Esta acción queda registrada en la auditoría.</p>
         </div>

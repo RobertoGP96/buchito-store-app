@@ -61,7 +61,7 @@ export function ZoneList({ rows }: { rows: ZoneRow[] }) {
       cell: (r) => (
         <div className="min-w-0">
           <p className="font-semibold text-ink">{r.name}</p>
-          {r.description && <p className="text-[12px] text-slate-400">{r.description}</p>}
+          {r.description && <p className="text-[12px] text-ink-subtle">{r.description}</p>}
         </div>
       ),
     },
@@ -70,7 +70,7 @@ export function ZoneList({ rows }: { rows: ZoneRow[] }) {
       id: "free",
       header: "Gratis desde",
       align: "right",
-      cell: (r) => (r.freeShippingThreshold == null ? <span className="text-slate-400">General</span> : <Money value={r.freeShippingThreshold} />),
+      cell: (r) => (r.freeShippingThreshold == null ? <span className="text-ink-subtle">General</span> : <Money value={r.freeShippingThreshold} />),
     },
     { id: "eta", header: "Tiempo", cell: (r) => r.etaLabel ?? "—" },
     { id: "orders", header: "Pedidos", align: "right", cell: (r) => <span className="tabular">{r.orderCount}</span> },

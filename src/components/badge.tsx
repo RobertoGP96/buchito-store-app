@@ -3,12 +3,12 @@ import { cn } from "@/lib/utils";
 type BadgeVariant = "featured" | "discount" | "soldout" | "neutral";
 
 const VARIANTS: Record<BadgeVariant, string> = {
-  featured: "bg-gold-100 text-gold-600",
+  featured: "bg-caramelo-100 text-caramelo-700",
   discount: "bg-ok-soft text-ok",
   // Agotado es el único estado que debe cortar la lectura de la retícula, así
   // que va en relleno sólido y no en tinte suave como el resto.
-  soldout: "bg-danger font-bold text-alert-fg",
-  neutral: "border border-line bg-canvas font-medium text-slate-500",
+  soldout: "bg-danger font-bold text-on-danger",
+  neutral: "border border-line bg-canvas font-medium text-ink-muted",
 };
 
 interface BadgeProps extends React.ComponentProps<"span"> {

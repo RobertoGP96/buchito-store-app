@@ -41,18 +41,18 @@ export default async function OffersPage() {
                 <div className="flex items-end justify-between gap-4">
                   <div>
                     <p className="eyebrow">Rebajados</p>
-                    <h2 className="font-display mt-2 text-[20px] leading-tight text-navy-900 md:text-[24px]">
+                    <h2 className="font-display mt-2 text-[20px] leading-tight text-espresso-900 md:text-[24px]">
                       Productos con descuento
                     </h2>
                   </div>
-                  <p className="tabular text-[12.5px] text-slate-400">
+                  <p className="tabular text-[12.5px] text-ink-subtle">
                     {products.length} {products.length === 1 ? "producto" : "productos"}
                   </p>
                 </div>
                 <ProductGrid className="mt-5">
                   {products.map((product, i) => (
                     <ProductGridCell key={product.productId}>
-                      <ProductCard product={product} priority={i < 4} />
+                      <ProductCard product={product} priority={i < 2} />
                     </ProductGridCell>
                   ))}
                 </ProductGrid>
@@ -64,7 +64,7 @@ export default async function OffersPage() {
                 <div className="flex items-end justify-between gap-4">
                   <div>
                     <p className="eyebrow">Combos</p>
-                    <h2 className="font-display mt-2 text-[20px] leading-tight text-navy-900 md:text-[24px]">
+                    <h2 className="font-display mt-2 text-[20px] leading-tight text-espresso-900 md:text-[24px]">
                       Paquetes que ahorran
                     </h2>
                   </div>

@@ -14,8 +14,8 @@ interface CartSummaryProps {
 function Row({ label, value, muted }: { label: string; value: React.ReactNode; muted?: boolean }) {
   return (
     <div className="flex items-center justify-between gap-4 text-[13.5px]">
-      <dt className={muted ? "text-slate-400" : "text-slate-500"}>{label}</dt>
-      <dd className={muted ? "font-medium text-slate-400" : "font-medium text-ink"}>{value}</dd>
+      <dt className={muted ? "text-ink-subtle" : "text-ink-muted"}>{label}</dt>
+      <dd className={muted ? "font-medium text-ink-subtle" : "font-medium text-ink"}>{value}</dd>
     </div>
   );
 }
@@ -36,18 +36,18 @@ export function CartSummary({ totals, paymentCurrency, children }: CartSummaryPr
         )}
       </dl>
       {totals.freeShippingRemaining != null && totals.freeShippingRemaining > 0 && (
-        <p className="mt-3 rounded-field bg-tint px-3 py-2 text-[12.5px] text-navy-900">
+        <p className="mt-3 rounded-field bg-crema-100 px-3 py-2 text-[12.5px] text-espresso-900">
           Te faltan <Money value={totals.freeShippingRemaining} className="font-semibold" /> para envío gratis.
         </p>
       )}
       <div className="mt-4 flex items-end justify-between gap-4 border-t border-line pt-4">
         <span className="text-[14px] font-semibold text-ink">Total</span>
         <div className="text-right">
-          <p className="font-display text-[22px] leading-none text-navy-900">
+          <p className="font-display text-[22px] leading-none text-espresso-900">
             <Money value={totals.total} />
           </p>
           {paymentCurrency && totals.totalInPaymentCurrency != null && (
-            <p className="mt-1 text-[12.5px] text-slate-500">
+            <p className="mt-1 text-[12.5px] text-ink-muted">
               A pagar: <Money value={totals.totalInPaymentCurrency} currency={paymentCurrency} className="font-semibold text-ink" />
             </p>
           )}

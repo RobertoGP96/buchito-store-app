@@ -98,7 +98,7 @@ export function CourierPaymentForm({ open, onOpenChange, balances, courierId }: 
           isRequired
         />
         {selected && (
-          <div className="rounded-field bg-page px-4 py-3 text-[13px] text-slate-500">
+          <div className="rounded-field bg-page px-4 py-3 text-[13px] text-ink-muted">
             {selected.pendingCount} {selected.pendingCount === 1 ? "entrega completada" : "entregas completadas"} ·
             tarifas <Money value={selected.pendingFees} className="font-semibold text-ink" />
           </div>

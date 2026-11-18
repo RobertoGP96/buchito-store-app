@@ -13,6 +13,7 @@ import {
   type CourierHistoryStatus,
   type DeliveryRow,
 } from "../queries/delivery-queries";
+import { ScrollFadeRow } from "@/components/scroll-fade-row";
 
 interface CourierHistoryProps {
   rows: DeliveryRow[];
@@ -28,7 +29,7 @@ function closedAt(d: DeliveryRow): string {
 export function CourierHistory({ rows, activeStatus }: CourierHistoryProps) {
   return (
     <>
-      <div className="no-scrollbar -mx-1 flex snap-x gap-2 overflow-x-auto px-1 py-1">
+      <ScrollFadeRow>
         <Link href="/mensajero/historial" scroll={false} className={cn(CHIP_BASE, activeStatus === null ? CHIP_ON : CHIP_OFF)}>
           Todas
           <LinkPending />
@@ -44,7 +45,7 @@ export function CourierHistory({ rows, activeStatus }: CourierHistoryProps) {
             <LinkPending />
           </Link>
         ))}
-      </div>
+      </ScrollFadeRow>
 
       {rows.length === 0 ? (
         <div className="rounded-card bg-canvas shadow-card">
@@ -68,7 +69,7 @@ export function CourierHistory({ rows, activeStatus }: CourierHistoryProps) {
                     <p className="font-semibold text-ink">{d.orderNo}</p>
                     <StatusChip {...DELIVERY_STATUS_META[d.status]} />
                     {d.proofPhotoUrl && (
-                      <span className="inline-flex items-center gap-1 text-[11.5px] font-semibold text-slate-500">
+                      <span className="inline-flex items-center gap-1 text-[11.5px] font-semibold text-ink-muted">
                         <Camera className="h-3.5 w-3.5" strokeWidth={1.9} />
                         Con foto
                       </span>
@@ -76,22 +77,22 @@ export function CourierHistory({ rows, activeStatus }: CourierHistoryProps) {
                   </div>
                   <p className="mt-1.5 text-[14px] text-ink">
                     {d.recipientName}
-                    {d.zoneName && <span className="text-slate-400"> · {d.zoneName}</span>}
+                    {d.zoneName && <span className="text-ink-subtle"> · {d.zoneName}</span>}
                   </p>
-                  <p className="tabular mt-1 text-[12.5px] text-slate-500">{fmtDateTime(closedAt(d))}</p>
+                  <p className="tabular mt-1 text-[12.5px] text-ink-muted">{fmtDateTime(closedAt(d))}</p>
                   {d.failedReason && d.status === "failed" && (
                     <p className="mt-1.5 text-[12.5px] text-danger">{d.failedReason}</p>
                   )}
                 </div>
                 {d.status === "delivered" && (
                   <div className="flex flex-col items-end gap-0.5 text-right">
-                    <Money value={d.courierFee} className="font-semibold text-navy-900" />
-                    <span className={cn("text-[11px] font-semibold", d.isPaidToCourier ? "text-ok" : "text-slate-400")}>
+                    <Money value={d.courierFee} className="font-semibold text-espresso-900" />
+                    <span className={cn("text-[11px] font-semibold", d.isPaidToCourier ? "text-ok" : "text-ink-subtle")}>
                       {d.isPaidToCourier ? "Liquidada" : "Por cobrar"}
                     </span>
                   </div>
                 )}
-                <ChevronRight className="h-4 w-4 flex-none text-slate-300" strokeWidth={2} />
+                <ChevronRight className="h-4 w-4 flex-none text-ink-faint" strokeWidth={2} />
               </Link>
             </li>
           ))}

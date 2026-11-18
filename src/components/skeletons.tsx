@@ -1,6 +1,7 @@
 "use client";
 
 import { Skeleton } from "@heroui/react";
+import { LoadingStatus } from "@/components/loading-status";
 import { cn } from "@/lib/utils";
 
 /* Esqueletos de carga de las rutas (`loading.tsx`) y de los Suspense internos.
@@ -17,7 +18,7 @@ export function ProductCardSkeleton() {
       <Skeleton animationType="none" className="h-3.5 w-3/4 rounded-full" />
       <div className="mt-1 flex items-center justify-between border-t border-line pt-3">
         <Skeleton animationType="none" className="h-4 w-20 rounded-full" />
-        <Skeleton animationType="none" className="h-9 w-9 rounded-full sm:w-16" />
+        <Skeleton animationType="none" className="h-9 w-9 rounded-full sm:w-16 pointer-coarse:h-11" />
       </div>
     </div>
   );
@@ -37,6 +38,7 @@ export function ProductGridSkeleton({ count = 8, className }: { count?: number; 
 export function HomeSkeleton() {
   return (
     <>
+      <LoadingStatus />
       <section className="flex flex-col items-center border-b border-line bg-canvas px-5 pt-14 pb-12 md:px-10 md:pt-[72px] md:pb-16">
         <Skeleton className="h-2.5 w-36 rounded-full" />
         <Skeleton className="mt-5 h-8 w-[min(640px,90%)] rounded-full md:h-12" />
@@ -55,10 +57,12 @@ export function HomeSkeleton() {
   );
 }
 
-/** Resultados del catálogo: contador más retícula. */
-export function CatalogResultsSkeleton() {
+/** Resultados del catálogo: contador más retícula. `announce` se apaga cuando
+ *  va dentro de otra silueta que ya anuncia la carga. */
+export function CatalogResultsSkeleton({ announce = true }: { announce?: boolean }) {
   return (
     <div className="flex flex-col gap-6">
+      {announce && <LoadingStatus />}
       <Skeleton className="h-3 w-24 rounded-full" />
       <ProductGridSkeleton />
     </div>
@@ -75,6 +79,7 @@ export function StoreScreenSkeleton({
 }) {
   return (
     <>
+      <LoadingStatus />
       <div className="mx-auto w-full max-w-[1120px] px-5 pt-7 pb-5 md:px-6 md:pt-9 md:pb-6">
         {back && <Skeleton className="mb-4 h-4 w-16 rounded-full" />}
         <Skeleton className="h-2.5 w-20 rounded-full" />
@@ -150,6 +155,7 @@ export function ComboDetailSkeleton() {
 export function AdminPageSkeleton({ variant = "list" }: { variant?: "list" | "detail" }) {
   return (
     <>
+      <LoadingStatus />
       <div className="flex items-start gap-3.5">
         <Skeleton className="h-11 w-11 flex-none rounded-field" />
         <div className="flex flex-1 flex-col gap-2 pt-1">

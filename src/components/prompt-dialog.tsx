@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Description, Input, Label, TextArea, TextField } from "@heroui/react";
+import { Button, Description, FieldError, Input, Label, TextArea, TextField } from "@heroui/react";
 import { ResponsiveFormDialog } from "@/components/responsive-form-dialog";
 
 interface PromptDialogProps {
@@ -43,10 +43,17 @@ export function PromptDialog({
 }: PromptDialogProps) {
   const [value, setValue] = useState(initialValue);
   const invalid = !allowEmpty && value.trim() === "";
+  // El botón no se deshabilita con el campo vacío: se deja enviar y el error
+  // dice qué falta (un botón gris no explica nada y no recibe el foco).
+  const [showError, setShowError] = useState(false);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (invalid || isPending) return;
+    if (isPending) return;
+    if (invalid) {
+      setShowError(true);
+      return;
+    }
     onConfirm(value.trim());
   };
 
@@ -68,7 +75,7 @@ export function PromptDialog({
             variant={tone === "danger" ? "danger" : "primary"}
             className="rounded-full"
             isPending={isPending}
-            isDisabled={invalid || isPending}
+            isDisabled={isPending}
           >
             {confirmLabel}
           </Button>
@@ -76,7 +83,14 @@ export function PromptDialog({
       }
     >
       <form id="prompt-dialog-form" onSubmit={submit} noValidate>
-        <TextField value={value} onChange={setValue} fullWidth autoFocus>
+        <TextField
+          value={value}
+          onChange={setValue}
+          isRequired={!allowEmpty}
+          isInvalid={showError && invalid}
+          fullWidth
+          autoFocus
+        >
           <Label>{label}</Label>
           {kind === "textarea" ? (
             <TextArea rows={3} />
@@ -90,13 +104,14 @@ export function PromptDialog({
                 className={suffix ? "pr-14" : undefined}
               />
               {suffix && (
-                <span className="tabular pointer-events-none absolute inset-y-0 right-4 flex items-center text-[12px] font-semibold text-slate-400">
+                <span className="tabular pointer-events-none absolute inset-y-0 right-4 flex items-center text-[12px] font-semibold text-ink-subtle">
                   {suffix}
                 </span>
               )}
             </div>
           )}
           {hint && <Description>{hint}</Description>}
+          <FieldError>Este dato es obligatorio</FieldError>
         </TextField>
       </form>
     </ResponsiveFormDialog>

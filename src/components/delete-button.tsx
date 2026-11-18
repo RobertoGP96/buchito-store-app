@@ -126,11 +126,11 @@ export function DeleteButton({
         }
       >
         {blocked ? (
-          <p className="text-[13px] leading-[1.6] text-slate-500">
+          <p className="text-[13px] leading-[1.6] text-ink-muted">
             Si ya no quieres usarlo, desactívalo: los registros que lo referencian conservan su historial.
           </p>
         ) : (
-          <div className="flex flex-col gap-2 text-[13px] leading-[1.6] text-slate-500">
+          <div className="flex flex-col gap-2 text-[13px] leading-[1.6] text-ink-muted">
             {children}
             <p>Esta acción no se puede deshacer y queda registrada en la auditoría.</p>
           </div>

@@ -60,7 +60,7 @@ export function RateManager({ overview }: { overview: RatesOverview }) {
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
                 <p className="eyebrow">{row.currency.name ?? row.currency.code}</p>
-                <p className="tabular font-display mt-2 text-[22px] leading-none text-navy-900">
+                <p className="tabular font-display mt-2 text-[22px] leading-none text-espresso-900">
                   1 {row.currency.code} ={" "}
                   {row.rate == null ? (
                     <span className="text-warn">sin tasa</span>
@@ -71,7 +71,7 @@ export function RateManager({ overview }: { overview: RatesOverview }) {
                   )}
                 </p>
                 {row.updatedAt && (
-                  <p className="tabular mt-2 text-[12px] text-slate-400">
+                  <p className="tabular mt-2 text-[12px] text-ink-subtle">
                     Actualizada {fmtDateTime(row.updatedAt)}
                     {row.isInverse && " · guardada como par inverso"}
                   </p>

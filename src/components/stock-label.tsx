@@ -27,7 +27,7 @@ export function StockLabel({
     stock <= 0
       ? "font-semibold text-danger"
       : stock <= threshold
-        ? "font-medium text-gold-600"
+        ? "font-medium text-caramelo-700"
         : "font-medium text-ok";
 
   return (

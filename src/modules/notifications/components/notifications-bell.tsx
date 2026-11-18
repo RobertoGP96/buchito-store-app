@@ -25,7 +25,7 @@ const POLL_MS = 60_000;
 const THROTTLE_MS = 5_000;
 
 const LIGHT_TRIGGER =
-  "relative inline-flex h-9 w-9 min-w-0 items-center justify-center rounded-full bg-transparent p-0 text-slate-500 transition-colors duration-150 hover:bg-hover hover:text-navy-700 data-[pressed]:bg-tint";
+  "relative inline-flex h-9 w-9 min-w-0 items-center justify-center rounded-full bg-transparent p-0 text-ink-muted transition-colors duration-150 hover:bg-hover hover:text-tostado-700 data-[pressed]:bg-crema-100";
 
 /** Campana con contador de no leídas. Se refresca al montar, al navegar, al
  *  volver a la pestaña, al abrirla y cada minuto con la pestaña visible. En
@@ -235,7 +235,7 @@ export function NotificationsBell({ audience, tone, inboxHref }: NotificationsBe
             <Drawer.Dialog aria-label="Notificaciones" className="max-h-[86dvh] bg-canvas">
               <Drawer.Handle />
               <Drawer.Header>
-                <Drawer.Heading className="font-display text-[18px] text-navy-900">Notificaciones</Drawer.Heading>
+                <Drawer.Heading className="font-display text-[18px] text-espresso-900">Notificaciones</Drawer.Heading>
               </Drawer.Header>
               <Drawer.Body className="-mx-2">{list}</Drawer.Body>
               <Drawer.Footer className="flex w-full gap-2 pb-[max(0px,env(safe-area-inset-bottom))]">

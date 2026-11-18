@@ -101,12 +101,12 @@ function ProductDrawerContent({
             <Link
               href={`/catalogo?cat=${product.categorySlug}`}
               onClick={onNavigate}
-              className="eyebrow self-start hover:text-navy-700"
+              className="eyebrow self-start hover:text-tostado-700"
             >
               {product.categoryName}
             </Link>
           )}
-          <Drawer.Heading className="font-display mt-2 text-[22px] leading-[1.15] text-navy-900">
+          <Drawer.Heading className="font-display mt-2 text-[22px] leading-[1.15] text-espresso-900">
             {product.name}
           </Drawer.Heading>
           <ProductPrice variant={variant} className="mt-3" />
@@ -122,7 +122,7 @@ function ProductDrawerContent({
           <Link
             href={`/producto/${encodeURIComponent(product.slug)}`}
             onClick={onNavigate}
-            className="nav-label mt-6 inline-flex items-center gap-1 self-start text-navy-700 hover:underline"
+            className="nav-label mt-6 inline-flex items-center gap-1 self-start text-tostado-700 hover:underline"
           >
             Ver ficha completa
             <ArrowUpRight className="h-4 w-4" strokeWidth={2} aria-hidden />

@@ -27,20 +27,20 @@ export function PaymentMethodPicker({ methods, value, onChange, labelledBy }: Pa
             onClick={() => onChange(method.paymentMethodId)}
             className={cn(
               "flex items-start gap-3 rounded-field border-[1.5px] p-3.5 text-left transition-colors duration-150",
-              checked ? "border-navy-700 bg-tint" : "border-line bg-canvas hover:border-navy-700"
+              checked ? "border-tostado-700 bg-crema-100" : "border-line bg-canvas hover:border-tostado-700"
             )}
           >
             <span
               className={cn(
                 "mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded-full border-[1.5px]",
-                checked ? "border-navy-700 bg-navy-700 text-on-brand" : "border-line"
+                checked ? "border-tostado-700 bg-tostado-700 text-on-tostado" : "border-line"
               )}
             >
               {checked && <Check className="h-3 w-3" strokeWidth={3} />}
             </span>
             <span className="min-w-0">
               <span className="block text-[14px] font-semibold text-ink">{method.name}</span>
-              <span className="mt-0.5 block text-[12.5px] text-slate-500">
+              <span className="mt-0.5 block text-[12.5px] text-ink-muted">
                 {PAYMENT_KIND_LABELS[method.kind]} · pagas en{" "}
                 <span className="tabular font-semibold">{method.currency.code}</span>
                 {method.surchargePercent != null && method.surchargePercent > 0 && (
@@ -48,7 +48,7 @@ export function PaymentMethodPicker({ methods, value, onChange, labelledBy }: Pa
                 )}
               </span>
               {checked && method.instructions && (
-                <span className="mt-2 block rounded-chip bg-canvas px-3 py-2 text-[12.5px] leading-[1.6] text-slate-500">
+                <span className="mt-2 block rounded-chip bg-canvas px-3 py-2 text-[12.5px] leading-[1.6] text-ink-muted">
                   {method.instructions}
                 </span>
               )}

@@ -160,10 +160,10 @@ export function StockAdjustForm({ open, onOpenChange, variant }: StockAdjustForm
                   <p className="font-medium text-ink">
                     {STOCK_MOVEMENT_TYPE_LABELS[m.type]}
                     {m.referenceType === "order" && m.referenceId != null && (
-                      <span className="text-slate-400"> · pedido #{m.referenceId}</span>
+                      <span className="text-ink-subtle"> · pedido #{m.referenceId}</span>
                     )}
                   </p>
-                  <p className="tabular truncate text-slate-400">
+                  <p className="tabular truncate text-ink-subtle">
                     {fmtDateTime(m.createdAt)}
                     {m.createdBy ? ` · ${m.createdBy}` : ""}
                     {m.notes ? ` · ${m.notes}` : ""}
@@ -173,7 +173,7 @@ export function StockAdjustForm({ open, onOpenChange, variant }: StockAdjustForm
                   <p className={cn("font-semibold", m.type === "exit" ? "text-danger" : "text-ink")}>
                     {movementDelta(m.type, m.quantity)}
                   </p>
-                  <p className="text-[11.5px] text-slate-400">quedan {fmtQty(m.stockAfter, variant.unit)}</p>
+                  <p className="text-[11.5px] text-ink-subtle">quedan {fmtQty(m.stockAfter, variant.unit)}</p>
                 </div>
               </li>
             ))}

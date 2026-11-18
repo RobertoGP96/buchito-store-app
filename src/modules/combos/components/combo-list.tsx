@@ -23,7 +23,7 @@ function PriceCell({ row }: { row: AdminComboRow }) {
         <Money value={row.price} currency={row.priceCurrency} />
       </span>
       {row.regularPriceBase != null && row.regularPriceBase > (row.priceBase ?? 0) && (
-        <span className="text-[11.5px] text-slate-400">
+        <span className="text-[11.5px] text-ink-subtle">
           <span className="line-through">
             <Money value={row.regularPriceBase} />
           </span>
@@ -36,7 +36,7 @@ function PriceCell({ row }: { row: AdminComboRow }) {
 }
 
 function Validity({ row }: { row: AdminComboRow }) {
-  if (!row.startsAt && !row.endsAt) return <span className="text-slate-400">Siempre</span>;
+  if (!row.startsAt && !row.endsAt) return <span className="text-ink-subtle">Siempre</span>;
   return (
     <span className="tabular whitespace-nowrap">
       {row.startsAt ? fmtDate(row.startsAt) : "…"} – {row.endsAt ? fmtDate(row.endsAt) : "…"}
@@ -77,10 +77,10 @@ export function ComboList({ rows }: { rows: AdminComboRow[] }) {
             </span>
           </span>
           <div className="min-w-0">
-            <Link href={`/admin/combos/${r.comboId}`} className="font-semibold text-ink hover:text-navy-700">
+            <Link href={`/admin/combos/${r.comboId}`} className="font-semibold text-ink hover:text-tostado-700">
               {r.name}
             </Link>
-            <p className="line-clamp-1 text-[12px] text-slate-400">{itemsSummary(r)}</p>
+            <p className="line-clamp-1 text-[12px] text-ink-subtle">{itemsSummary(r)}</p>
           </div>
         </div>
       ),
@@ -98,7 +98,7 @@ export function ComboList({ rows }: { rows: AdminComboRow[] }) {
         <Link
           href={`/admin/combos/${r.comboId}`}
           aria-label={`Editar ${r.name}`}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-500 hover:bg-hover hover:text-navy-700"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-muted hover:bg-hover hover:text-tostado-700"
         >
           <Pencil className="h-4 w-4" strokeWidth={1.9} />
         </Link>

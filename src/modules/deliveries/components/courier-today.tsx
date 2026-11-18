@@ -24,15 +24,15 @@ function DeliveryCard({ d }: { d: DeliveryRow }) {
           </div>
           <p className="mt-2 text-[15px] font-semibold text-ink">{d.recipientName}</p>
           {d.addressLine && (
-            <p className="mt-1 flex items-start gap-1.5 text-[13px] leading-[1.5] text-slate-600">
-              <MapPin className="mt-0.5 h-3.5 w-3.5 flex-none text-navy-700" strokeWidth={1.9} />
+            <p className="mt-1 flex items-start gap-1.5 text-[13px] leading-[1.5] text-ink-muted">
+              <MapPin className="mt-0.5 h-3.5 w-3.5 flex-none text-tostado-700" strokeWidth={1.9} />
               <span>
                 {d.addressLine}
-                {d.zoneName && <span className="text-slate-400"> · {d.zoneName}</span>}
+                {d.zoneName && <span className="text-ink-subtle"> · {d.zoneName}</span>}
               </span>
             </p>
           )}
-          <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12.5px] text-slate-500">
+          <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12.5px] text-ink-muted">
             <span className="inline-flex items-center gap-1">
               <Phone className="h-3.5 w-3.5" strokeWidth={1.9} />
               <span className="tabular">{d.recipientPhone}</span>
@@ -44,7 +44,7 @@ function DeliveryCard({ d }: { d: DeliveryRow }) {
             )}
           </p>
         </div>
-        <ChevronRight className="h-5 w-5 flex-none text-slate-300" strokeWidth={2} />
+        <ChevronRight className="h-5 w-5 flex-none text-ink-faint" strokeWidth={2} />
       </Link>
     </li>
   );
@@ -55,7 +55,7 @@ function Group({ title, rows }: { title: string; rows: DeliveryRow[] }) {
   return (
     <section>
       <p className="eyebrow mb-2.5">
-        {title} <span className="tabular text-slate-400">· {rows.length}</span>
+        {title} <span className="tabular text-ink-subtle">· {rows.length}</span>
       </p>
       <ul className="flex flex-col gap-3">
         {rows.map((d) => (

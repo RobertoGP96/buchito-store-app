@@ -15,6 +15,7 @@ import { fmtDate, fmtDateTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { PAYMENT_RANGE_LABELS, PAYMENT_RANGES, type PaymentRange } from "@/modules/payments/lib/payment-ranges";
 import type { CourierBalanceRow, CourierPaymentRow, CourierPaymentsResult } from "../queries/courier-payment-queries";
+import { ScrollFadeRow } from "@/components/scroll-fade-row";
 
 const CourierPaymentForm = lazyDialog(() => import("./courier-payment-form").then((m) => m.CourierPaymentForm));
 
@@ -33,7 +34,7 @@ function Balances({ balances, onPay }: { balances: CourierBalanceRow[]; onPay: (
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <p className="truncate text-[14.5px] font-semibold text-ink">{b.fullName}</p>
-              <p className="text-[12px] text-slate-400">
+              <p className="text-[12px] text-ink-subtle">
                 Tarifa <Money value={b.deliveryFee} /> por entrega
               </p>
             </div>
@@ -41,16 +42,16 @@ function Balances({ balances, onPay }: { balances: CourierBalanceRow[]; onPay: (
           </div>
           <div>
             <p className="eyebrow">Por pagar</p>
-            <p className={cn("tabular font-display mt-1 text-[24px] leading-none", b.pendingFees > 0 ? "text-navy-900" : "text-slate-400")}>
+            <p className={cn("tabular font-display mt-1 text-[24px] leading-none", b.pendingFees > 0 ? "text-espresso-900" : "text-ink-subtle")}>
               <Money value={b.pendingFees} />
             </p>
-            <p className="mt-1 text-[12px] text-slate-500">
+            <p className="mt-1 text-[12px] text-ink-muted">
               {b.pendingCount} {b.pendingCount === 1 ? "entrega completada" : "entregas completadas"} sin liquidar
             </p>
           </div>
           <div className="flex items-end justify-between gap-3 border-t border-line pt-3">
-            <p className="text-[12px] text-slate-400">
-              Pagado <Money value={b.paidTotal} className="font-medium text-slate-500" />
+            <p className="text-[12px] text-ink-subtle">
+              Pagado <Money value={b.paidTotal} className="font-medium text-ink-muted" />
               {b.lastPaidAt && <span className="block">Último pago {fmtDate(b.lastPaidAt)}</span>}
             </p>
             <Button
@@ -76,7 +77,7 @@ function AmountCell({ row }: { row: CourierPaymentRow }) {
     <div className="flex flex-col items-end">
       <Money value={row.amountBase} className="font-semibold text-ink" />
       {differs && (
-        <span className="text-[11.5px] text-slate-400">
+        <span className="text-[11.5px] text-ink-subtle">
           tarifas <Money value={row.feesBase} />
         </span>
       )}
@@ -94,12 +95,12 @@ export function CourierPaymentList({ balances, result, activeRange }: CourierPay
   };
 
   const columns: ListColumn<CourierPaymentRow>[] = [
-    { id: "date", header: "Fecha", isRowHeader: true, cell: (r) => <span className="tabular text-slate-500">{fmtDateTime(r.paidAt)}</span> },
+    { id: "date", header: "Fecha", isRowHeader: true, cell: (r) => <span className="tabular text-ink-muted">{fmtDateTime(r.paidAt)}</span> },
     { id: "courier", header: "Mensajero", cell: (r) => <span className="font-semibold text-ink">{r.courierName}</span> },
     { id: "count", header: "Entregas", align: "right", cell: (r) => <span className="tabular">{r.deliveryCount}</span> },
     { id: "amount", header: "Monto", align: "right", cell: (r) => <AmountCell row={r} /> },
-    { id: "notes", header: "Notas", cell: (r) => <span className="text-slate-500">{r.notes ?? "—"}</span> },
-    { id: "paidBy", header: "Registrado por", cell: (r) => <span className="text-slate-500">{r.paidBy ?? "—"}</span> },
+    { id: "notes", header: "Notas", cell: (r) => <span className="text-ink-muted">{r.notes ?? "—"}</span> },
+    { id: "paidBy", header: "Registrado por", cell: (r) => <span className="text-ink-muted">{r.paidBy ?? "—"}</span> },
   ];
 
   return (
@@ -108,7 +109,7 @@ export function CourierPaymentList({ balances, result, activeRange }: CourierPay
 
       <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
         <p className="eyebrow px-0.5">Pagos registrados</p>
-        <div className="no-scrollbar -mx-1 flex snap-x gap-2 overflow-x-auto px-1 py-1">
+        <ScrollFadeRow>
           {PAYMENT_RANGES.map((range) => (
             <Link
               key={range}
@@ -120,15 +121,15 @@ export function CourierPaymentList({ balances, result, activeRange }: CourierPay
               <LinkPending />
             </Link>
           ))}
-        </div>
+        </ScrollFadeRow>
       </div>
 
       <div className="rounded-card bg-canvas p-4 shadow-card sm:max-w-xs">
         <p className="eyebrow">Total pagado</p>
-        <p className="tabular font-display mt-2 text-[24px] leading-none text-navy-900">
+        <p className="tabular font-display mt-2 text-[24px] leading-none text-espresso-900">
           <Money value={result.totalBase} />
         </p>
-        <p className="mt-1.5 text-[12px] text-slate-500">
+        <p className="mt-1.5 text-[12px] text-ink-muted">
           {result.rows.length} {result.rows.length === 1 ? "pago" : "pagos"} en el periodo
         </p>
       </div>

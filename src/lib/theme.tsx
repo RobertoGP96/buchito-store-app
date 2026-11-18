@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import {
   createContext,
   useCallback,
@@ -11,11 +12,18 @@ import {
 
 export type Theme = "light" | "dark";
 
+/** Solo guarda una elección que contradice al sistema. Sin valor, la tienda
+ *  sigue al sistema (y a su cambio automático de día/noche). */
 export const THEME_STORAGE_KEY = "buchito-theme";
 
+const SYSTEM_DARK_QUERY = "(prefers-color-scheme: dark)";
+
 /** Corre antes del primer paint: sin esto la pantalla parpadea en blanco al
- *  recargar en oscuro. Pone la clase (Tailwind) y data-theme (HeroUI). */
-export const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem("${THEME_STORAGE_KEY}");if(t!=="light"&&t!=="dark"){t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}document.documentElement.classList.toggle("dark",t==="dark");document.documentElement.dataset.theme=t}catch(e){}})();`;
+ *  recargar en oscuro. Pone la clase (Tailwind), data-theme (HeroUI) y el
+ *  `<meta name="color-scheme">`, que pinta el lienzo del navegador en el
+ *  esquema correcto antes de que llegue el CSS. El meta lo crea el script y no
+ *  React para que la hidratación no lo vea como una discrepancia. */
+export const THEME_INIT_SCRIPT = `(function(){try{var s=null;try{s=localStorage.getItem("${THEME_STORAGE_KEY}")}catch(e){}var p=s==="light"||s==="dark";var t=p?s:window.matchMedia("${SYSTEM_DARK_QUERY}").matches?"dark":"light";var r=document.documentElement;r.classList.toggle("dark",t==="dark");r.dataset.theme=t;var m=document.createElement("meta");m.name="color-scheme";m.content=p?t:"light dark";document.head.appendChild(m)}catch(e){}})();`;
 
 interface ThemeApi {
   theme: Theme;
@@ -25,16 +33,48 @@ interface ThemeApi {
 
 const ThemeContext = createContext<ThemeApi | null>(null);
 
-function applyTheme(theme: Theme) {
+function readStoredTheme(): Theme | null {
+  try {
+    const stored = localStorage.getItem(THEME_STORAGE_KEY);
+    return stored === "light" || stored === "dark" ? stored : null;
+  } catch {
+    return null;
+  }
+}
+
+function systemTheme(): Theme {
+  return window.matchMedia(SYSTEM_DARK_QUERY).matches ? "dark" : "light";
+}
+
+/** La barra del navegador (`theme-color`) y el lienzo (`color-scheme`) siguen
+ *  al sistema por sus media queries; con un tema fijado a mano hay que
+ *  forzarlos o quedan del color contrario al de la página. */
+function syncBrowserChrome(theme: Theme, pinned: boolean) {
+  const scheme = document.querySelector<HTMLMetaElement>('meta[name="color-scheme"]');
+  if (scheme) scheme.content = pinned ? theme : "light dark";
+
+  document
+    .querySelectorAll<HTMLMetaElement>('meta[name="theme-color"][media]')
+    .forEach((meta) => {
+      // El esquema de cada meta se lee una vez de su media query original.
+      meta.dataset.scheme ??= meta.media.includes("dark") ? "dark" : "light";
+      const own = meta.dataset.scheme;
+      meta.media = pinned ? (own === theme ? "all" : "not all") : `(prefers-color-scheme: ${own})`;
+    });
+}
+
+function applyTheme(theme: Theme, pinned: boolean) {
   const root = document.documentElement;
   root.classList.toggle("dark", theme === "dark");
   root.dataset.theme = theme;
+  syncBrowserChrome(theme, pinned);
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // El script inline ya dejó la clase puesta; leerla evita un repintado y
   // mantiene el primer render del cliente igual al DOM que llegó del servidor.
   const [theme, setThemeState] = useState<Theme>("light");
+  const pathname = usePathname();
 
   useEffect(() => {
     setThemeState(
@@ -42,11 +82,23 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     );
   }, []);
 
+  // Cada grupo de rutas trae sus propios `theme-color`: al cambiar de ruta
+  // llegan sin forzar y hay que volver a alinearlos con el tema fijado.
+  useEffect(() => {
+    const stored = readStoredTheme();
+    syncBrowserChrome(stored ?? systemTheme(), stored !== null);
+  }, [pathname]);
+
   const setTheme = useCallback((next: Theme) => {
+    // Elegir lo mismo que el sistema es deshacer el ajuste: se borra la
+    // elección y la tienda vuelve a seguir al sistema. Guardarla la dejaría
+    // fijada para siempre sin que el usuario lo vea.
+    const pinned = next !== systemTheme();
     setThemeState(next);
-    applyTheme(next);
+    applyTheme(next, pinned);
     try {
-      localStorage.setItem(THEME_STORAGE_KEY, next);
+      if (pinned) localStorage.setItem(THEME_STORAGE_KEY, next);
+      else localStorage.removeItem(THEME_STORAGE_KEY);
     } catch {
       // Modo privado / storage lleno: el tema vive solo en esta sesión.
     }
@@ -58,21 +110,32 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     );
   }, [setTheme]);
 
-  // Solo mientras el usuario no haya elegido: seguir al sistema.
   useEffect(() => {
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const onChange = (event: MediaQueryListEvent) => {
-      try {
-        if (localStorage.getItem(THEME_STORAGE_KEY)) return;
-      } catch {
-        return;
-      }
+    // Solo mientras el usuario no haya elegido: seguir al sistema. Una
+    // elección guardada se conserva aunque el sistema pase a coincidir con ella.
+    const media = window.matchMedia(SYSTEM_DARK_QUERY);
+    const onSystemChange = (event: MediaQueryListEvent) => {
+      if (readStoredTheme()) return;
       const next: Theme = event.matches ? "dark" : "light";
       setThemeState(next);
-      applyTheme(next);
+      applyTheme(next, false);
     };
-    media.addEventListener("change", onChange);
-    return () => media.removeEventListener("change", onChange);
+
+    // La elección puede cambiar desde otra pestaña.
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== null && event.key !== THEME_STORAGE_KEY) return;
+      const stored = readStoredTheme();
+      const next = stored ?? systemTheme();
+      setThemeState(next);
+      applyTheme(next, stored !== null);
+    };
+
+    media.addEventListener("change", onSystemChange);
+    window.addEventListener("storage", onStorage);
+    return () => {
+      media.removeEventListener("change", onSystemChange);
+      window.removeEventListener("storage", onStorage);
+    };
   }, []);
 
   const value = useMemo(

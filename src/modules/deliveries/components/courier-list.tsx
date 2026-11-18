@@ -53,7 +53,7 @@ export function CourierList({ rows }: { rows: CourierRow[] }) {
       cell: (r) => (
         <div className="min-w-0">
           <p className="font-semibold text-ink">{r.fullName}</p>
-          <p className="text-[12px] text-slate-400">{r.email}</p>
+          <p className="text-[12px] text-ink-subtle">{r.email}</p>
         </div>
       ),
     },
@@ -66,7 +66,7 @@ export function CourierList({ rows }: { rows: CourierRow[] }) {
       id: "pending",
       header: "Por pagar",
       align: "right",
-      cell: (r) => <Money value={r.pendingFees} className={r.pendingFees > 0 ? "font-semibold text-warn" : "text-slate-400"} />,
+      cell: (r) => <Money value={r.pendingFees} className={r.pendingFees > 0 ? "font-semibold text-warn" : "text-ink-subtle"} />,
     },
     { id: "status", header: "Estado", cell: (r) => <StatusChip label={r.active ? "Activo" : "Inactivo"} tone={r.active ? "success" : "neutral"} /> },
     {

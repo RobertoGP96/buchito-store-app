@@ -37,12 +37,12 @@ export default async function CourierProfilePage() {
       <section className="rounded-card bg-canvas p-5 shadow-card">
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
-            <span className="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-tint text-navy-700">
+            <span className="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-crema-100 text-tostado-700">
               <UserRound className="h-5 w-5" strokeWidth={1.9} />
             </span>
             <div className="min-w-0">
               <p className="truncate text-[15px] font-semibold text-ink">{profile.fullName}</p>
-              <p className="truncate text-[12.5px] text-slate-400">{profile.email}</p>
+              <p className="truncate text-[12.5px] text-ink-subtle">{profile.email}</p>
             </div>
           </div>
           {/* La clave remonta el botón (y cierra su diálogo) cuando los datos cambian. */}
@@ -52,19 +52,19 @@ export default async function CourierProfilePage() {
           />
         </div>
         <dl className="mt-5 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-[13px]">
-          <dt className="text-slate-400">Teléfono</dt>
+          <dt className="text-ink-subtle">Teléfono</dt>
           <dd className="tabular font-medium text-ink">{profile.phone}</dd>
-          <dt className="text-slate-400">Vehículo</dt>
+          <dt className="text-ink-subtle">Vehículo</dt>
           <dd className="font-medium text-ink">{VEHICLE_LABELS[profile.vehicle]}</dd>
-          <dt className="text-slate-400">Pago por entrega</dt>
+          <dt className="text-ink-subtle">Pago por entrega</dt>
           <dd className="font-medium text-ink">
             <Money value={profile.deliveryFee} />
           </dd>
-          <dt className="text-slate-400">Estado</dt>
+          <dt className="text-ink-subtle">Estado</dt>
           <dd>
             <StatusChip label={profile.active ? "Activo" : "Inactivo"} tone={profile.active ? "success" : "neutral"} />
           </dd>
-          <dt className="text-slate-400">Mensajero desde</dt>
+          <dt className="text-ink-subtle">Mensajero desde</dt>
           <dd className="tabular font-medium text-ink">{fmtDate(profile.createdAt)}</dd>
         </dl>
       </section>

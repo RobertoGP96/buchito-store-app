@@ -85,7 +85,13 @@ export function TwoFactorSetupDialog({ open, onOpenChange, emailAvailable }: Two
   };
 
   const confirm = async (value: string) => {
-    if (isPending || value.length < 6) return;
+    if (isPending) return;
+    // Se deja pulsar con el código incompleto y se explica qué falta.
+    if (value.length < 6) {
+      setInvalid(true);
+      toast.warning("Escribe los 6 dígitos del código");
+      return;
+    }
     setIsPending(true);
     setInvalid(false);
     try {
@@ -151,7 +157,7 @@ export function TwoFactorSetupDialog({ open, onOpenChange, emailAvailable }: Two
           variant="primary"
           className="rounded-full"
           isPending={isPending}
-          isDisabled={isPending || code.length < 6}
+          isDisabled={isPending}
           onPress={() => void confirm(code)}
         >
           Activar
@@ -190,16 +196,16 @@ export function TwoFactorSetupDialog({ open, onOpenChange, emailAvailable }: Two
                 onClick={() => setMethod(option)}
                 className={cn(
                   "flex items-start gap-3 rounded-xl border p-3 text-left transition-colors duration-150",
-                  selected ? "border-navy-700 bg-tint" : "border-line hover:bg-hover",
+                  selected ? "border-tostado-700 bg-crema-100" : "border-line hover:bg-hover",
                   disabled && "cursor-not-allowed opacity-50 hover:bg-transparent"
                 )}
               >
-                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-canvas text-navy-700 shadow-card">
+                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-canvas text-tostado-700 shadow-card">
                   <Icon className="h-4 w-4" strokeWidth={1.9} />
                 </span>
                 <span className="min-w-0">
                   <span className="block text-[14px] font-semibold text-ink">{TWO_FACTOR_METHOD_LABELS[option]}</span>
-                  <span className="mt-0.5 block text-[12.5px] leading-[1.55] text-slate-500">
+                  <span className="mt-0.5 block text-[12.5px] leading-[1.55] text-ink-muted">
                     {disabled ? "No disponible: la tienda no tiene configurado el envío de correos." : TWO_FACTOR_METHOD_DESCRIPTIONS[option]}
                   </span>
                 </span>
@@ -222,9 +228,9 @@ export function TwoFactorSetupDialog({ open, onOpenChange, emailAvailable }: Two
                 className="rounded-xl bg-white p-2 shadow-card"
               />
               <div className="w-full text-center">
-                <p className="text-[12.5px] text-slate-500">¿No puedes escanear? Escribe esta clave en la app:</p>
+                <p className="text-[12.5px] text-ink-muted">¿No puedes escanear? Escribe esta clave en la app:</p>
                 <div className="mt-2 flex items-center justify-center gap-2">
-                  <code className="rounded-lg bg-tint px-3 py-1.5 font-mono text-[13px] tracking-wide text-ink select-all">
+                  <code className="rounded-lg bg-crema-100 px-3 py-1.5 font-mono text-[13px] tracking-wide text-ink select-all">
                     {setup.manualKey}
                   </code>
                   <Button
@@ -256,7 +262,7 @@ export function TwoFactorSetupDialog({ open, onOpenChange, emailAvailable }: Two
               type="button"
               onClick={() => void start("email")}
               disabled={cooldown > 0 || isPending}
-              className="text-[13px] font-semibold text-navy-700 hover:underline disabled:cursor-not-allowed disabled:text-slate-400 disabled:no-underline"
+              className="text-[13px] font-semibold text-tostado-700 hover:underline disabled:cursor-not-allowed disabled:text-ink-subtle disabled:no-underline"
             >
               {cooldown > 0 ? `Reenviar código (${cooldown} s)` : "Reenviar código"}
             </button>
@@ -266,7 +272,7 @@ export function TwoFactorSetupDialog({ open, onOpenChange, emailAvailable }: Two
 
       {step === "codes" && (
         <div className="flex flex-col gap-3">
-          <ul className="grid grid-cols-2 gap-2 rounded-xl bg-tint p-3 font-mono text-[13.5px] tracking-wide text-ink">
+          <ul className="grid grid-cols-2 gap-2 rounded-xl bg-crema-100 p-3 font-mono text-[13.5px] tracking-wide text-ink">
             {recoveryCodes.map((item) => (
               <li key={item} className="select-all px-1 py-0.5 tabular">
                 {item}
@@ -282,8 +288,8 @@ export function TwoFactorSetupDialog({ open, onOpenChange, emailAvailable }: Two
             <Copy className="h-3.5 w-3.5" strokeWidth={1.9} />
             Copiar todos
           </Button>
-          <p className="flex items-start gap-2 text-[12.5px] leading-[1.6] text-slate-500">
-            <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-navy-700" strokeWidth={2} />
+          <p className="flex items-start gap-2 text-[12.5px] leading-[1.6] text-ink-muted">
+            <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-tostado-700" strokeWidth={2} />
             Guárdalos en un sitio seguro (gestor de contraseñas, nota impresa). Cada código vale una sola vez.
           </p>
         </div>

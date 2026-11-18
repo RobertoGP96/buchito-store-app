@@ -30,18 +30,18 @@ export function PageHeader({
       )}
     >
       <div className="flex min-w-0 items-start gap-3.5">
-        <span className="flex h-11 w-11 flex-none items-center justify-center rounded-field bg-tint text-navy-700">
+        <span className="flex h-11 w-11 flex-none items-center justify-center rounded-field bg-crema-100 text-tostado-700">
           <Icon className="h-5 w-5" strokeWidth={1.9} />
         </span>
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2.5">
-            <h1 className="font-display text-[22px] leading-[1.1] text-navy-900 md:text-[26px]">
+            <h1 className="font-display text-[22px] leading-[1.1] text-balance text-espresso-900 md:text-[26px]">
               {title}
             </h1>
             {badge}
           </div>
           {description && (
-            <p className="mt-1.5 max-w-[560px] text-[13px] leading-[1.6] text-pretty text-slate-500">
+            <p className="mt-1.5 max-w-[560px] text-[13px] leading-[1.6] text-pretty text-ink-muted">
               {description}
             </p>
           )}

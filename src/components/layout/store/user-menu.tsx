@@ -100,7 +100,7 @@ export function UserMenu({ user, triggerClassName }: UserMenuProps) {
       <Dropdown.Trigger
         aria-label={user ? `Cuenta de ${user.fullName}` : "Tu cuenta"}
         className={cn(
-          "nav-label inline-flex h-9 min-w-9 items-center justify-center gap-1.5 rounded-full px-2 text-slate-500 transition-colors duration-150 hover:bg-hover hover:text-navy-700 data-[pressed]:bg-tint data-[pressed]:text-navy-700",
+          "nav-label inline-flex h-9 min-w-9 items-center justify-center gap-1.5 rounded-full px-2 text-ink-muted transition-colors duration-150 hover:bg-hover hover:text-tostado-700 data-[pressed]:bg-crema-100 data-[pressed]:text-tostado-700",
           firstName && "lg:px-3",
           triggerClassName
         )}
@@ -118,7 +118,7 @@ export function UserMenu({ user, triggerClassName }: UserMenuProps) {
           <p className="truncate text-[14px] font-semibold text-ink">
             {user ? user.fullName : "Cliente invitado"}
           </p>
-          <p className="mt-0.5 truncate text-[12px] text-slate-400">
+          <p className="mt-0.5 truncate text-[12px] text-ink-subtle">
             {user ? user.email : "Inicia sesión o crea tu cuenta"}
           </p>
           {!user && (

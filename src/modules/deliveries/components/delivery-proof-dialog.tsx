@@ -126,9 +126,9 @@ export function DeliveryProofDialog({
 
         <div>
           <p className="text-[13px] font-semibold text-ink">
-            Foto de prueba{requirePhoto ? "" : <span className="font-normal text-slate-400"> · opcional</span>}
+            Foto de prueba{requirePhoto ? "" : <span className="font-normal text-ink-subtle"> · opcional</span>}
           </p>
-          <p className="mt-1 text-[12.5px] leading-[1.55] text-slate-500">
+          <p className="mt-1 text-[12.5px] leading-[1.55] text-ink-muted">
             Una foto del paquete entregado (en la puerta o en manos del cliente) queda guardada como prueba.
           </p>
 
@@ -138,7 +138,7 @@ export function DeliveryProofDialog({
               <img src={preview} alt="Vista previa de la foto de prueba" className="max-h-[260px] w-full object-cover" />
               {uploading && (
                 <div className="absolute inset-0 flex items-center justify-center bg-canvas/70">
-                  <Loader2 className="h-6 w-6 animate-spin text-navy-700" strokeWidth={2} />
+                  <Loader2 className="h-6 w-6 animate-spin text-tostado-700" strokeWidth={2} />
                 </div>
               )}
               <button
@@ -158,11 +158,11 @@ export function DeliveryProofDialog({
                 onClick={() => pick(cameraRef.current)}
                 disabled={busy}
                 className={cn(
-                  "flex flex-col items-center justify-center gap-2 rounded-field border-[1.5px] border-dashed border-rule bg-page px-3 py-5 text-[13px] font-semibold text-ink transition-colors duration-150 hover:border-navy-700",
+                  "flex flex-col items-center justify-center gap-2 rounded-field border-[1.5px] border-dashed border-rule bg-page px-3 py-5 text-[13px] font-semibold text-ink transition-colors duration-150 hover:border-tostado-700",
                   busy && "pointer-events-none opacity-60"
                 )}
               >
-                <Camera className="h-5 w-5 text-navy-700" strokeWidth={1.9} />
+                <Camera className="h-5 w-5 text-tostado-700" strokeWidth={1.9} />
                 Tomar foto
               </button>
               <button
@@ -170,17 +170,17 @@ export function DeliveryProofDialog({
                 onClick={() => pick(galleryRef.current)}
                 disabled={busy}
                 className={cn(
-                  "flex flex-col items-center justify-center gap-2 rounded-field border-[1.5px] border-dashed border-rule bg-page px-3 py-5 text-[13px] font-semibold text-ink transition-colors duration-150 hover:border-navy-700",
+                  "flex flex-col items-center justify-center gap-2 rounded-field border-[1.5px] border-dashed border-rule bg-page px-3 py-5 text-[13px] font-semibold text-ink transition-colors duration-150 hover:border-tostado-700",
                   busy && "pointer-events-none opacity-60"
                 )}
               >
-                <Images className="h-5 w-5 text-navy-700" strokeWidth={1.9} />
+                <Images className="h-5 w-5 text-tostado-700" strokeWidth={1.9} />
                 Elegir de la galería
               </button>
             </div>
           )}
           {preview && !busy && (
-            <div className="mt-2 flex gap-3 text-[12.5px] font-semibold text-navy-700">
+            <div className="mt-2 flex gap-3 text-[12.5px] font-semibold text-tostado-700">
               <button type="button" onClick={() => pick(cameraRef.current)} className="hover:underline">
                 Repetir foto
               </button>
@@ -196,7 +196,7 @@ export function DeliveryProofDialog({
             <Label>Monto cobrado</Label>
             <div className="relative">
               <Input type="number" inputMode="decimal" step="0.01" min={0} className="pr-16" />
-              <span className="tabular pointer-events-none absolute inset-y-0 right-4 flex items-center text-[12px] font-semibold text-slate-400">
+              <span className="tabular pointer-events-none absolute inset-y-0 right-4 flex items-center text-[12px] font-semibold text-ink-subtle">
                 {askAmount.currencyCode}
               </span>
             </div>

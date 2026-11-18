@@ -18,6 +18,7 @@ import { DELIVERY_STATUS_META, DELIVERY_STATUSES, VEHICLE_LABELS, type DeliveryS
 import type { CourierRow } from "../queries/courier-queries";
 import type { DeliveryRow } from "../queries/delivery-queries";
 import { cn } from "@/lib/utils";
+import { ScrollFadeRow } from "@/components/scroll-fade-row";
 
 /** Abre la foto de prueba en un visor sin salir de la lista. */
 function ProofLink({ url, orderNo, deliveredAt }: { url: string; orderNo: string; deliveredAt: string | null }) {
@@ -27,7 +28,7 @@ function ProofLink({ url, orderNo, deliveredAt }: { url: string; orderNo: string
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="mt-1 inline-flex items-center gap-1 text-[12px] font-semibold text-navy-700 hover:underline"
+        className="mt-1 inline-flex items-center gap-1 text-[12px] font-semibold text-tostado-700 hover:underline"
       >
         <Camera className="h-3.5 w-3.5" strokeWidth={1.9} />
         Ver foto de entrega
@@ -62,7 +63,7 @@ function AssignControl({
   const canAssign = delivery.status === "pending" || delivery.status === "failed";
   const canUnassign = delivery.status === "assigned";
 
-  if (!canAssign && !canUnassign) return <span className="text-[12.5px] text-slate-400">{delivery.courierName ?? "—"}</span>;
+  if (!canAssign && !canUnassign) return <span className="text-[12.5px] text-ink-subtle">{delivery.courierName ?? "—"}</span>;
 
   const run = async () => {
     setPending(true);
@@ -102,7 +103,7 @@ function AssignControl({
               {couriers.map((c) => (
                 <ListBox.Item key={c.courierId} id={String(c.courierId)} textValue={c.fullName}>
                   {c.fullName}
-                  <span className="ml-2 text-[12px] text-slate-400">
+                  <span className="ml-2 text-[12px] text-ink-subtle">
                     {VEHICLE_LABELS[c.vehicle]} · {c.openDeliveries} en curso
                   </span>
                   <ListBox.ItemIndicator />
@@ -134,10 +135,10 @@ export function DeliveryList({ rows, couriers, activeStatus }: DeliveryListProps
       isRowHeader: true,
       cell: (r) => (
         <div className="min-w-0">
-          <Link href={`/admin/pedidos/${r.orderId}`} className="font-semibold text-navy-700 hover:underline">
+          <Link href={`/admin/pedidos/${r.orderId}`} className="font-semibold text-tostado-700 hover:underline">
             {r.orderNo}
           </Link>
-          <p className="text-[12px] text-slate-400">
+          <p className="text-[12px] text-ink-subtle">
             {r.recipientName} · <span className="tabular">{r.recipientPhone}</span>
           </p>
           {r.proofPhotoUrl && <ProofLink url={r.proofPhotoUrl} orderNo={r.orderNo} deliveredAt={r.deliveredAt} />}
@@ -148,12 +149,12 @@ export function DeliveryList({ rows, couriers, activeStatus }: DeliveryListProps
     { id: "fee", header: "Tarifa", align: "right", cell: (r) => <Money value={r.fee} /> },
     { id: "status", header: "Estado", cell: (r) => <StatusChip {...DELIVERY_STATUS_META[r.status]} /> },
     { id: "courier", header: "Mensajero", cell: (r) => <AssignControl delivery={r} couriers={couriers} /> },
-    { id: "date", header: "Creada", cell: (r) => <span className="tabular text-slate-500">{fmtDateTime(r.createdAt)}</span> },
+    { id: "date", header: "Creada", cell: (r) => <span className="tabular text-ink-muted">{fmtDateTime(r.createdAt)}</span> },
   ];
 
   return (
     <>
-      <div className="no-scrollbar -mx-1 flex snap-x gap-2 overflow-x-auto px-1 py-1">
+      <ScrollFadeRow>
         <Link href="/admin/entregas" scroll={false} className={cn(CHIP_BASE, activeStatus === null ? CHIP_ON : CHIP_OFF)}>
           Todas
           <LinkPending />
@@ -169,7 +170,7 @@ export function DeliveryList({ rows, couriers, activeStatus }: DeliveryListProps
             <LinkPending />
           </Link>
         ))}
-      </div>
+      </ScrollFadeRow>
 
       <ResponsiveList
         rows={rows}

@@ -25,7 +25,7 @@ export function ProductDetail({ product }: { product: CatalogProduct }) {
     <div className="mx-auto w-full max-w-[1120px] px-5 pt-6 pb-12 md:px-6 md:pt-8">
       <Link
         href="/catalogo"
-        className="nav-label -ml-1 inline-flex items-center gap-0.5 text-slate-500 transition-colors duration-150 hover:text-navy-700"
+        className="nav-label -ml-1 inline-flex items-center gap-0.5 text-ink-muted transition-colors duration-150 hover:text-tostado-700"
       >
         <ChevronLeft className="h-4 w-4" strokeWidth={2} />
         Catálogo
@@ -46,11 +46,11 @@ export function ProductDetail({ product }: { product: CatalogProduct }) {
 
         <div className="flex min-w-0 flex-col">
           {product.categoryName && (
-            <Link href={`/catalogo?cat=${product.categorySlug}`} className="eyebrow self-start hover:text-navy-700">
+            <Link href={`/catalogo?cat=${product.categorySlug}`} className="eyebrow self-start hover:text-tostado-700">
               {product.categoryName}
             </Link>
           )}
-          <h1 className="font-display mt-2 text-[26px] leading-[1.1] text-navy-900 md:text-[32px]">
+          <h1 className="font-display mt-2 text-[26px] leading-[1.1] text-espresso-900 md:text-[32px]">
             {product.name}
           </h1>
           <ProductPrice variant={variant} className="mt-4" />

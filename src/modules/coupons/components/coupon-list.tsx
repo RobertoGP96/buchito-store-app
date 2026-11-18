@@ -22,7 +22,7 @@ function Discount({ row }: { row: CouponRow }) {
 }
 
 function Validity({ row }: { row: CouponRow }) {
-  if (!row.startsAt && !row.endsAt) return <span className="text-slate-400">Siempre</span>;
+  if (!row.startsAt && !row.endsAt) return <span className="text-ink-subtle">Siempre</span>;
   return (
     <span className="tabular whitespace-nowrap">
       {row.startsAt ? fmtDate(row.startsAt) : "…"} – {row.endsAt ? fmtDate(row.endsAt) : "…"}
@@ -34,7 +34,7 @@ function Uses({ row }: { row: CouponRow }) {
   return (
     <span className="tabular">
       {row.usedCount}
-      <span className="text-slate-400"> / {row.maxUses ?? "∞"}</span>
+      <span className="text-ink-subtle"> / {row.maxUses ?? "∞"}</span>
     </span>
   );
 }
@@ -82,7 +82,7 @@ export function CouponList({ rows }: { rows: CouponRow[] }) {
       id: "min",
       header: "Compra mínima",
       align: "right",
-      cell: (r) => (r.minSubtotal == null ? <span className="text-slate-400">—</span> : <Money value={r.minSubtotal} />),
+      cell: (r) => (r.minSubtotal == null ? <span className="text-ink-subtle">—</span> : <Money value={r.minSubtotal} />),
     },
     { id: "uses", header: "Usos", align: "right", cell: (r) => <Uses row={r} /> },
     { id: "validity", header: "Vigencia", cell: (r) => <Validity row={r} /> },

@@ -94,17 +94,17 @@ export function ImageUploader({
           }}
           className={cn(
             "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-field border-[1.5px] border-dashed px-4 py-6 text-center transition-colors duration-150",
-            dragging ? "border-navy-700 bg-tint" : "border-rule bg-page hover:border-navy-700",
+            dragging ? "border-tostado-700 bg-crema-100" : "border-rule bg-page hover:border-tostado-700",
             (disabled || uploading) && "pointer-events-none opacity-60"
           )}
         >
           {uploading ? (
-            <Loader2 className="h-5 w-5 animate-spin text-navy-700" strokeWidth={2} />
+            <Loader2 className="h-5 w-5 animate-spin text-tostado-700" strokeWidth={2} />
           ) : (
-            <ImagePlus className="h-5 w-5 text-navy-700" strokeWidth={1.9} />
+            <ImagePlus className="h-5 w-5 text-tostado-700" strokeWidth={1.9} />
           )}
           <span className="text-[13px] font-semibold text-ink">{uploading ? "Subiendo…" : label}</span>
-          <span className="text-[12px] text-slate-400">JPG, PNG, WebP, GIF o AVIF · hasta 5 MB</span>
+          <span className="text-[12px] text-ink-subtle">JPG, PNG, WebP, GIF o AVIF · hasta 5 MB</span>
         </label>
       </div>
     );

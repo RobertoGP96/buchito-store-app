@@ -20,7 +20,7 @@ export function CurrencySwitcher({ className }: CurrencySwitcherProps) {
       <Dropdown.Trigger
         aria-label={`Moneda: ${display.code}`}
         className={cn(
-          "nav-label inline-flex h-9 items-center gap-1 rounded-full px-2 text-slate-500 sm:gap-1.5 sm:px-2.5 transition-colors duration-150 hover:bg-hover hover:text-navy-700",
+          "nav-label inline-flex h-9 items-center gap-1 rounded-full px-2 text-ink-muted sm:gap-1.5 sm:px-2.5 transition-colors duration-150 hover:bg-hover hover:text-tostado-700",
           className
         )}
       >
@@ -38,7 +38,7 @@ export function CurrencySwitcher({ className }: CurrencySwitcherProps) {
           {currencies.map((currency) => (
             <Dropdown.Item key={currency.code} id={currency.code} textValue={currency.code}>
               <span className="tabular font-semibold">{currency.code}</span>
-              <span className="ml-2 text-[12px] text-slate-400">
+              <span className="ml-2 text-[12px] text-ink-subtle">
                 {currency.name ?? ""}
                 {currency.currencyId === base.currencyId && " · base"}
               </span>

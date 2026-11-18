@@ -13,6 +13,7 @@ import { PAYMENT_STATUS_META } from "@/modules/payments/lib/labels";
 import { FULFILLMENT_LABELS, ORDER_STATUS_META, ORDER_STATUSES, type OrderStatus } from "../lib/labels";
 import type { OrderSummaryRow } from "../queries/order-queries";
 import { cn } from "@/lib/utils";
+import { ScrollFadeRow } from "@/components/scroll-fade-row";
 
 interface OrderListProps {
   rows: OrderSummaryRow[];
@@ -27,7 +28,7 @@ export function OrderList({ rows, activeStatus, counts }: OrderListProps) {
       header: "Pedido",
       isRowHeader: true,
       cell: (r) => (
-        <Link href={`/admin/pedidos/${r.orderId}`} className="font-semibold text-navy-700 hover:underline">
+        <Link href={`/admin/pedidos/${r.orderId}`} className="font-semibold text-tostado-700 hover:underline">
           {r.orderNo}
         </Link>
       ),
@@ -38,7 +39,7 @@ export function OrderList({ rows, activeStatus, counts }: OrderListProps) {
       cell: (r) => (
         <div className="min-w-0">
           <p className="font-medium text-ink">{r.customerName}</p>
-          <p className="tabular text-[12px] text-slate-400">{r.customerPhone}</p>
+          <p className="tabular text-[12px] text-ink-subtle">{r.customerPhone}</p>
         </div>
       ),
     },
@@ -51,7 +52,7 @@ export function OrderList({ rows, activeStatus, counts }: OrderListProps) {
         <div>
           <Money value={r.total} className="font-semibold" />
           {r.paymentCurrency.code !== undefined && (
-            <p className="text-[11.5px] text-slate-400">
+            <p className="text-[11.5px] text-ink-subtle">
               <Money value={r.totalInPaymentCurrency} currency={r.paymentCurrency} /> · {r.paymentMethodName}
             </p>
           )}
@@ -68,12 +69,12 @@ export function OrderList({ rows, activeStatus, counts }: OrderListProps) {
         </div>
       ),
     },
-    { id: "date", header: "Fecha", cell: (r) => <span className="tabular text-slate-500">{fmtDateTime(r.createdAt)}</span> },
+    { id: "date", header: "Fecha", cell: (r) => <span className="tabular text-ink-muted">{fmtDateTime(r.createdAt)}</span> },
   ];
 
   return (
     <>
-      <div className="no-scrollbar -mx-1 flex snap-x gap-2 overflow-x-auto px-1 py-1">
+      <ScrollFadeRow>
         <Link href="/admin/pedidos" scroll={false} className={cn(CHIP_BASE, activeStatus === null ? CHIP_ON : CHIP_OFF)}>
           Todos
           <LinkPending />
@@ -90,7 +91,7 @@ export function OrderList({ rows, activeStatus, counts }: OrderListProps) {
             <LinkPending />
           </Link>
         ))}
-      </div>
+      </ScrollFadeRow>
 
       <ResponsiveList
         rows={rows}

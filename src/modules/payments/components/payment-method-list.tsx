@@ -59,7 +59,7 @@ export function PaymentMethodList({ rows, currencies }: PaymentMethodListProps) 
       cell: (r) => (
         <div className="min-w-0">
           <p className="font-semibold text-ink">{r.name}</p>
-          <p className="text-[12px] text-slate-400">{r.code}</p>
+          <p className="text-[12px] text-ink-subtle">{r.code}</p>
         </div>
       ),
     },

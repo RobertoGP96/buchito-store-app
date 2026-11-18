@@ -40,7 +40,7 @@ function DeleteCurrencyButton({ row, appearance }: { row: CurrencyRow; appearanc
 }
 
 function RateCell({ row, baseCode }: { row: CurrencyRow; baseCode: string | null }) {
-  if (row.isBase) return <span className="text-slate-400">Base</span>;
+  if (row.isBase) return <span className="text-ink-subtle">Base</span>;
   if (row.rateToBase == null) return <span className="font-medium text-warn">Sin tasa</span>;
   return (
     <span className="tabular">

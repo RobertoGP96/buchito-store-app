@@ -41,15 +41,15 @@ function referenceLabel(r: StockMovementRow): string | null {
 
 function ReferenceCell({ row }: { row: StockMovementRow }) {
   const label = referenceLabel(row);
-  if (!label) return <span className="text-slate-400">—</span>;
+  if (!label) return <span className="text-ink-subtle">—</span>;
   if (row.referenceType === "order" && row.referenceId != null) {
     return (
-      <Link href={`/admin/pedidos/${row.referenceId}`} className="font-medium text-navy-700 hover:underline">
+      <Link href={`/admin/pedidos/${row.referenceId}`} className="font-medium text-tostado-700 hover:underline">
         {label}
       </Link>
     );
   }
-  return <span className="text-slate-500">{label}</span>;
+  return <span className="text-ink-muted">{label}</span>;
 }
 
 function DeltaCell({ row }: { row: StockMovementRow }) {
@@ -58,7 +58,7 @@ function DeltaCell({ row }: { row: StockMovementRow }) {
       <p className={cn("font-semibold", row.type === "exit" ? "text-danger" : "text-ink")}>
         {movementDelta(row.type, row.quantity)}
       </p>
-      <p className="text-[11.5px] text-slate-400">quedan {fmtQty(row.stockAfter, row.unit)}</p>
+      <p className="text-[11.5px] text-ink-subtle">quedan {fmtQty(row.stockAfter, row.unit)}</p>
     </div>
   );
 }
@@ -71,17 +71,17 @@ export function StockMovementList({ rows, variantId }: StockMovementListProps) {
       id: "date",
       header: "Fecha",
       isRowHeader: true,
-      cell: (r) => <span className="tabular text-slate-500">{fmtDateTime(r.createdAt)}</span>,
+      cell: (r) => <span className="tabular text-ink-muted">{fmtDateTime(r.createdAt)}</span>,
     },
     {
       id: "variant",
       header: "Producto / variante",
       cell: (r) => (
         <div className="min-w-0">
-          <Link href={`/admin/productos/${r.productId}`} className="font-semibold text-navy-700 hover:underline">
+          <Link href={`/admin/productos/${r.productId}`} className="font-semibold text-tostado-700 hover:underline">
             {r.productName}
           </Link>
-          <p className="text-[12px] text-slate-400">
+          <p className="text-[12px] text-ink-subtle">
             {r.variantName ? `${r.variantName} · ` : ""}
             <span className="tabular">{r.sku}</span>
           </p>
@@ -101,7 +101,7 @@ export function StockMovementList({ rows, variantId }: StockMovementListProps) {
       cell: (r) => (
         <div className="min-w-0 max-w-[260px]">
           {r.notes && <p className="truncate text-ink">{r.notes}</p>}
-          <p className="truncate text-[12px] text-slate-400">{r.createdBy ?? "Sistema"}</p>
+          <p className="truncate text-[12px] text-ink-subtle">{r.createdBy ?? "Sistema"}</p>
         </div>
       ),
     },
@@ -110,8 +110,8 @@ export function StockMovementList({ rows, variantId }: StockMovementListProps) {
   return (
     <>
       {variantId != null && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-field bg-tint px-4 py-3 text-[13px]">
-          <p className="text-navy-900">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-field bg-crema-100 px-4 py-3 text-[13px]">
+          <p className="text-espresso-900">
             Mostrando solo{" "}
             {filtered ? (
               <>
@@ -123,7 +123,7 @@ export function StockMovementList({ rows, variantId }: StockMovementListProps) {
               <span className="font-semibold">la variante #{variantId}</span>
             )}
           </p>
-          <Link href="/admin/inventario/movimientos" className="font-semibold text-navy-700 hover:underline">
+          <Link href="/admin/inventario/movimientos" className="font-semibold text-tostado-700 hover:underline">
             Ver todos
           </Link>
         </div>

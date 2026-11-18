@@ -73,11 +73,11 @@ export function AdminUserMenu({ userName, role, className }: AdminUserMenuProps)
       <Dropdown.Trigger
         aria-label={`Cuenta de ${userName}`}
         className={cn(
-          "inline-flex h-9 items-center gap-2 rounded-full pr-2 pl-1 text-slate-500 transition-colors duration-150 hover:bg-hover data-[pressed]:bg-tint",
+          "inline-flex h-9 items-center gap-2 rounded-full pr-2 pl-1 text-ink-muted transition-colors duration-150 hover:bg-hover data-[pressed]:bg-crema-100",
           className
         )}
       >
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-navy-700 text-[11px] font-bold text-on-brand">
+        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-tostado-700 text-[11px] font-bold text-on-tostado">
           {initials || "U"}
         </span>
         <span className="hidden max-w-[120px] truncate text-[13px] font-semibold text-ink lg:inline">{userName}</span>
@@ -88,7 +88,7 @@ export function AdminUserMenu({ userName, role, className }: AdminUserMenuProps)
             y descartaba la cabecera junto con los atajos. */}
         <div className="border-b border-line px-4 pt-3.5 pb-3">
           <p className="truncate text-[14px] font-semibold text-ink">{userName}</p>
-          <p className="mt-0.5 text-[12px] text-slate-400">{roleLabel}</p>
+          <p className="mt-0.5 text-[12px] text-ink-subtle">{roleLabel}</p>
         </div>
         {/* El foco lo marca el ítem resaltado; el anillo global del contenedor
             solo asomaba como una línea bajo la cabecera. */}

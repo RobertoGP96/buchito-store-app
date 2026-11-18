@@ -33,13 +33,16 @@ export function ProductImage({
         fill
         sizes={sizes}
         priority={priority}
+        // `priority` solo quita el lazy y precarga; la prioridad de red alta
+        // para la candidata a LCP hay que pedirla aparte.
+        fetchPriority={priority ? "high" : undefined}
         className="object-cover"
         onError={() => setFailed(true)}
       />
     );
   }
   return (
-    <span className="flex items-center justify-center text-slate-300">
+    <span className="flex items-center justify-center text-ink-faint">
       <ImageIcon className="h-[26px] w-[26px]" strokeWidth={1.5} aria-hidden />
       <span className="sr-only">{label}</span>
     </span>

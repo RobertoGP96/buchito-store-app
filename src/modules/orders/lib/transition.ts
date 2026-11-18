@@ -186,7 +186,7 @@ async function restockLines(
 ): Promise<void> {
   // Mismo orden de bloqueo que el descuento de stock en createOrder: evita
   // deadlocks entre una cancelación y un checkout con las mismas variantes.
-  const lines = [...order.lines].sort((a, b) => a.variantId - b.variantId);
+  const lines = order.lines.toSorted((a, b) => a.variantId - b.variantId);
   for (const line of lines) {
     const variant = await tx.productVariant.update({
       where: { variantId: line.variantId },

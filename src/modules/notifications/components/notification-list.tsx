@@ -91,30 +91,30 @@ export function NotificationList({
                 className={cn(
                   "flex min-h-11 items-start gap-3 px-3 py-3 transition-colors duration-150",
                   variant === "panel" ? "rounded-field" : "md:px-4",
-                  isRead ? "hover:bg-hover" : "bg-tint/40 hover:bg-tint/70"
+                  isRead ? "hover:bg-hover" : "bg-crema-100/40 hover:bg-crema-100/70"
                 )}
               >
-                <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-tint text-navy-700">
+                <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-crema-100 text-tostado-700">
                   <Icon className="h-4 w-4" strokeWidth={1.9} />
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className={cn("block text-[13.5px] leading-snug text-ink", isRead ? "font-medium" : "font-semibold")}>
                     {item.title}
                   </span>
-                  <span className="mt-0.5 line-clamp-2 block text-[12.5px] leading-[1.5] text-slate-500">{item.body}</span>
+                  <span className="mt-0.5 line-clamp-2 block text-[12.5px] leading-[1.5] text-ink-muted">{item.body}</span>
                   {/* La hora se formatea con la zona de quien pinta: el servidor
                       (UTC en producción) y el navegador pueden diferir. */}
                   <time
                     dateTime={item.createdAt}
                     suppressHydrationWarning
-                    className="tabular mt-1 block text-[11.5px] text-slate-400"
+                    className="tabular mt-1 block text-[11.5px] text-ink-subtle"
                   >
                     {fmtDateTime(item.createdAt)}
                   </time>
                 </span>
                 {!isRead && (
                   <>
-                    <span aria-hidden className="mt-2 h-2 w-2 flex-none rounded-full bg-gold-500" />
+                    <span aria-hidden className="mt-2 h-2 w-2 flex-none rounded-full bg-caramelo-500" />
                     <span className="sr-only">No leída</span>
                   </>
                 )}
@@ -124,7 +124,7 @@ export function NotificationList({
         })}
       </ul>
       {variant === "page" && items.length >= INBOX_SIZE && (
-        <p className="mt-3 text-center text-[12.5px] text-slate-400">
+        <p className="mt-3 text-center text-[12.5px] text-ink-subtle">
           Se muestran las últimas {INBOX_SIZE} notificaciones.
         </p>
       )}

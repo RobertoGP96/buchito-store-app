@@ -6,6 +6,7 @@ import { toast } from "@heroui/react";
 import { Plus } from "lucide-react";
 import { Badge } from "@/components/badge";
 import { Money } from "@/components/money";
+import { PRODUCT_GRID_IMAGE_SIZES } from "@/components/product-grid";
 import { ProductImage } from "@/components/product-image";
 import { StockLabel } from "@/components/stock-label";
 import { discountPct } from "@/lib/format";
@@ -81,7 +82,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           <ProductImage
             src={product.imageUrl}
             alt=""
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 280px"
+            sizes={PRODUCT_GRID_IMAGE_SIZES}
             priority={priority}
           />
         </span>
@@ -108,7 +109,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           {product.name}
         </h3>
         {hasVariants && (
-          <span className="text-[12px] text-slate-400">{product.variants.length} variantes</span>
+          <span className="text-[12px] text-ink-subtle">{product.variants.length} variantes</span>
         )}
         <StockLabel stock={product.totalStock} unit={hasVariants ? "unit" : variant.unit} />
       </div>
@@ -123,18 +124,18 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
         <div className="min-w-0 sm:flex-1 sm:basis-0">
           <div
             className={cn(
-              "flex flex-wrap items-baseline gap-x-1 leading-tight font-bold text-navy-900",
+              "flex flex-wrap items-baseline gap-x-1 leading-tight font-bold text-espresso-900",
               priceSizeClass(priceText)
             )}
           >
-            {hasVariants && <span className="text-[11px] font-medium text-slate-400">desde</span>}
+            {hasVariants && <span className="text-[11px] font-medium text-ink-subtle">desde</span>}
             <Money value={variant.price} className="whitespace-normal break-words" />
             {perUnitSuffix(variant.unit) && (
-              <span className="text-[11px] font-medium text-slate-400">{perUnitSuffix(variant.unit)}</span>
+              <span className="text-[11px] font-medium text-ink-subtle">{perUnitSuffix(variant.unit)}</span>
             )}
           </div>
           {variant.compareAtPrice != null && variant.compareAtPrice > variant.price && (
-            <div className="mt-0.5 text-[11px] font-medium text-slate-400 line-through">
+            <div className="mt-0.5 text-[11px] font-medium text-ink-subtle line-through">
               <Money value={variant.compareAtPrice} className="whitespace-normal break-words" />
             </div>
           )}
@@ -144,7 +145,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
             href={href}
             prefetch={false}
             onClick={handleOpen}
-            className="relative z-10 flex h-9 flex-none items-center justify-center rounded-full bg-tint px-4 text-[12.5px] font-semibold text-navy-900 transition-colors duration-150 hover:bg-tint-strong sm:w-auto"
+            className="relative z-10 flex min-h-9 flex-none items-center justify-center rounded-full bg-crema-100 px-4 pointer-coarse:min-h-11 text-[12.5px] font-semibold text-espresso-900 transition-colors duration-150 hover:bg-crema-200 sm:w-auto"
           >
             Elegir
           </Link>
@@ -154,10 +155,10 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
             onClick={handleAdd}
             aria-disabled={soldOut}
             className={cn(
-              "relative z-10 flex h-9 flex-none items-center justify-center gap-1.5 rounded-full px-4 text-[12.5px] font-semibold transition-[background-color,transform] duration-150 motion-safe:active:scale-95 sm:w-auto",
+              "relative z-10 flex min-h-9 flex-none items-center justify-center gap-1.5 rounded-full px-4 pointer-coarse:min-h-11 text-[12.5px] font-semibold transition-[background-color,transform] duration-150 motion-safe:active:scale-95 sm:w-auto",
               soldOut
                 ? "cursor-not-allowed bg-cream text-disabled"
-                : "bg-navy-700 text-on-brand hover:bg-navy-600",
+                : "bg-tostado-700 text-on-tostado hover:bg-tostado-600",
               adding && "scale-95"
             )}
           >

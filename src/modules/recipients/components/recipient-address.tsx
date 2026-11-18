@@ -10,8 +10,8 @@ export function RecipientAddress({ address, className }: { address: AddressLike;
       {address.line1}
       {address.line2 && <>, {address.line2}</>}
       {address.neighborhood && <span className="block">{address.neighborhood}</span>}
-      {address.zoneName && <span className="block text-slate-500">Zona: {address.zoneName}</span>}
-      {address.reference && <span className="block text-slate-500">Ref.: {address.reference}</span>}
+      {address.zoneName && <span className="block text-ink-muted">Zona: {address.zoneName}</span>}
+      {address.reference && <span className="block text-ink-muted">Ref.: {address.reference}</span>}
     </span>
   );
 }

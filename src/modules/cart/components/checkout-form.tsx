@@ -204,19 +204,19 @@ export function CheckoutForm({
       <div className="flex flex-col gap-6">
         <section className="rounded-card bg-canvas p-5 shadow-card">
           <div className="flex items-start justify-between gap-3">
-            <p className="eyebrow">Tus datos</p>
-            <Link href="/perfil" className="text-[12.5px] font-semibold text-navy-700 hover:underline">
+            <h2 className="eyebrow">Tus datos</h2>
+            <Link href="/perfil" className="text-[12.5px] font-semibold text-tostado-700 hover:underline">
               Editar en mi perfil
             </Link>
           </div>
           <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-[13.5px]">
-            <dt className="text-slate-400">Nombre</dt>
+            <dt className="text-ink-subtle">Nombre</dt>
             <dd className="font-medium text-ink">{customer.name}</dd>
-            <dt className="text-slate-400">Teléfono</dt>
+            <dt className="text-ink-subtle">Teléfono</dt>
             <dd className="tabular font-medium text-ink">{customer.phone}</dd>
             {customer.email && (
               <>
-                <dt className="text-slate-400">Correo</dt>
+                <dt className="text-ink-subtle">Correo</dt>
                 <dd className="font-medium text-ink">{customer.email}</dd>
               </>
             )}
@@ -224,9 +224,9 @@ export function CheckoutForm({
         </section>
 
         <section className="rounded-card bg-canvas p-5 shadow-card">
-          <p id="fulfillment-label" className="eyebrow">
+          <h2 id="fulfillment-label" className="eyebrow">
             Entrega
-          </p>
+          </h2>
           <div className="mt-4">
             <Controller
               control={control}
@@ -280,7 +280,7 @@ export function CheckoutForm({
                   <FormTextField control={control} name="newRecipient.line2" label="Apto / piso (opcional)" autoComplete="address-line2" />
                   <FormTextField control={control} name="newRecipient.neighborhood" label="Barrio / reparto (opcional)" />
                   <FormTextField control={control} name="newRecipient.reference" label="Referencia (opcional)" placeholder="Edificio azul, timbre 3" />
-                  <p className="text-[12px] leading-[1.6] text-slate-400 sm:col-span-2">
+                  <p className="text-[12px] leading-[1.6] text-ink-subtle sm:col-span-2">
                     Se guarda en tus destinatarios para la próxima compra.
                   </p>
                 </div>
@@ -303,9 +303,9 @@ export function CheckoutForm({
         </section>
 
         <section className="rounded-card bg-canvas p-5 shadow-card">
-          <p id="payment-label" className="eyebrow">
+          <h2 id="payment-label" className="eyebrow">
             Pago
-          </p>
+          </h2>
           <div className="mt-4">
             <Controller
               control={control}
@@ -339,14 +339,14 @@ export function CheckoutForm({
             </div>
           )}
           {whatsappEnabled && (
-            <p className="mt-4 text-[12.5px] leading-[1.6] text-slate-500">
+            <p className="mt-4 text-[12.5px] leading-[1.6] text-ink-muted">
               Después de confirmar verás cómo coordinar el pago por WhatsApp con la tienda y enviar el comprobante.
             </p>
           )}
         </section>
 
         <section className="rounded-card bg-canvas p-5 shadow-card">
-          <p className="eyebrow">Notas</p>
+          <h2 className="eyebrow">Notas</h2>
           <div className="mt-4">
             <FormTextArea control={control} name="notes" label="Indicaciones para la entrega (opcional)" rows={2} />
           </div>
@@ -364,7 +364,7 @@ export function CheckoutForm({
         >
           Confirmar pedido
         </Button>
-        <p className="mt-3 text-center text-[12px] leading-[1.6] text-slate-400">
+        <p className="mt-3 text-center text-[12px] leading-[1.6] text-ink-subtle">
           Los precios se recalculan a la tasa vigente al confirmar.
         </p>
       </CartSummary>

@@ -166,7 +166,7 @@ export function ProductTypeForm({ open, onOpenChange, type }: ProductTypeFormPro
             </Button>
           </div>
           {fields.length === 0 && (
-            <p className="text-[13px] text-slate-400">
+            <p className="text-[13px] text-ink-subtle">
               Sin atributos: los productos de este tipo solo tienen nombre, descripción, precio y stock.
             </p>
           )}

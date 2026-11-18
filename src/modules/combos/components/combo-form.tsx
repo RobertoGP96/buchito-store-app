@@ -214,7 +214,7 @@ export function ComboForm({ combo, variants, currencies }: ComboFormProps) {
                   size="sm"
                   isIconOnly
                   aria-label="Quitar producto"
-                  className="mt-7 rounded-full text-slate-400 hover:text-danger"
+                  className="mt-7 rounded-full text-ink-subtle hover:text-danger"
                   isDisabled={fields.length === 1}
                   onPress={() => remove(index)}
                 >
@@ -228,7 +228,7 @@ export function ComboForm({ combo, variants, currencies }: ComboFormProps) {
         <div className="grid gap-4 border-t border-line pt-4 sm:grid-cols-2">
           <FormTextField control={control} name="price" label="Precio del combo" type="number" step="0.01" min={0} isRequired />
           <FormSelect control={control} name="priceCurrencyId" label="Moneda del precio" options={currencyOptions} isRequired />
-          <div className="rounded-field bg-page px-4 py-3 text-[13px] text-slate-500 sm:col-span-2">
+          <div className="rounded-field bg-page px-4 py-3 text-[13px] text-ink-muted sm:col-span-2">
             {summary.count === 0 ? (
               "Añade productos para ver cuánto ahorra el cliente."
             ) : summary.regular == null ? (

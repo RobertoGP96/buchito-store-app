@@ -42,11 +42,11 @@ export default async function HomePage() {
   return (
     <>
       <section className="border-b border-line bg-canvas px-5 pt-14 pb-12 text-center md:px-10 md:pt-[72px] md:pb-16">
-        <p className="eyebrow text-navy-700">Bienvenido a {STORE_NAME}</p>
-        <h1 className="font-display mx-auto mt-5 max-w-[640px] text-[30px] leading-[1.05] text-navy-900 md:text-[48px]">
+        <p className="eyebrow text-tostado-700">Bienvenido a {STORE_NAME}</p>
+        <h1 className="font-display mx-auto mt-5 max-w-[640px] text-[30px] leading-[1.05] text-espresso-900 md:text-[48px]">
           Todo lo que necesitas, entregado en tu puerta.
         </h1>
-        <p className="mx-auto mt-5 max-w-[470px] text-[14px] leading-[1.7] text-pretty text-slate-500 md:text-[15px]">
+        <p className="mx-auto mt-5 max-w-[470px] text-[14px] leading-[1.7] text-pretty text-ink-muted md:text-[15px]">
           Productos de distintos tipos, precios claros en tu moneda y entrega a
           domicilio con seguimiento.
         </p>
@@ -69,7 +69,7 @@ export default async function HomePage() {
                   <Sparkles className="h-3.5 w-3.5" strokeWidth={2} />
                   Novedades
                 </p>
-                <h2 className="font-display mt-2 text-[20px] leading-tight text-navy-900 md:text-[24px]">
+                <h2 className="font-display mt-2 text-[20px] leading-tight text-espresso-900 md:text-[24px]">
                   Recién añadidos
                 </h2>
               </div>
@@ -92,7 +92,7 @@ export default async function HomePage() {
           <div className="flex items-end justify-between gap-4">
             <div>
               <p className="eyebrow">Destacados</p>
-              <h2 className="font-display mt-2 text-[20px] leading-tight text-navy-900 md:text-[24px]">
+              <h2 className="font-display mt-2 text-[20px] leading-tight text-espresso-900 md:text-[24px]">
                 Lo más pedido
               </h2>
             </div>
@@ -125,7 +125,7 @@ export default async function HomePage() {
             <div className="flex items-end justify-between gap-4">
               <div>
                 <p className="eyebrow">Combos</p>
-                <h2 className="font-display mt-2 text-[20px] leading-tight text-navy-900 md:text-[24px]">
+                <h2 className="font-display mt-2 text-[20px] leading-tight text-espresso-900 md:text-[24px]">
                   Más por menos
                 </h2>
               </div>
@@ -152,15 +152,15 @@ export default async function HomePage() {
                 href={link.href}
                 className="group flex items-center gap-3.5 rounded-card bg-canvas p-4 shadow-card transition-[box-shadow,transform] duration-200 hover:shadow-float motion-safe:hover:-translate-y-0.5"
               >
-                <span className="flex h-11 w-11 flex-none items-center justify-center rounded-field bg-tint text-navy-700">
+                <span className="flex h-11 w-11 flex-none items-center justify-center rounded-field bg-crema-100 text-tostado-700">
                   <Icon className="h-5 w-5" strokeWidth={1.9} />
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block text-[14.5px] font-semibold text-ink">{link.title}</span>
-                  <span className="block text-[12.5px] leading-[1.5] text-slate-500">{link.description}</span>
+                  <span className="block text-[12.5px] leading-[1.5] text-ink-muted">{link.description}</span>
                 </span>
                 <ArrowRight
-                  className="h-4 w-4 flex-none text-slate-300 transition-transform motion-safe:group-hover:translate-x-0.5"
+                  className="h-4 w-4 flex-none text-ink-faint transition-transform motion-safe:group-hover:translate-x-0.5"
                   strokeWidth={2}
                 />
               </Link>

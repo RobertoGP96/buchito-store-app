@@ -44,13 +44,13 @@ export default async function MyOrdersPage() {
                       <StatusChip {...ORDER_STATUS_META[order.status]} />
                       <StatusChip {...PAYMENT_STATUS_META[order.paymentStatus]} />
                     </div>
-                    <p className="tabular mt-1 text-[12.5px] text-slate-400">
+                    <p className="tabular mt-1 text-[12.5px] text-ink-subtle">
                       {fmtDateTime(order.createdAt)} · {FULFILLMENT_LABELS[order.fulfillment]} · {order.lineCount}{" "}
                       {order.lineCount === 1 ? "artículo" : "artículos"}
                     </p>
                   </div>
-                  <Money value={order.total} className="font-semibold text-navy-900" />
-                  <ChevronRight className="h-4 w-4 flex-none text-slate-300" strokeWidth={2} />
+                  <Money value={order.total} className="font-semibold text-espresso-900" />
+                  <ChevronRight className="h-4 w-4 flex-none text-ink-faint" strokeWidth={2} />
                 </Link>
               </li>
             ))}

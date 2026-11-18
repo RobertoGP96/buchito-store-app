@@ -25,7 +25,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function Field({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="contents">
-      <dt className="text-slate-400">{label}</dt>
+      <dt className="text-ink-subtle">{label}</dt>
       <dd className="font-medium text-ink">{value}</dd>
     </div>
   );
@@ -40,12 +40,12 @@ export function CustomerDetail({ customer }: { customer: CustomerDetailData }) {
       header: "Pedido",
       isRowHeader: true,
       cell: (r) => (
-        <Link href={`/admin/pedidos/${r.orderId}`} className="font-semibold text-navy-700 hover:underline">
+        <Link href={`/admin/pedidos/${r.orderId}`} className="font-semibold text-tostado-700 hover:underline">
           {r.orderNo}
         </Link>
       ),
     },
-    { id: "date", header: "Fecha", cell: (r) => <span className="tabular text-slate-500">{fmtDateTime(r.createdAt)}</span> },
+    { id: "date", header: "Fecha", cell: (r) => <span className="tabular text-ink-muted">{fmtDateTime(r.createdAt)}</span> },
     {
       id: "status",
       header: "Estado",
@@ -68,12 +68,12 @@ export function CustomerDetail({ customer }: { customer: CustomerDetailData }) {
             <Field
               label="Teléfono"
               value={
-                <a href={`tel:${customer.phone.replace(/\s+/g, "")}`} className="tabular text-navy-700 hover:underline">
+                <a href={`tel:${customer.phone.replace(/\s+/g, "")}`} className="tabular text-tostado-700 hover:underline">
                   {customer.phone}
                 </a>
               }
             />
-            <Field label="Correo" value={customer.email ?? <span className="text-slate-400">—</span>} />
+            <Field label="Correo" value={customer.email ?? <span className="text-ink-subtle">—</span>} />
             <Field label="Alta" value={<span className="tabular">{fmtDate(customer.createdAt)}</span>} />
             <Field label="Pedidos" value={<span className="tabular">{customer.orderCount}</span>} />
             <Field label="Total comprado" value={<Money value={customer.totalSpent} />} />
@@ -96,7 +96,7 @@ export function CustomerDetail({ customer }: { customer: CustomerDetailData }) {
               />
             </dl>
           ) : (
-            <p className="text-[13.5px] text-slate-500">
+            <p className="text-[13.5px] text-ink-muted">
               Compra como invitado. Si se registra con este teléfono, sus pedidos se enlazan a la cuenta.
             </p>
           )}
@@ -110,12 +110,12 @@ export function CustomerDetail({ customer }: { customer: CustomerDetailData }) {
       <div className="flex flex-col gap-4 lg:order-1">
         <Section title="Direcciones">
           {customer.addresses.length === 0 ? (
-            <p className="text-[13.5px] text-slate-500">Sin direcciones guardadas.</p>
+            <p className="text-[13.5px] text-ink-muted">Sin direcciones guardadas.</p>
           ) : (
             <ul className="flex flex-col gap-3">
               {customer.addresses.map((a) => (
                 <li key={a.addressId} className="flex items-start gap-2 text-[13.5px] leading-[1.6] text-ink">
-                  <MapPin className="mt-1 h-4 w-4 flex-none text-navy-700" strokeWidth={2} />
+                  <MapPin className="mt-1 h-4 w-4 flex-none text-tostado-700" strokeWidth={2} />
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       {a.label && <span className="font-semibold">{a.label}</span>}
@@ -126,10 +126,10 @@ export function CustomerDetail({ customer }: { customer: CustomerDetailData }) {
                       {a.line2 && <>, {a.line2}</>}
                       {a.neighborhood && <span className="block">{a.neighborhood}</span>}
                     </p>
-                    {a.zoneName && <p className="text-slate-500">Zona: {a.zoneName}</p>}
-                    {a.reference && <p className="text-slate-500">Ref.: {a.reference}</p>}
+                    {a.zoneName && <p className="text-ink-muted">Zona: {a.zoneName}</p>}
+                    {a.reference && <p className="text-ink-muted">Ref.: {a.reference}</p>}
                     {(a.recipientName || a.phone) && (
-                      <p className="text-slate-500">
+                      <p className="text-ink-muted">
                         {a.recipientName}
                         {a.recipientName && a.phone && " · "}
                         {a.phone && <span className="tabular">{a.phone}</span>}

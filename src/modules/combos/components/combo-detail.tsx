@@ -35,7 +35,7 @@ export function ComboDetail({ combo }: { combo: CatalogCombo }) {
     <div className="mx-auto w-full max-w-[1120px] px-5 pt-6 pb-12 md:px-6 md:pt-8">
       <Link
         href="/combos"
-        className="nav-label -ml-1 inline-flex items-center gap-0.5 text-slate-500 transition-colors duration-150 hover:text-navy-700"
+        className="nav-label -ml-1 inline-flex items-center gap-0.5 text-ink-muted transition-colors duration-150 hover:text-tostado-700"
       >
         <ChevronLeft className="h-4 w-4" strokeWidth={2} />
         Combos
@@ -60,14 +60,14 @@ export function ComboDetail({ combo }: { combo: CatalogCombo }) {
           <p className="eyebrow">
             {combo.items.length} {combo.items.length === 1 ? "producto" : "productos"} en un solo paquete
           </p>
-          <h1 className="font-display mt-2 text-[26px] leading-[1.1] text-navy-900 md:text-[32px]">{combo.name}</h1>
+          <h1 className="font-display mt-2 text-[26px] leading-[1.1] text-espresso-900 md:text-[32px]">{combo.name}</h1>
 
           <div className="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <p className="font-display text-[26px] leading-none text-navy-900">
+            <p className="font-display text-[26px] leading-none text-espresso-900">
               <Money value={combo.price} />
             </p>
             {combo.regularPrice > combo.price && (
-              <p className="text-[14px] font-medium text-slate-400 line-through">
+              <p className="text-[14px] font-medium text-ink-subtle line-through">
                 <Money value={combo.regularPrice} />
               </p>
             )}
@@ -94,16 +94,16 @@ export function ComboDetail({ combo }: { combo: CatalogCombo }) {
                   <div className="min-w-0 flex-1">
                     <Link
                       href={`/producto/${encodeURIComponent(item.productSlug)}`}
-                      className="line-clamp-1 text-[14px] font-semibold text-ink hover:text-navy-700"
+                      className="line-clamp-1 text-[14px] font-semibold text-ink hover:text-tostado-700"
                     >
                       {item.productName}
                     </Link>
-                    <p className="text-[12.5px] text-slate-400">
+                    <p className="text-[12.5px] text-ink-subtle">
                       {item.variantName ? `${item.variantName} · ` : ""}
                       <Money value={item.unitPrice} /> {perUnitSuffix(item.unit) ?? "c/u"}
                     </p>
                   </div>
-                  <span className="tabular flex-none rounded-full bg-tint px-2.5 py-1 text-[12.5px] font-semibold text-navy-700">
+                  <span className="tabular flex-none rounded-full bg-crema-100 px-2.5 py-1 text-[12.5px] font-semibold text-tostado-700">
                     × {fmtQty(item.qty, item.unit)}
                   </span>
                 </li>
@@ -128,11 +128,11 @@ export function ComboDetail({ combo }: { combo: CatalogCombo }) {
           {combo.description && (
             <div className="mt-8 border-t border-line pt-6">
               <p className="eyebrow">Descripción</p>
-              <p className="mt-2.5 text-[14px] leading-[1.7] text-pretty text-slate-500">{combo.description}</p>
+              <p className="mt-2.5 text-[14px] leading-[1.7] text-pretty text-ink-muted">{combo.description}</p>
             </div>
           )}
           {combo.endsAt && (
-            <p className="mt-6 text-[12.5px] text-slate-400">Oferta válida hasta el {fmtDate(combo.endsAt)}.</p>
+            <p className="mt-6 text-[12.5px] text-ink-subtle">Oferta válida hasta el {fmtDate(combo.endsAt)}.</p>
           )}
         </div>
       </div>

@@ -6,6 +6,7 @@ import { toast } from "@heroui/react";
 import { Plus } from "lucide-react";
 import { Badge } from "@/components/badge";
 import { Money } from "@/components/money";
+import { PRODUCT_GRID_IMAGE_SIZES } from "@/components/product-grid";
 import { ProductImage } from "@/components/product-image";
 import { StockLabel } from "@/components/stock-label";
 import { cn } from "@/lib/utils";
@@ -67,7 +68,7 @@ export function ComboCard({ combo, priority = false }: ComboCardProps) {
 
       <div className="relative aspect-square w-full overflow-hidden rounded-field bg-cream">
         <span className="absolute inset-0 flex items-center justify-center">
-          <ProductImage src={combo.imageUrl} alt="" sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 280px" priority={priority} />
+          <ProductImage src={combo.imageUrl} alt="" sizes={PRODUCT_GRID_IMAGE_SIZES} priority={priority} />
         </span>
         {soldOut ? (
           <Badge variant="soldout" className="absolute top-2 left-2">
@@ -90,17 +91,17 @@ export function ComboCard({ combo, priority = false }: ComboCardProps) {
           {combo.items.length} {combo.items.length === 1 ? "producto" : "productos"}
         </span>
         <h3 className="line-clamp-2 text-[14.5px] leading-[1.35] font-semibold text-ink sm:text-[15px]">{combo.name}</h3>
-        <p className="line-clamp-2 text-[12px] leading-[1.45] text-slate-400">{comboItemsSummary(combo)}</p>
+        <p className="line-clamp-2 text-[12px] leading-[1.45] text-ink-subtle">{comboItemsSummary(combo)}</p>
         <StockLabel stock={combo.available} />
       </div>
 
       <div className="mt-auto flex items-end justify-between gap-2.5 border-t border-line pt-3">
         <div className="min-w-0">
-          <div className="text-[15px] leading-tight font-bold text-navy-900 sm:text-[16px]">
+          <div className="text-[15px] leading-tight font-bold text-espresso-900 sm:text-[16px]">
             <Money value={combo.price} />
           </div>
           {combo.regularPrice > combo.price && (
-            <div className="mt-0.5 text-[11px] font-medium text-slate-400 line-through">
+            <div className="mt-0.5 text-[11px] font-medium text-ink-subtle line-through">
               <Money value={combo.regularPrice} />
             </div>
           )}
@@ -110,8 +111,8 @@ export function ComboCard({ combo, priority = false }: ComboCardProps) {
           onClick={handleAdd}
           aria-disabled={soldOut}
           className={cn(
-            "relative z-10 flex h-9 w-9 flex-none items-center justify-center rounded-full font-semibold transition-[background-color,transform] duration-150 motion-safe:active:scale-95 sm:h-auto sm:w-auto sm:px-4 sm:py-[9px] sm:text-[12.5px]",
-            soldOut ? "cursor-not-allowed bg-cream text-disabled" : "bg-navy-700 text-on-brand hover:bg-navy-600",
+            "touch-target relative z-10 flex h-9 w-9 flex-none items-center justify-center rounded-full font-semibold transition-[background-color,transform] duration-150 motion-safe:active:scale-95 sm:h-auto sm:w-auto sm:px-4 sm:py-[9px] sm:text-[12.5px]",
+            soldOut ? "cursor-not-allowed bg-cream text-disabled" : "bg-tostado-700 text-on-tostado hover:bg-tostado-600",
             adding && "scale-95"
           )}
         >

@@ -22,6 +22,7 @@ import { LinkPending } from "@/components/nav-icon";
 import { cn } from "@/lib/utils";
 import { PAYMENT_RANGE_LABELS, PAYMENT_RANGES, type PaymentRange } from "@/modules/payments/lib/payment-ranges";
 import type { FinanceSummary } from "../queries/finance-queries";
+import { ScrollFadeRow } from "@/components/scroll-fade-row";
 
 interface Tile {
   label: string;
@@ -55,12 +56,12 @@ function StatTile({ tile }: { tile: Tile }) {
           featured
             ? "bg-white/12 text-brand-tile-fg"
             : tile.tone === "warn"
-              ? "bg-gold-100 text-gold-600"
+              ? "bg-warn-soft text-warn"
               : tile.tone === "bad"
                 ? "bg-danger-soft text-danger"
                 : tile.tone === "good"
                   ? "bg-ok-soft text-ok"
-                  : "bg-tint text-navy-700"
+                  : "bg-crema-100 text-tostado-700"
         )}
       >
         <Icon className="h-[18px] w-[18px]" strokeWidth={1.9} />
@@ -69,13 +70,13 @@ function StatTile({ tile }: { tile: Tile }) {
         <p
           className={cn(
             "tabular font-display truncate text-[22px] leading-none md:text-[26px]",
-            featured ? "text-white" : tile.tone === "bad" ? "text-danger" : tile.tone === "good" ? "text-ok" : "text-navy-900"
+            featured ? "text-brand-tile-fg" : tile.tone === "bad" ? "text-danger" : tile.tone === "good" ? "text-ok" : "text-espresso-900"
           )}
         >
           {tile.value}
         </p>
-        <p className={cn("mt-2 text-[12.5px] font-medium", featured ? "text-brand-tile-fg/90" : "text-slate-500")}>{tile.label}</p>
-        <p className={cn("tabular mt-0.5 text-[11.5px]", featured ? "text-footer-muted/80" : "text-slate-400")}>{tile.hint}</p>
+        <p className={cn("mt-2 text-[12.5px] font-medium", featured ? "text-brand-tile-fg/90" : "text-ink-muted")}>{tile.label}</p>
+        <p className={cn("tabular mt-0.5 text-[11.5px]", featured ? "text-footer-muted/80" : "text-ink-subtle")}>{tile.hint}</p>
       </div>
     </div>
   );
@@ -167,7 +168,7 @@ export function FinanceSummaryView({ summary, activeRange }: { summary: FinanceS
 
   return (
     <>
-      <div className="no-scrollbar -mx-1 flex snap-x gap-2 overflow-x-auto px-1 py-1">
+      <ScrollFadeRow>
         {PAYMENT_RANGES.map((range) => (
           <Link
             key={range}
@@ -179,12 +180,12 @@ export function FinanceSummaryView({ summary, activeRange }: { summary: FinanceS
             <LinkPending />
           </Link>
         ))}
-      </div>
+      </ScrollFadeRow>
 
       {summary.linesWithoutCost > 0 && (
         <p
           role="status"
-          className="flex items-start gap-2.5 rounded-field bg-gold-100 px-4 py-3 text-[13px] leading-[1.5] text-gold-600"
+          className="flex items-start gap-2.5 rounded-field bg-warn-soft px-4 py-3 text-[13px] leading-[1.5] text-warn"
         >
           <AlertTriangle className="mt-0.5 h-4 w-4 flex-none" strokeWidth={2} />
           <span>

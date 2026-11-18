@@ -46,7 +46,7 @@ export function ResponsiveList<Row>({
 
   return (
     <div className={className}>
-      <ul className="flex flex-col gap-3 md:hidden">
+      <ul className="responsive-cards flex flex-col gap-3 md:hidden">
         {rows.map((row) => (
           <li key={rowKey(row)}>{renderCard(row)}</li>
         ))}
@@ -114,7 +114,7 @@ export function ListCard({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="truncate text-[14.5px] font-semibold text-ink">{title}</p>
-          {subtitle && <p className="mt-0.5 truncate text-[12.5px] text-slate-400">{subtitle}</p>}
+          {subtitle && <p className="mt-0.5 truncate text-[12.5px] text-ink-subtle">{subtitle}</p>}
         </div>
         {badge}
       </div>
@@ -122,7 +122,7 @@ export function ListCard({
         <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-[13px]">
           {rows.map((row) => (
             <div key={row.label} className="contents">
-              <dt className="text-slate-400">{row.label}</dt>
+              <dt className="text-ink-subtle">{row.label}</dt>
               <dd className="text-right font-medium text-ink">{row.value}</dd>
             </div>
           ))}

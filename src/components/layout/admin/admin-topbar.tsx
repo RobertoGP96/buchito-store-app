@@ -40,25 +40,25 @@ export function AdminTopbar({ userName, role }: AdminTopbarProps) {
             onClick={() => setSheetOpen(true)}
             aria-label="Abrir menú"
             aria-expanded={sheetOpen}
-            className="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 transition-colors duration-150 hover:bg-hover hover:text-navy-700 md:hidden"
+            className="touch-target flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:bg-hover hover:text-tostado-700 md:hidden"
           >
             <Menu className="h-5 w-5" strokeWidth={2} />
           </button>
           <BrandLogo size="sm" href="/admin" className="md:hidden" />
 
           <nav aria-label="Ubicación" className="hidden min-w-0 items-center gap-1.5 text-[13px] md:flex">
-            <Link href="/admin" className="font-medium text-slate-400 hover:text-navy-700">
+            <Link href="/admin" className="font-medium text-ink-subtle hover:text-tostado-700">
               Panel
             </Link>
             {section?.label && (
               <>
-                <ChevronRight className="h-3.5 w-3.5 text-slate-300" strokeWidth={2} />
-                <span className="text-slate-400">{section.label}</span>
+                <ChevronRight className="h-3.5 w-3.5 text-ink-faint" strokeWidth={2} />
+                <span className="text-ink-subtle">{section.label}</span>
               </>
             )}
             {entry && entry.href !== "/admin" && (
               <>
-                <ChevronRight className="h-3.5 w-3.5 text-slate-300" strokeWidth={2} />
+                <ChevronRight className="h-3.5 w-3.5 text-ink-faint" strokeWidth={2} />
                 <span className="truncate font-semibold text-ink">{entry.label}</span>
               </>
             )}
@@ -66,7 +66,7 @@ export function AdminTopbar({ userName, role }: AdminTopbarProps) {
 
           <div className="ml-auto flex items-center gap-1 md:gap-2">
             <AdminSearch />
-            <ThemeToggle className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-hover hover:text-navy-700" />
+            <ThemeToggle className="touch-target flex h-9 w-9 items-center justify-center rounded-full hover:bg-hover hover:text-tostado-700" />
             <NotificationsBell audience="admin" tone="light" inboxHref="/admin/notificaciones" />
             <AdminUserMenu userName={userName} role={role} />
           </div>
@@ -87,7 +87,7 @@ export function AdminTopbar({ userName, role }: AdminTopbarProps) {
                 <Link
                   href="/"
                   onClick={() => setSheetOpen(false)}
-                  className="mt-5 flex items-center gap-3 border-t border-line px-3.5 pt-4 text-[13px] font-semibold text-slate-500 hover:text-navy-700"
+                  className="mt-5 flex items-center gap-3 border-t border-line px-3.5 pt-4 text-[13px] font-semibold text-ink-muted hover:text-tostado-700"
                 >
                   <Store className="h-4 w-4" strokeWidth={1.9} />
                   Ver la tienda

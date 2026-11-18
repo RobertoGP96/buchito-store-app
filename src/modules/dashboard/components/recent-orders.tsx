@@ -35,7 +35,7 @@ export function RecentOrders({ rows }: { rows: RecentOrderRow[] }) {
           {rows.map((o) => (
             <li key={o.orderId}>
               <DashboardRow href={`/admin/pedidos/${o.orderId}`}>
-                <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-tint text-[12px] font-semibold text-navy-700">
+                <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-crema-100 text-[12px] font-semibold text-tostado-700">
                   {initials(o.customerName)}
                 </span>
                 <div className="min-w-0 flex-1">
@@ -44,11 +44,11 @@ export function RecentOrders({ rows }: { rows: RecentOrderRow[] }) {
                     <StatusChip {...ORDER_STATUS_META[o.status]} />
                     <StatusChip {...PAYMENT_STATUS_META[o.paymentStatus]} />
                   </div>
-                  <p className="mt-1 truncate text-[13px] text-slate-500">{o.customerName}</p>
+                  <p className="mt-1 truncate text-[13px] text-ink-muted">{o.customerName}</p>
                 </div>
                 <div className="flex-none text-right">
                   <Money value={o.total} className="block text-[14px] font-semibold text-ink" />
-                  <span className="tabular mt-0.5 block text-[11.5px] text-slate-400">{fmtDateTime(o.createdAt)}</span>
+                  <span className="tabular mt-0.5 block text-[11.5px] text-ink-subtle">{fmtDateTime(o.createdAt)}</span>
                 </div>
               </DashboardRow>
             </li>

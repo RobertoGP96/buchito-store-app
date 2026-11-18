@@ -72,13 +72,13 @@ async function CatalogResults({ q, category }: { q: string; category: string }) 
 
   return (
     <>
-      <p className="tabular text-[12.5px] text-slate-400">
+      <p className="tabular text-[12.5px] text-ink-subtle">
         {products.length} {products.length === 1 ? "producto" : "productos"}
       </p>
       <ProductGrid>
         {products.map((product, i) => (
           <ProductGridCell key={product.productId}>
-            <ProductCard product={product} priority={i < 4} />
+            <ProductCard product={product} priority={i < 2} />
           </ProductGridCell>
         ))}
       </ProductGrid>

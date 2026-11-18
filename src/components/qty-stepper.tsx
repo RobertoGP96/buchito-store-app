@@ -19,7 +19,7 @@ interface QtyStepperProps {
 export function QtyStepper({ qty, onInc, onDec, max, step = 1, unit = "unit", size = "sm" }: QtyStepperProps) {
   const isLg = size === "lg";
   const btnClass = cn(
-    "flex flex-none items-center justify-center rounded-full text-slate-500 transition-colors duration-150 hover:bg-hover hover:text-navy-700 disabled:pointer-events-none disabled:text-disabled",
+    "flex flex-none items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:bg-hover hover:text-tostado-700 disabled:pointer-events-none disabled:text-disabled",
     isLg ? "h-10 w-10" : "h-8 w-8"
   );
   const showUnit = unit !== "unit";
@@ -37,13 +37,13 @@ export function QtyStepper({ qty, onInc, onDec, max, step = 1, unit = "unit", si
       </button>
       <div
         className={cn(
-          "tabular text-center font-semibold text-navy-900",
+          "tabular text-center font-semibold text-espresso-900",
           isLg ? "min-w-[34px] text-[15px]" : "min-w-[26px] text-[13px]",
           showUnit && "px-1.5"
         )}
       >
         {fmtQtyNumber(qty)}
-        {showUnit && <span className="ml-0.5 text-[0.8em] font-medium text-slate-400">{SALE_UNIT_SHORT[unit]}</span>}
+        {showUnit && <span className="ml-0.5 text-[0.8em] font-medium text-ink-subtle">{SALE_UNIT_SHORT[unit]}</span>}
       </div>
       <button
         type="button"

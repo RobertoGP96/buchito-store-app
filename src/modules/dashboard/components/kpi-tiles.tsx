@@ -21,7 +21,7 @@ interface Tile {
   hint: string;
   icon: LucideIcon;
   href: string;
-  /** `warn`: el valor pide atención. `featured`: la tesela principal, en navy. */
+  /** `warn`: el valor pide atención. `featured`: la tesela principal, en café. */
   tone?: "warn" | "featured";
 }
 
@@ -150,7 +150,7 @@ function KpiTile({ tile }: { tile: Tile }) {
         <span
           className={cn(
             "flex h-9 w-9 items-center justify-center rounded-chip",
-            featured ? "bg-white/12 text-brand-tile-fg" : warn ? "bg-gold-100 text-gold-600" : "bg-tint text-navy-700"
+            featured ? "bg-white/12 text-brand-tile-fg" : warn ? "bg-warn-soft text-warn" : "bg-crema-100 text-tostado-700"
           )}
         >
           <Icon className="h-[18px] w-[18px]" strokeWidth={1.9} />
@@ -159,7 +159,7 @@ function KpiTile({ tile }: { tile: Tile }) {
           aria-hidden
           className={cn(
             "h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100",
-            featured ? "text-brand-tile-fg" : "text-slate-400"
+            featured ? "text-brand-tile-fg" : "text-ink-subtle"
           )}
           strokeWidth={2}
         />
@@ -168,18 +168,18 @@ function KpiTile({ tile }: { tile: Tile }) {
         <p
           className={cn(
             "tabular font-display truncate text-[24px] leading-none md:text-[28px]",
-            featured ? "text-white" : warn ? "text-warn" : "text-navy-900"
+            featured ? "text-brand-tile-fg" : warn ? "text-warn" : "text-espresso-900"
           )}
         >
           {tile.value}
         </p>
-        <p className={cn("mt-2 text-[12.5px] font-medium", featured ? "text-brand-tile-fg/90" : "text-slate-500")}>
+        <p className={cn("mt-2 text-[12.5px] font-medium", featured ? "text-brand-tile-fg/90" : "text-ink-muted")}>
           {tile.label}
         </p>
         <p
           className={cn(
             "tabular mt-0.5 flex items-center gap-1.5 text-[11.5px]",
-            featured ? "text-footer-muted/80" : "text-slate-400"
+            featured ? "text-footer-muted/80" : "text-ink-subtle"
           )}
         >
           {warn && <span aria-hidden className="h-1.5 w-1.5 flex-none rounded-full bg-warn" />}

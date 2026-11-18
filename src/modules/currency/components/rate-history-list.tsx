@@ -7,7 +7,7 @@ function fmtRate(value: number): string {
 
 export function RateHistoryList({ history, baseCode }: { history: RateHistoryRow[]; baseCode: string }) {
   if (history.length === 0) {
-    return <p className="text-[12.5px] text-slate-400">Sin cambios registrados.</p>;
+    return <p className="text-[12.5px] text-ink-subtle">Sin cambios registrados.</p>;
   }
   return (
     <ol className="flex flex-col divide-y divide-line-soft">
@@ -16,14 +16,14 @@ export function RateHistoryList({ history, baseCode }: { history: RateHistoryRow
           <div className="min-w-0">
             <p className="tabular font-medium text-ink">
               {h.oldRate != null && (
-                <span className="text-slate-400 line-through">{fmtRate(h.oldRate)}</span>
+                <span className="text-ink-subtle line-through">{fmtRate(h.oldRate)}</span>
               )}
               {h.oldRate != null && " → "}
               {fmtRate(h.newRate)} {baseCode}
             </p>
-            {h.note && <p className="mt-0.5 truncate text-slate-500">{h.note}</p>}
+            {h.note && <p className="mt-0.5 truncate text-ink-muted">{h.note}</p>}
           </div>
-          <div className="flex-none text-right text-slate-400">
+          <div className="flex-none text-right text-ink-subtle">
             <p className="tabular">{fmtDateTime(h.changedAt)}</p>
             {h.changedBy && <p className="truncate">{h.changedBy}</p>}
           </div>
