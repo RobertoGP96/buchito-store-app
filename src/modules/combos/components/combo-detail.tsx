@@ -41,12 +41,12 @@ export function ComboDetail({ combo }: { combo: CatalogCombo }) {
         Combos
       </Link>
 
-      <div className="mt-5 grid gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:gap-12">
+      <div className="mt-5 grid gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:items-start md:gap-12">
         <div className="relative aspect-square w-full overflow-hidden rounded-card bg-cream shadow-card">
           <span className="absolute inset-0 flex items-center justify-center">
             <ProductImage src={combo.imageUrl} alt={combo.name} sizes="(max-width: 768px) 100vw, 560px" priority />
           </span>
-          <Badge variant="featured" className="absolute top-3 left-3">
+          <Badge variant="combo" className="absolute top-3 left-3">
             Combo
           </Badge>
           {!soldOut && combo.savingsPct > 0 && (
@@ -56,14 +56,14 @@ export function ComboDetail({ combo }: { combo: CatalogCombo }) {
           )}
         </div>
 
-        <div className="flex flex-col">
-          <p className="eyebrow">
+        <div className="flex flex-col md:sticky md:top-24">
+          <p className="eyebrow text-tostado-700">
             {combo.items.length} {combo.items.length === 1 ? "producto" : "productos"} en un solo paquete
           </p>
-          <h1 className="font-display mt-2 text-[26px] leading-[1.1] text-espresso-900 md:text-[32px]">{combo.name}</h1>
+          <h1 className="font-display type-title mt-2 text-balance text-espresso-900">{combo.name}</h1>
 
           <div className="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <p className="num-display text-[26px] leading-none text-espresso-900">
+            <p className="num-display text-[30px] text-espresso-900 md:text-[34px]">
               <Money value={combo.price} />
             </p>
             {combo.regularPrice > combo.price && (

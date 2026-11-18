@@ -36,11 +36,11 @@ export default async function MyOrdersPage() {
               <li key={order.orderId}>
                 <Link
                   href={`/pedido-confirmado/${encodeURIComponent(order.orderNo)}`}
-                  className="flex items-center gap-4 rounded-card bg-canvas p-4 shadow-card transition-shadow duration-200 hover:shadow-float"
+                  className="flex items-center gap-4 rounded-card bg-canvas p-4 shadow-card transition-[box-shadow,transform] duration-200 hover:shadow-float motion-safe:hover:-translate-y-0.5 motion-safe:active:scale-[.995]"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-semibold text-ink">{order.orderNo}</p>
+                      <p className="tabular type-subheading font-bold text-espresso-900">{order.orderNo}</p>
                       <StatusChip {...ORDER_STATUS_META[order.status]} />
                       <StatusChip {...PAYMENT_STATUS_META[order.paymentStatus]} />
                     </div>
@@ -49,7 +49,7 @@ export default async function MyOrdersPage() {
                       {order.lineCount === 1 ? "artículo" : "artículos"}
                     </p>
                   </div>
-                  <Money value={order.total} className="font-semibold text-espresso-900" />
+                  <Money value={order.total} className="num-display text-[16px] text-espresso-900" />
                   <ChevronRight className="h-4 w-4 flex-none text-ink-faint" strokeWidth={2} />
                 </Link>
               </li>
