@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { MapPin, Package, UserRound } from "lucide-react";
+import { MapPin, Package } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { getSessionCustomer } from "@/lib/auth-guard";
 import { ROLE_LABELS, isRole } from "@/lib/roles";
@@ -12,6 +12,7 @@ import { ProfileEditButton } from "@/modules/customers/components/profile-edit-b
 import { NotificationPreferencesCard } from "@/modules/notifications/components/notification-preferences-card";
 import { inboxHrefForRole } from "@/modules/notifications/lib/labels";
 import { getMutedCategories } from "@/modules/notifications/queries/notification-queries";
+import { initials } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Mi perfil" };
 export const dynamic = "force-dynamic";
@@ -31,12 +32,15 @@ export default async function ProfilePage() {
         <section className="rounded-card bg-canvas p-5 shadow-card md:col-span-2 md:p-6">
           <div className="flex items-start justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3">
-              <span className="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-crema-100 text-tostado-700">
-                <UserRound className="h-5 w-5" strokeWidth={1.9} />
+              <span
+                aria-hidden
+                className="type-body flex h-12 w-12 flex-none items-center justify-center rounded-full bg-tostado-700 font-bold text-on-tostado"
+              >
+                {initials(customer?.name ?? user.fullName)}
               </span>
               <div className="min-w-0">
-                <p className="truncate text-[15px] font-semibold text-ink">{customer?.name ?? user.fullName}</p>
-                <p className="truncate text-[12.5px] text-ink-subtle">{user.email}</p>
+                <p className="font-display type-subheading truncate text-espresso-900">{customer?.name ?? user.fullName}</p>
+                <p className="truncate type-meta text-ink-subtle">{user.email}</p>
               </div>
             </div>
             {/* La clave remonta el botón (y cierra su diálogo) cuando los datos cambian. */}
@@ -47,7 +51,7 @@ export default async function ProfilePage() {
               />
             )}
           </div>
-          <dl className="mt-5 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-[13px]">
+          <dl className="mt-5 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 type-meta">
             {customer && (
               <>
                 <dt className="text-ink-subtle">Teléfono</dt>
@@ -63,12 +67,12 @@ export default async function ProfilePage() {
             <span className="flex h-11 w-11 items-center justify-center rounded-full bg-crema-100 text-tostado-700">
               <Package className="h-5 w-5" strokeWidth={1.9} />
             </span>
-            <p className="text-[15px] font-semibold text-ink">Mis pedidos</p>
+            <h2 className="font-display type-subheading text-espresso-900">Mis pedidos</h2>
           </div>
-          <p className="mt-3 text-[13px] leading-[1.6] text-ink-muted">
+          <p className="type-meta mt-3 mb-4 text-ink-muted">
             Consulta el estado de tus pedidos y el seguimiento de la entrega.
           </p>
-          <ButtonLink href="/perfil/pedidos" variant="soft" className="mt-auto self-start pt-3">
+          <ButtonLink href="/perfil/pedidos" variant="soft" className="mt-auto self-start">
             Ver pedidos
           </ButtonLink>
         </section>
@@ -77,12 +81,12 @@ export default async function ProfilePage() {
             <span className="flex h-11 w-11 items-center justify-center rounded-full bg-crema-100 text-tostado-700">
               <MapPin className="h-5 w-5" strokeWidth={1.9} />
             </span>
-            <p className="text-[15px] font-semibold text-ink">Mis destinatarios</p>
+            <h2 className="font-display type-subheading text-espresso-900">Mis destinatarios</h2>
           </div>
-          <p className="mt-3 text-[13px] leading-[1.6] text-ink-muted">
+          <p className="type-meta mt-3 mb-4 text-ink-muted">
             A quién le entregamos tus pedidos: nombre, teléfono y dirección, listos para elegir al comprar.
           </p>
-          <ButtonLink href="/perfil/destinatarios" variant="soft" className="mt-auto self-start pt-3">
+          <ButtonLink href="/perfil/destinatarios" variant="soft" className="mt-auto self-start">
             Ver destinatarios
           </ButtonLink>
         </section>

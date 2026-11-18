@@ -33,10 +33,10 @@ export function OrdersByStatus({ rows, total }: OrdersByStatusProps) {
       footer={
         total > 0 ? (
           <>
-            <p className="tabular text-[12.5px] text-ink-muted">
+            <p className="tabular type-meta text-ink-muted">
               {total} {total === 1 ? "pedido en total" : "pedidos en total"}
             </p>
-            <p className="tabular text-[12.5px] font-medium text-ok">{Math.round(pct(delivered))}% entregados</p>
+            <p className="tabular type-meta font-medium text-ok">{Math.round(pct(delivered))}% entregados</p>
           </>
         ) : undefined
       }
@@ -55,7 +55,7 @@ export function OrdersByStatus({ rows, total }: OrdersByStatusProps) {
             ))}
         </div>
       ) : (
-        <p className="text-[13px] text-ink-muted">Todavía no hay pedidos.</p>
+        <p className="type-meta text-ink-muted">Todavía no hay pedidos.</p>
       )}
       <ul className="mt-3 divide-y divide-line-soft">
         {rows.map((r) => (
@@ -66,7 +66,7 @@ export function OrdersByStatus({ rows, total }: OrdersByStatusProps) {
                 <StatusChip {...ORDER_STATUS_META[r.status]} />
               </span>
               <span className="flex items-baseline gap-2">
-                <span className="tabular text-[11.5px] text-ink-subtle">{Math.round(pct(r.count))}%</span>
+                <span className="tabular type-caption text-ink-subtle">{Math.round(pct(r.count))}%</span>
                 <span
                   className={cn(
                     "tabular min-w-[2ch] text-right text-[15px] font-semibold",

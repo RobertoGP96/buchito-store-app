@@ -52,7 +52,6 @@ export function CustomerNotesForm({ customerId, notes }: CustomerNotesFormProps)
           type="submit"
           variant="primary"
           size="sm"
-          className="rounded-full"
           isPending={isSubmitting}
           isDisabled={isSubmitting || !formState.isDirty}
         >

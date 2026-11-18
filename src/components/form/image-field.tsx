@@ -44,14 +44,14 @@ export function FormImageField<T extends FieldValues>({
               <div className="flex flex-wrap items-center gap-2">
                 <ImageUploader scope={scope} label={url ? "Cambiar" : "Subir foto"} onUploaded={(next) => field.onChange(next)} />
                 {url && (
-                  <Button variant="ghost" size="sm" className="rounded-full" onPress={() => field.onChange("")}>
+                  <Button variant="ghost" size="sm" onPress={() => field.onChange("")}>
                     <X className="h-3.5 w-3.5" strokeWidth={2} />
                     Quitar
                   </Button>
                 )}
               </div>
             </div>
-            {description && <p className="mt-1.5 text-[12px] text-ink-subtle">{description}</p>}
+            {description && <p className="mt-1.5 type-caption text-ink-subtle">{description}</p>}
           </div>
         );
       }}

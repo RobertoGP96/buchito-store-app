@@ -9,9 +9,9 @@ export type ChoiceChipSize = "sm" | "md";
 const CHIP_CORE =
   "tabular flex flex-none snap-start items-center rounded-full border-[1.5px] font-semibold whitespace-nowrap motion-safe:transition-colors motion-safe:duration-150";
 const CHIP_SIZE: Record<ChoiceChipSize, string> = {
-  md: "min-h-10 px-4 text-[13px]",
+  md: "min-h-10 px-4 type-meta",
   // Dentro de la card (dos columnas en móvil) el chip pleno no cabe.
-  sm: "min-h-9 px-3 text-[12px]",
+  sm: "min-h-9 px-3 type-caption",
 };
 
 export const CHIP_BASE = cn(CHIP_CORE, CHIP_SIZE.md);

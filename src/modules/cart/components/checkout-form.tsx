@@ -281,7 +281,7 @@ export function CheckoutForm({
                   <FormTextField control={control} name="newRecipient.line2" label="Apto / piso (opcional)" autoComplete="address-line2" />
                   <FormTextField control={control} name="newRecipient.neighborhood" label="Barrio / reparto (opcional)" />
                   <FormTextField control={control} name="newRecipient.reference" label="Referencia (opcional)" placeholder="Edificio azul, timbre 3" />
-                  <p className="text-[12px] leading-[1.6] text-ink-subtle sm:col-span-2">
+                  <p className="type-caption leading-[1.6] text-ink-subtle sm:col-span-2">
                     Se guarda en tus destinatarios para la próxima compra.
                   </p>
                 </div>
@@ -323,7 +323,7 @@ export function CheckoutForm({
                     labelledBy="payment-label"
                   />
                   {fieldState.error && (
-                    <p className="mt-2 text-[12.5px] text-danger">{fieldState.error.message}</p>
+                    <p className="mt-2 type-meta text-danger">{fieldState.error.message}</p>
                   )}
                 </>
               )}
@@ -340,7 +340,7 @@ export function CheckoutForm({
             </div>
           )}
           {whatsappEnabled && (
-            <p className="mt-4 text-[12.5px] leading-[1.6] text-ink-muted">
+            <p className="mt-4 type-meta leading-[1.6] text-ink-muted">
               Después de confirmar verás cómo coordinar el pago por WhatsApp con la tienda y enviar el comprobante.
             </p>
           )}

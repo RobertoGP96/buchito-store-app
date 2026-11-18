@@ -98,7 +98,7 @@ function buildItems(term: string, results: AdminSearchResult): SearchItem[] {
       subtitle: o.customerName,
       trailing: (
         <span className="flex items-center gap-2">
-          <Money value={o.total} className="text-[12px] font-semibold text-ink-muted" />
+          <Money value={o.total} className="type-caption font-semibold text-ink-muted" />
           <StatusChip label={meta.label} tone={meta.tone} />
         </span>
       ),
@@ -285,13 +285,13 @@ export function AdminSearch({ className }: AdminSearchProps) {
         onClick={() => setOpen(true)}
         aria-label="Buscar en el panel"
         className={cn(
-          "hidden h-9 items-center gap-2 rounded-full border-[1.5px] border-line bg-cream-50 pr-2 pl-3 text-[13px] text-ink-subtle transition-colors duration-150 hover:border-tostado-700/40 hover:text-ink-muted md:flex md:w-[260px] lg:w-[320px]",
+          "hidden h-9 items-center gap-2 rounded-full border-[1.5px] border-line bg-cream-50 pr-2 pl-3 type-meta text-ink-subtle transition-colors duration-150 hover:border-tostado-700/40 hover:text-ink-muted md:flex md:w-[260px] lg:w-[320px]",
           className
         )}
       >
         <Search className="h-4 w-4 flex-none" strokeWidth={1.9} />
         <span className="min-w-0 flex-1 truncate text-left">Buscar pedidos, clientes, productos…</span>
-        <kbd className="hidden rounded-md border border-line bg-canvas px-1.5 py-0.5 font-sans text-[10.5px] font-semibold text-ink-subtle lg:inline-block">
+        <kbd className="hidden rounded-md border border-line bg-canvas px-1.5 py-0.5 font-sans type-micro font-semibold text-ink-subtle lg:inline-block">
           {shortcut}
         </kbd>
       </button>
@@ -353,7 +353,7 @@ export function AdminSearch({ className }: AdminSearchProps) {
                   <button
                     type="button"
                     onClick={close}
-                    className="flex-none rounded-md border border-line bg-cream-50 px-1.5 py-0.5 font-sans text-[10.5px] font-semibold text-ink-subtle hover:text-tostado-700"
+                    className="flex-none rounded-md border border-line bg-cream-50 px-1.5 py-0.5 font-sans type-micro font-semibold text-ink-subtle hover:text-tostado-700"
                   >
                     Esc
                   </button>
@@ -366,9 +366,9 @@ export function AdminSearch({ className }: AdminSearchProps) {
                 aria-label="Resultados"
                 className="no-scrollbar max-h-[min(60dvh,440px)] overflow-y-auto px-2 py-2"
               >
-                {error && <p className="px-3 py-6 text-center text-[13px] text-danger">{error}</p>}
+                {error && <p className="px-3 py-6 text-center type-meta text-danger">{error}</p>}
                 {showEmpty && (
-                  <p className="px-3 py-8 text-center text-[13px] text-ink-subtle">
+                  <p className="px-3 py-8 text-center type-meta text-ink-subtle">
                     Sin resultados para «{trimmed}»
                   </p>
                 )}
@@ -407,9 +407,9 @@ export function AdminSearch({ className }: AdminSearchProps) {
                               <Icon className="h-4 w-4" strokeWidth={1.9} />
                             </span>
                             <span className="min-w-0 flex-1">
-                              <span className="block truncate text-[13.5px] font-semibold">{item.title}</span>
+                              <span className="block truncate type-body font-semibold">{item.title}</span>
                               {item.subtitle && (
-                                <span className="block truncate text-[12px] text-ink-subtle">{item.subtitle}</span>
+                                <span className="block truncate type-caption text-ink-subtle">{item.subtitle}</span>
                               )}
                             </span>
                             {item.trailing && <span className="hidden flex-none sm:inline-flex">{item.trailing}</span>}
@@ -424,7 +424,7 @@ export function AdminSearch({ className }: AdminSearchProps) {
                 })}
               </div>
 
-              <div className="hidden items-center gap-4 border-t border-line px-4 py-2 text-[11px] text-ink-subtle md:flex">
+              <div className="hidden items-center gap-4 border-t border-line px-4 py-2 type-micro text-ink-subtle md:flex">
                 <span>
                   <kbd className="font-sans font-semibold">↑↓</kbd> moverse
                 </span>

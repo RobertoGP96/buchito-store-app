@@ -63,7 +63,7 @@ export function ZoneList({ rows, heading }: { rows: ZoneRow[]; heading?: ReactNo
       cell: (r) => (
         <div className="min-w-0">
           <p className="font-semibold text-ink">{r.name}</p>
-          {r.description && <p className="text-[12px] text-ink-subtle">{r.description}</p>}
+          {r.description && <p className="type-caption text-ink-subtle">{r.description}</p>}
         </div>
       ),
     },
@@ -123,7 +123,7 @@ export function ZoneList({ rows, heading }: { rows: ZoneRow[]; heading?: ReactNo
             ]}
             actions={
               <>
-                <Button variant="outline" size="sm" className="rounded-full" onPress={() => openEdit(r)}>
+                <Button variant="outline" size="sm" onPress={() => openEdit(r)}>
                   <Pencil className="h-3.5 w-3.5" strokeWidth={1.9} />
                   Editar
                 </Button>

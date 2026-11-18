@@ -69,25 +69,25 @@ export function CourierHistory({ rows, activeStatus }: CourierHistoryProps) {
                     <p className="font-semibold text-ink">{d.orderNo}</p>
                     <StatusChip {...DELIVERY_STATUS_META[d.status]} />
                     {d.proofPhotoUrl && (
-                      <span className="inline-flex items-center gap-1 text-[11.5px] font-semibold text-ink-muted">
+                      <span className="inline-flex items-center gap-1 type-caption font-semibold text-ink-muted">
                         <Camera className="h-3.5 w-3.5" strokeWidth={1.9} />
                         Con foto
                       </span>
                     )}
                   </div>
-                  <p className="mt-1.5 text-[14px] text-ink">
+                  <p className="mt-1.5 type-body text-ink">
                     {d.recipientName}
                     {d.zoneName && <span className="text-ink-subtle"> · {d.zoneName}</span>}
                   </p>
-                  <p className="tabular mt-1 text-[12.5px] text-ink-muted">{fmtDateTime(closedAt(d))}</p>
+                  <p className="tabular mt-1 type-meta text-ink-muted">{fmtDateTime(closedAt(d))}</p>
                   {d.failedReason && d.status === "failed" && (
-                    <p className="mt-1.5 text-[12.5px] text-danger">{d.failedReason}</p>
+                    <p className="mt-1.5 type-meta text-danger">{d.failedReason}</p>
                   )}
                 </div>
                 {d.status === "delivered" && (
                   <div className="flex flex-col items-end gap-0.5 text-right">
                     <Money value={d.courierFee} className="font-semibold text-espresso-900" />
-                    <span className={cn("text-[11px] font-semibold", d.isPaidToCourier ? "text-ok" : "text-ink-subtle")}>
+                    <span className={cn("type-micro font-semibold", d.isPaidToCourier ? "text-ok" : "text-ink-subtle")}>
                       {d.isPaidToCourier ? "Liquidada" : "Por cobrar"}
                     </span>
                   </div>

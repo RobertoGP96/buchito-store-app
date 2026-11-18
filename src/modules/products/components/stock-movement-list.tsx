@@ -58,7 +58,7 @@ function DeltaCell({ row }: { row: StockMovementRow }) {
       <p className={cn("font-semibold", row.type === "exit" ? "text-danger" : "text-ink")}>
         {movementDelta(row.type, row.quantity)}
       </p>
-      <p className="text-[11.5px] text-ink-subtle">quedan {fmtQty(row.stockAfter, row.unit)}</p>
+      <p className="type-caption text-ink-subtle">quedan {fmtQty(row.stockAfter, row.unit)}</p>
     </div>
   );
 }
@@ -81,7 +81,7 @@ export function StockMovementList({ rows, variantId }: StockMovementListProps) {
           <Link href={`/admin/productos/${r.productId}`} className="font-semibold text-tostado-700 hover:underline">
             {r.productName}
           </Link>
-          <p className="text-[12px] text-ink-subtle">
+          <p className="type-caption text-ink-subtle">
             {r.variantName ? `${r.variantName} · ` : ""}
             <span className="tabular">{r.sku}</span>
           </p>
@@ -101,7 +101,7 @@ export function StockMovementList({ rows, variantId }: StockMovementListProps) {
       cell: (r) => (
         <div className="min-w-0 max-w-[260px]">
           {r.notes && <p className="truncate text-ink">{r.notes}</p>}
-          <p className="truncate text-[12px] text-ink-subtle">{r.createdBy ?? "Sistema"}</p>
+          <p className="truncate type-caption text-ink-subtle">{r.createdBy ?? "Sistema"}</p>
         </div>
       ),
     },
@@ -110,7 +110,7 @@ export function StockMovementList({ rows, variantId }: StockMovementListProps) {
   return (
     <>
       {variantId != null && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-field bg-crema-100 px-4 py-3 text-[13px]">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-field bg-crema-100 px-4 py-3 type-meta">
           <p className="text-espresso-900">
             Mostrando solo{" "}
             {filtered ? (

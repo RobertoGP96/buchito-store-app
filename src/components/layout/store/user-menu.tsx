@@ -65,7 +65,7 @@ function manageLinksFor(user: NavUser): MenuLink[] {
   return [];
 }
 
-const ITEM = "flex items-center gap-3 text-[13px] font-medium";
+const ITEM = "flex items-center gap-3 type-meta font-medium";
 
 interface UserMenuProps {
   user: NavUser | null;
@@ -115,10 +115,10 @@ export function UserMenu({ user, triggerClassName }: UserMenuProps) {
         {/* La cabecera va fuera del Menu: React Aria solo admite ítems dentro
             de una sección y descartaba el bloque junto con los enlaces. */}
         <div className="border-b border-line px-4 pt-3.5 pb-3">
-          <p className="truncate text-[14px] font-semibold text-ink">
+          <p className="truncate type-body font-semibold text-ink">
             {user ? user.fullName : "Cliente invitado"}
           </p>
-          <p className="mt-0.5 truncate text-[12px] text-ink-subtle">
+          <p className="mt-0.5 truncate type-caption text-ink-subtle">
             {user ? user.email : "Inicia sesión o crea tu cuenta"}
           </p>
           {!user && (

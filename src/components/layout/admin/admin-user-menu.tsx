@@ -46,7 +46,7 @@ const ACCOUNT_LINKS: MenuLink[] = [
   { id: "store", href: "/", label: "Ver la tienda", icon: Store },
 ];
 
-const ITEM = "flex items-center gap-3 text-[13px] font-medium";
+const ITEM = "flex items-center gap-3 type-meta font-medium";
 
 /** Avatar con menú: atajos a las secciones principales, cuenta y salir. */
 export function AdminUserMenu({ userName, role, className }: AdminUserMenuProps) {
@@ -77,18 +77,18 @@ export function AdminUserMenu({ userName, role, className }: AdminUserMenuProps)
           className
         )}
       >
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-tostado-700 text-[11px] font-bold text-on-tostado">
+        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-tostado-700 type-micro font-bold text-on-tostado">
           {initials || "U"}
         </span>
-        <span className="hidden max-w-[120px] truncate text-[13px] font-semibold text-ink lg:inline">{userName}</span>
+        <span className="hidden max-w-[120px] truncate type-meta font-semibold text-ink lg:inline">{userName}</span>
         <ChevronDown className="hidden h-3.5 w-3.5 flex-none sm:block" strokeWidth={2} />
       </Dropdown.Trigger>
       <Dropdown.Popover placement="bottom end" className="w-[248px]">
         {/* Fuera del Menu: React Aria solo admite ítems dentro de una sección
             y descartaba la cabecera junto con los atajos. */}
         <div className="border-b border-line px-4 pt-3.5 pb-3">
-          <p className="truncate text-[14px] font-semibold text-ink">{userName}</p>
-          <p className="mt-0.5 text-[12px] text-ink-subtle">{roleLabel}</p>
+          <p className="truncate type-body font-semibold text-ink">{userName}</p>
+          <p className="mt-0.5 type-caption text-ink-subtle">{roleLabel}</p>
         </div>
         {/* El foco lo marca el ítem resaltado; el anillo global del contenedor
             solo asomaba como una línea bajo la cabecera. */}

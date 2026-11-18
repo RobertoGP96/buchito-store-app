@@ -46,7 +46,7 @@ export function AdminTopbar({ userName, role }: AdminTopbarProps) {
           </button>
           <BrandLogo size="sm" href="/admin" className="md:hidden" />
 
-          <nav aria-label="Ubicación" className="hidden min-w-0 items-center gap-1.5 text-[13px] md:flex">
+          <nav aria-label="Ubicación" className="hidden min-w-0 items-center gap-1.5 type-meta md:flex">
             <Link href="/admin" className="font-medium text-ink-subtle hover:text-tostado-700">
               Panel
             </Link>
@@ -87,7 +87,7 @@ export function AdminTopbar({ userName, role }: AdminTopbarProps) {
                 <Link
                   href="/"
                   onClick={() => setSheetOpen(false)}
-                  className="mt-5 flex items-center gap-3 border-t border-line px-3.5 pt-4 text-[13px] font-semibold text-ink-muted hover:text-tostado-700"
+                  className="mt-5 flex items-center gap-3 border-t border-line px-3.5 pt-4 type-meta font-semibold text-ink-muted hover:text-tostado-700"
                 >
                   <Store className="h-4 w-4" strokeWidth={1.9} />
                   Ver la tienda

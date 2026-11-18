@@ -6,7 +6,7 @@ import { logoutUser } from "../actions/auth-actions";
 
 export function LogoutButton() {
   return (
-    <Button variant="outline" size="sm" className="rounded-full" onPress={() => void logoutUser()}>
+    <Button variant="outline" size="sm" onPress={() => void logoutUser()}>
       <LogOut className="h-4 w-4" strokeWidth={1.9} />
       Cerrar sesión
     </Button>

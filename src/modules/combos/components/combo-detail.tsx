@@ -67,13 +67,13 @@ export function ComboDetail({ combo }: { combo: CatalogCombo }) {
               <Money value={combo.price} />
             </p>
             {combo.regularPrice > combo.price && (
-              <p className="text-[14px] font-medium text-ink-subtle line-through">
+              <p className="type-body font-medium text-ink-subtle line-through">
                 <Money value={combo.regularPrice} />
               </p>
             )}
           </div>
           {savings > 0 && (
-            <p className="mt-2 text-[13px] font-medium text-ok">
+            <p className="mt-2 type-meta font-medium text-ok">
               Ahorras <Money value={savings} /> frente a comprar los productos por separado.
             </p>
           )}
@@ -94,16 +94,16 @@ export function ComboDetail({ combo }: { combo: CatalogCombo }) {
                   <div className="min-w-0 flex-1">
                     <Link
                       href={`/producto/${encodeURIComponent(item.productSlug)}`}
-                      className="line-clamp-1 text-[14px] font-semibold text-ink hover:text-tostado-700"
+                      className="line-clamp-1 type-body font-semibold text-ink hover:text-tostado-700"
                     >
                       {item.productName}
                     </Link>
-                    <p className="text-[12.5px] text-ink-subtle">
+                    <p className="type-meta text-ink-subtle">
                       {item.variantName ? `${item.variantName} · ` : ""}
                       <Money value={item.unitPrice} /> {perUnitSuffix(item.unit) ?? "c/u"}
                     </p>
                   </div>
-                  <span className="tabular flex-none rounded-full bg-crema-100 px-2.5 py-1 text-[12.5px] font-semibold text-tostado-700">
+                  <span className="tabular flex-none rounded-full bg-crema-100 px-2.5 py-1 type-meta font-semibold text-tostado-700">
                     × {fmtQty(item.qty, item.unit)}
                   </span>
                 </li>
@@ -119,7 +119,7 @@ export function ComboDetail({ combo }: { combo: CatalogCombo }) {
               max={combo.available}
               size="lg"
             />
-            <Button variant="primary" size="lg" className="rounded-full" isDisabled={soldOut} onPress={handleAdd}>
+            <Button variant="primary" size="lg" isDisabled={soldOut} onPress={handleAdd}>
               <ShoppingCart className="h-4 w-4" strokeWidth={2} />
               {soldOut ? "Agotado" : "Añadir al carrito"}
             </Button>
@@ -128,11 +128,11 @@ export function ComboDetail({ combo }: { combo: CatalogCombo }) {
           {combo.description && (
             <div className="mt-8 border-t border-line pt-6">
               <p className="eyebrow">Descripción</p>
-              <p className="mt-2.5 text-[14px] leading-[1.7] text-pretty text-ink-muted">{combo.description}</p>
+              <p className="mt-2.5 type-body leading-[1.7] text-pretty text-ink-muted">{combo.description}</p>
             </div>
           )}
           {combo.endsAt && (
-            <p className="mt-6 text-[12.5px] text-ink-subtle">Oferta válida hasta el {fmtDate(combo.endsAt)}.</p>
+            <p className="mt-6 type-meta text-ink-subtle">Oferta válida hasta el {fmtDate(combo.endsAt)}.</p>
           )}
         </div>
       </div>

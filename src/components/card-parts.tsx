@@ -24,7 +24,7 @@ export const CARD_TITLE = "line-clamp-2 text-[14.5px] leading-[1.3] font-semibol
 export const CARD_FOOT = "mt-auto flex flex-col gap-2.5 p-3 sm:p-4 sm:pt-3";
 
 const CTA_BASE =
-  "relative z-10 flex min-h-10 w-full items-center justify-center gap-1.5 rounded-full px-4 text-[13px] font-semibold transition-[background-color,transform] duration-150 motion-safe:active:scale-[.98] pointer-coarse:min-h-11";
+  "relative z-10 flex min-h-10 w-full items-center justify-center gap-1.5 rounded-full px-4 type-meta font-semibold transition-[background-color,transform] duration-150 motion-safe:active:scale-[.98] pointer-coarse:min-h-11";
 
 const CTA_KIND = {
   solid: "bg-tostado-700 text-on-tostado hover:bg-tostado-600",

@@ -38,7 +38,7 @@ export function QtyStepper({ qty, onInc, onDec, max, step = 1, unit = "unit", si
       <div
         className={cn(
           "tabular text-center font-semibold text-espresso-900",
-          isLg ? "min-w-[34px] text-[15px]" : "min-w-[26px] text-[13px]",
+          isLg ? "min-w-[34px] text-[15px]" : "min-w-[26px] type-meta",
           showUnit && "px-1.5"
         )}
       >

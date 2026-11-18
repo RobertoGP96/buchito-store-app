@@ -26,7 +26,7 @@ export function BenefitsStrip() {
             <Icon className="h-5 w-5" strokeWidth={1.9} aria-hidden />
           </span>
           <span className="min-w-0">
-            <span className="type-caption block leading-tight font-semibold text-balance text-ink sm:text-[14px]">
+            <span className="type-caption block leading-tight font-semibold text-balance text-ink sm:type-body">
               {title}
             </span>
             <span className="type-caption mt-0.5 hidden text-pretty text-ink-muted sm:block">{description}</span>

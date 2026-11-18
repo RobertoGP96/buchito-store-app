@@ -134,7 +134,6 @@ export function SettingsForm({ settings, currencies }: SettingsFormProps) {
           variant="primary"
           isPending={isSubmitting}
           isDisabled={isSubmitting}
-          className="rounded-full"
         >
           Guardar cambios
         </Button>

@@ -100,7 +100,7 @@ export function FormTextField<T extends FieldValues>({
               className={cn(suffix && "pr-14", isPassword && "pr-12")}
             />
             {suffix && (
-              <span className="tabular pointer-events-none absolute inset-y-0 right-4 flex items-center text-[12px] font-semibold text-ink-subtle">
+              <span className="tabular pointer-events-none absolute inset-y-0 right-4 flex items-center type-caption font-semibold text-ink-subtle">
                 {suffix}
               </span>
             )}
@@ -223,7 +223,7 @@ export function FormSelect<T extends FieldValues>({
                   <span className="flex flex-col">
                     <span>{option.label}</span>
                     {option.description && (
-                      <span className="text-[12px] text-ink-subtle">{option.description}</span>
+                      <span className="type-caption text-ink-subtle">{option.description}</span>
                     )}
                   </span>
                   <ListBox.ItemIndicator />

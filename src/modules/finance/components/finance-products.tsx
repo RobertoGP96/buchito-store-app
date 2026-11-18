@@ -10,7 +10,7 @@ import { fmtQtyNumber } from "@/modules/products/lib/units";
 import type { ProductProfitRow } from "../queries/finance-queries";
 
 function ProfitCell({ row }: { row: ProductProfitRow }) {
-  if (row.profit == null) return <span className="text-[12px] font-medium text-warn">Sin costo</span>;
+  if (row.profit == null) return <span className="type-caption font-medium text-warn">Sin costo</span>;
   return (
     <span className={cn("tabular font-semibold", row.profit < 0 ? "text-danger" : "text-ink")}>
       <Money value={row.profit} />
@@ -27,7 +27,7 @@ function Units({ row }: { row: ProductProfitRow }) {
   return (
     <span className="tabular">
       {fmtQtyNumber(row.qty)}
-      {row.inComboQty > 0 && <span className="text-[11.5px] text-ink-subtle"> · {fmtQtyNumber(row.inComboQty)} en combos</span>}
+      {row.inComboQty > 0 && <span className="type-caption text-ink-subtle"> · {fmtQtyNumber(row.inComboQty)} en combos</span>}
     </span>
   );
 }

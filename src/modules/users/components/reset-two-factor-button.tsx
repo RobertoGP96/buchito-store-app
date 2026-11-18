@@ -52,7 +52,7 @@ export function ResetTwoFactorButton({ row, appearance }: ResetTwoFactorButtonPr
           <ShieldOff className="h-4 w-4 text-danger" strokeWidth={1.9} />
         </Button>
       ) : (
-        <Button variant="danger-soft" size="sm" className="rounded-full" onPress={() => setOpen(true)}>
+        <Button variant="danger-soft" size="sm" onPress={() => setOpen(true)}>
           <ShieldOff className="h-3.5 w-3.5" strokeWidth={1.9} />
           Quitar 2FA
         </Button>
@@ -68,12 +68,11 @@ export function ResetTwoFactorButton({ row, appearance }: ResetTwoFactorButtonPr
         size="sm"
         footer={
           <div className="flex w-full items-center justify-end gap-2">
-            <Button variant="ghost" className="rounded-full" isDisabled={pending} onPress={() => setOpen(false)}>
+            <Button variant="ghost" isDisabled={pending} onPress={() => setOpen(false)}>
               Cancelar
             </Button>
             <Button
               variant="danger"
-              className="rounded-full"
               isPending={pending}
               isDisabled={pending}
               onPress={() => void confirm()}
@@ -83,7 +82,7 @@ export function ResetTwoFactorButton({ row, appearance }: ResetTwoFactorButtonPr
           </div>
         }
       >
-        <div className="flex flex-col gap-2 text-[13px] leading-[1.6] text-ink-muted">
+        <div className="flex flex-col gap-2 type-meta leading-[1.6] text-ink-muted">
           <p>Comprueba antes que la petición viene de la persona titular de la cuenta.</p>
           <p>Podrá activarla de nuevo desde su perfil. Esta acción queda registrada en la auditoría.</p>
         </div>

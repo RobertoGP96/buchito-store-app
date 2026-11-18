@@ -29,7 +29,7 @@ export function NotificationPreferencesButton({
   const [open, setOpen] = useState(false);
   return (
     <>
-      <Button variant={variant} size="sm" className="rounded-full" onPress={() => setOpen(true)}>
+      <Button variant={variant} size="sm" onPress={() => setOpen(true)}>
         <SlidersHorizontal className="h-3.5 w-3.5" strokeWidth={1.9} />
         {label}
       </Button>
@@ -56,11 +56,11 @@ export function NotificationPreferencesCard({ role, muted, inboxHref }: Preferen
         />
       </div>
 
-      <p className="mt-3 text-[13px] leading-[1.6] text-ink-muted">
+      <p className="mt-3 type-meta leading-[1.6] text-ink-muted">
         Elige qué avisos quieres recibir. Los que silencies no se generan y no aparecerán después en tu bandeja.
       </p>
 
-      <dl className="mt-4 grid grid-cols-[1fr_auto] gap-x-6 gap-y-2 text-[13px]">
+      <dl className="mt-4 grid grid-cols-[1fr_auto] gap-x-6 gap-y-2 type-meta">
         {categories.map((category) => (
           <div key={category} className="contents">
             <dt className="text-ink-muted">{categoryCopy(role, category).label}</dt>

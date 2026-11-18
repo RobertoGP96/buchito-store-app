@@ -19,12 +19,12 @@ function DeliveryCard({ d }: { d: DeliveryRow }) {
             <p className="font-semibold text-ink">{d.orderNo}</p>
             <StatusChip {...DELIVERY_STATUS_META[d.status]} />
             {d.attempts > 0 && (
-              <span className="text-[11.5px] font-semibold text-warning">Reintento {d.attempts + 1}</span>
+              <span className="type-caption font-semibold text-warn">Reintento {d.attempts + 1}</span>
             )}
           </div>
           <p className="mt-2 text-[15px] font-semibold text-ink">{d.recipientName}</p>
           {d.addressLine && (
-            <p className="mt-1 flex items-start gap-1.5 text-[13px] leading-[1.5] text-ink-muted">
+            <p className="mt-1 flex items-start gap-1.5 type-meta leading-[1.5] text-ink-muted">
               <MapPin className="mt-0.5 h-3.5 w-3.5 flex-none text-tostado-700" strokeWidth={1.9} />
               <span>
                 {d.addressLine}
@@ -32,7 +32,7 @@ function DeliveryCard({ d }: { d: DeliveryRow }) {
               </span>
             </p>
           )}
-          <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12.5px] text-ink-muted">
+          <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 type-meta text-ink-muted">
             <span className="inline-flex items-center gap-1">
               <Phone className="h-3.5 w-3.5" strokeWidth={1.9} />
               <span className="tabular">{d.recipientPhone}</span>

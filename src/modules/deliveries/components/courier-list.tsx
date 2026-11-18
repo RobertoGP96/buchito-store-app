@@ -55,7 +55,7 @@ export function CourierList({ rows, heading }: { rows: CourierRow[]; heading?: R
       cell: (r) => (
         <div className="min-w-0">
           <p className="font-semibold text-ink">{r.fullName}</p>
-          <p className="text-[12px] text-ink-subtle">{r.email}</p>
+          <p className="type-caption text-ink-subtle">{r.email}</p>
         </div>
       ),
     },
@@ -118,7 +118,7 @@ export function CourierList({ rows, heading }: { rows: CourierRow[]; heading?: R
             ]}
             actions={
               <>
-                <Button variant="outline" size="sm" className="rounded-full" onPress={() => openEdit(r)}>
+                <Button variant="outline" size="sm" onPress={() => openEdit(r)}>
                   <Pencil className="h-3.5 w-3.5" strokeWidth={1.9} />
                   Editar
                 </Button>

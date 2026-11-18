@@ -68,3 +68,10 @@ export function fmtDate(value: Date | string): string {
 export function fmtDateTime(value: Date | string): string {
   return DATETIME_FMT.format(new Date(value));
 }
+
+/** Dos iniciales de un nombre para un avatar; «?» si viene vacío. */
+export function initials(name: string): string {
+  const parts = name.trim().split(/s+/).filter(Boolean);
+  const letters = parts.slice(0, 2).map((p) => p[0]?.toUpperCase() ?? "");
+  return letters.join("") || "?";
+}

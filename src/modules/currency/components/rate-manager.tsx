@@ -71,7 +71,7 @@ export function RateManager({ overview }: { overview: RatesOverview }) {
                   )}
                 </p>
                 {row.updatedAt && (
-                  <p className="tabular mt-2 text-[12px] text-ink-subtle">
+                  <p className="tabular mt-2 type-caption text-ink-subtle">
                     Actualizada {fmtDateTime(row.updatedAt)}
                     {row.isInverse && " · guardada como par inverso"}
                   </p>
@@ -81,7 +81,6 @@ export function RateManager({ overview }: { overview: RatesOverview }) {
                 <Button
                   variant={row.rate == null ? "primary" : "outline"}
                   size="sm"
-                  className="rounded-full"
                   onPress={() => {
                     setEditing(row);
                     setOpen(true);

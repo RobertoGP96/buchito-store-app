@@ -58,7 +58,7 @@ function StockCell({ row, threshold }: { row: AdminProductRow; threshold: number
 function PriceCell({ row }: { row: AdminProductRow }) {
   if (row.hasMissingRate && row.minPrice == null) {
     return (
-      <span className="inline-flex items-center gap-1 text-[12.5px] font-medium text-warn">
+      <span className="inline-flex items-center gap-1 type-meta font-medium text-warn">
         <AlertTriangle className="h-3.5 w-3.5" strokeWidth={2} />
         Sin tasa
       </span>
@@ -67,7 +67,7 @@ function PriceCell({ row }: { row: AdminProductRow }) {
   if (row.minPrice == null) return <span className="text-ink-subtle">—</span>;
   return (
     <span>
-      {row.variantCount > 1 && <span className="mr-1 text-[11px] text-ink-subtle">desde</span>}
+      {row.variantCount > 1 && <span className="mr-1 type-micro text-ink-subtle">desde</span>}
       <Money value={row.minPrice} />
     </span>
   );
@@ -173,7 +173,7 @@ export function ProductList({ rows, currencies, lowStockThreshold, heading }: Pr
               <Link href={productHref(r.product)} className="font-semibold text-tostado-700 hover:underline">
                 {r.product.name}
               </Link>
-              <p className="text-[12px] text-ink-subtle">
+              <p className="type-caption text-ink-subtle">
                 {r.product.typeName}
                 {r.product.categoryName ? ` · ${r.product.categoryName}` : ""}
               </p>
@@ -184,7 +184,7 @@ export function ProductList({ rows, currencies, lowStockThreshold, heading }: Pr
             <CornerDownRight className="h-3.5 w-3.5 flex-none text-ink-subtle" strokeWidth={2} />
             <div className="min-w-0">
               <p className="font-medium text-ink">{variantDisplayName(r.variant, r.product.attributeSchema)}</p>
-              <p className="tabular text-[12px] text-ink-subtle">{r.variant.sku}</p>
+              <p className="tabular type-caption text-ink-subtle">{r.variant.sku}</p>
             </div>
           </div>
         ),
@@ -308,14 +308,14 @@ export function ProductList({ rows, currencies, lowStockThreshold, heading }: Pr
                     <ul className="mt-2 flex flex-col divide-y divide-line rounded-field bg-crema-100/40">
                       {product.variants.map((variant) => (
                         <li key={variant.variantId} className="flex items-start justify-between gap-3 px-3 py-2.5">
-                          <div className="min-w-0 text-[13px]">
+                          <div className="min-w-0 type-meta">
                             <p className="font-medium text-ink">
                               {variantDisplayName(variant, product.attributeSchema)}
                             </p>
-                            <p className="tabular text-[12px] text-ink-subtle">{variant.sku}</p>
+                            <p className="tabular type-caption text-ink-subtle">{variant.sku}</p>
                             <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
                               <VariantPriceCell variant={variant} />
-                              <span className="text-[12.5px]">
+                              <span className="type-meta">
                                 <span className="text-ink-subtle">Stock </span>
                                 <VariantStockCell variant={variant} threshold={lowStockThreshold} />
                               </span>

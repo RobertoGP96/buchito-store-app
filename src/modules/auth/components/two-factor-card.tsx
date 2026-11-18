@@ -37,7 +37,7 @@ export function TwoFactorCard({ status }: { status: TwoFactorStatus }) {
         <StatusChip label={status.enabled ? "Activada" : "Desactivada"} tone={status.enabled ? "success" : "neutral"} />
       </div>
 
-      <p className="mt-3 text-[13px] leading-[1.6] text-ink-muted">
+      <p className="mt-3 type-meta leading-[1.6] text-ink-muted">
         {status.enabled
           ? status.method === "app"
             ? "Al entrar te pediremos, además de la contraseña, el código de tu app de autenticación."
@@ -46,7 +46,7 @@ export function TwoFactorCard({ status }: { status: TwoFactorStatus }) {
       </p>
 
       {status.enabled && status.method && (
-        <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-[13px]">
+        <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 type-meta">
           <dt className="text-ink-subtle">Método</dt>
           <dd className="font-medium text-ink">{TWO_FACTOR_METHOD_LABELS[status.method]}</dd>
           {status.enabledAt && (
@@ -63,7 +63,7 @@ export function TwoFactorCard({ status }: { status: TwoFactorStatus }) {
       )}
 
       {status.enabled && status.recoveryCodesLeft === 0 && (
-        <p className="mt-3 text-[12.5px] leading-[1.6] text-danger">
+        <p className="mt-3 type-meta leading-[1.6] text-danger">
           Sin códigos de respaldo. Si pierdes el acceso al método, desactiva y vuelve a activar la verificación para
           generar otros.
         </p>
@@ -71,11 +71,11 @@ export function TwoFactorCard({ status }: { status: TwoFactorStatus }) {
 
       <div className="mt-auto pt-4">
         {status.enabled ? (
-          <Button variant="outline" size="sm" className="rounded-full" onPress={() => setDisableOpen(true)}>
+          <Button variant="outline" size="sm" onPress={() => setDisableOpen(true)}>
             Desactivar
           </Button>
         ) : (
-          <Button variant="primary" size="sm" className="rounded-full" onPress={openSetup}>
+          <Button variant="primary" size="sm" onPress={openSetup}>
             Activar
           </Button>
         )}

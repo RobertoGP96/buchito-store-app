@@ -46,7 +46,7 @@ export function CustomerList({ rows, query }: CustomerListProps) {
           <Link href={`/admin/clientes/${r.customerId}`} className="font-semibold text-tostado-700 hover:underline">
             {r.name}
           </Link>
-          <p className="tabular text-[12px] text-ink-subtle">{r.phone}</p>
+          <p className="tabular type-caption text-ink-subtle">{r.phone}</p>
         </div>
       ),
     },
@@ -78,7 +78,7 @@ export function CustomerList({ rows, query }: CustomerListProps) {
           placeholder="Nombre, teléfono o correo"
           aria-label="Buscar clientes"
           // 16px en móvil: por debajo, Safari de iOS amplía la página al enfocar.
-          className="min-w-0 flex-1 bg-transparent text-base text-ink outline-none placeholder:text-ink-subtle md:text-[13.5px]"
+          className="min-w-0 flex-1 bg-transparent text-base text-ink outline-none placeholder:text-ink-subtle md:type-body"
         />
         {value && (
           <button

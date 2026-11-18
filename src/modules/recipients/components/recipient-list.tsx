@@ -36,7 +36,7 @@ export function RecipientList({ recipients, zones }: RecipientListProps) {
   };
 
   const newButton = (
-    <Button variant="primary" className="rounded-full" onPress={openNew}>
+    <Button variant="primary" onPress={openNew}>
       <Plus className="h-4 w-4" strokeWidth={2.2} />
       Nuevo destinatario
     </Button>
@@ -66,7 +66,7 @@ export function RecipientList({ recipients, zones }: RecipientListProps) {
                   badge={r.isDefault ? <StatusChip label="Principal" tone="info" /> : undefined}
                   actions={
                     <>
-                      <Button variant="outline" size="sm" className="rounded-full" onPress={() => openEdit(r)}>
+                      <Button variant="outline" size="sm" onPress={() => openEdit(r)}>
                         <Pencil className="h-3.5 w-3.5" strokeWidth={1.9} />
                         Editar
                       </Button>
@@ -80,7 +80,7 @@ export function RecipientList({ recipients, zones }: RecipientListProps) {
                     </>
                   }
                 >
-                  <address className="mt-3 text-[13px] not-italic leading-[1.6] text-ink">
+                  <address className="mt-3 type-meta not-italic leading-[1.6] text-ink">
                     <RecipientAddress address={r} />
                   </address>
                 </ListCard>

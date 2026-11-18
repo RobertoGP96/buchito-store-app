@@ -231,7 +231,6 @@ export function ProductForm({ product, types, categories }: ProductFormProps) {
             type="submit"
             form={FORM_ID}
             variant="primary"
-            className="rounded-full"
             isPending={isSubmitting}
             isDisabled={isSubmitting}
           >

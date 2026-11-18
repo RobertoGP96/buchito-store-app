@@ -66,14 +66,13 @@ export function PromptDialog({
       size="sm"
       footer={
         <div className="flex w-full items-center justify-end gap-2">
-          <Button variant="ghost" className="rounded-full" isDisabled={isPending} onPress={() => onOpenChange(false)}>
+          <Button variant="ghost" isDisabled={isPending} onPress={() => onOpenChange(false)}>
             Cancelar
           </Button>
           <Button
             type="submit"
             form="prompt-dialog-form"
             variant={tone === "danger" ? "danger" : "primary"}
-            className="rounded-full"
             isPending={isPending}
             isDisabled={isPending}
           >
@@ -104,7 +103,7 @@ export function PromptDialog({
                 className={suffix ? "pr-14" : undefined}
               />
               {suffix && (
-                <span className="tabular pointer-events-none absolute inset-y-0 right-4 flex items-center text-[12px] font-semibold text-ink-subtle">
+                <span className="tabular pointer-events-none absolute inset-y-0 right-4 flex items-center type-caption font-semibold text-ink-subtle">
                   {suffix}
                 </span>
               )}

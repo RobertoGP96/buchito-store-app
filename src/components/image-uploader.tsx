@@ -103,8 +103,8 @@ export function ImageUploader({
           ) : (
             <ImagePlus className="h-5 w-5 text-tostado-700" strokeWidth={1.9} />
           )}
-          <span className="text-[13px] font-semibold text-ink">{uploading ? "Subiendo…" : label}</span>
-          <span className="text-[12px] text-ink-subtle">JPG, PNG, WebP, GIF o AVIF · hasta 5 MB</span>
+          <span className="type-meta font-semibold text-ink">{uploading ? "Subiendo…" : label}</span>
+          <span className="type-caption text-ink-subtle">JPG, PNG, WebP, GIF o AVIF · hasta 5 MB</span>
         </label>
       </div>
     );
@@ -116,7 +116,6 @@ export function ImageUploader({
       <Button
         variant="secondary"
         size="sm"
-        className="rounded-full"
         isPending={uploading}
         isDisabled={disabled || uploading}
         onPress={() => inputRef.current?.click()}

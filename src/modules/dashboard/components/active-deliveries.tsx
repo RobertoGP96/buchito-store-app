@@ -52,10 +52,10 @@ export function ActiveDeliveries({ rows, total }: ActiveDeliveriesProps) {
                   </span>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                      <span className="tabular text-[13.5px] font-semibold text-ink">{d.orderNo}</span>
-                      <span className="truncate text-[13px] text-ink-muted">{d.customerName}</span>
+                      <span className="tabular type-body font-semibold text-ink">{d.orderNo}</span>
+                      <span className="truncate type-meta text-ink-muted">{d.customerName}</span>
                     </div>
-                    <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-ink-subtle">
+                    <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 type-caption text-ink-subtle">
                       {d.zoneName && (
                         <span className="inline-flex items-center gap-1">
                           <MapPin className="h-3.5 w-3.5" strokeWidth={1.9} />

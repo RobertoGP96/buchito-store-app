@@ -28,14 +28,19 @@ function SidebarLink({ entry, collapsed }: { entry: NavEntry; collapsed: boolean
         title={collapsed ? entry.label : undefined}
         aria-label={collapsed ? entry.label : undefined}
         className={cn(
-          "flex items-center gap-3 rounded-chip text-[13px] font-medium transition-colors duration-150",
+          "type-meta relative flex items-center gap-3 rounded-chip font-medium transition-colors duration-150",
           collapsed ? "h-10 w-10 justify-center" : "px-3 py-2",
           active
-            ? "bg-footer-active font-semibold text-footer-fg"
+            ? "bg-footer-active font-semibold text-footer-strong"
             : "text-footer-muted hover:bg-footer-hover hover:text-footer-fg"
         )}
       >
-        <Icon className="h-4 w-4 flex-none" strokeWidth={active ? 2.1 : 1.9} />
+        {/* El activo se reconoce por tres señales, no solo por un velo: barra
+            caramelo, icono caramelo y texto en blanco pleno. */}
+        {active && (
+          <span aria-hidden className="absolute top-2 bottom-2 left-0 w-[3px] rounded-full bg-caramelo-500" />
+        )}
+        <Icon className={cn("h-4 w-4 flex-none", active && "text-caramelo-500")} strokeWidth={active ? 2.1 : 1.9} />
         {!collapsed && <span className="truncate">{entry.label}</span>}
       </Link>
     </li>
@@ -104,7 +109,8 @@ export function AdminSidebar() {
   return (
     <aside
       className={cn(
-        "sticky top-0 hidden h-dvh flex-none flex-col bg-footer text-footer-fg transition-[width] duration-200 md:flex",
+        // `on-brand`: sobre el café el anillo de foco café no se ve; aquí es claro.
+        "on-brand sticky top-0 hidden h-dvh flex-none flex-col bg-footer text-footer-fg transition-[width] duration-200 md:flex",
         collapsed ? "w-[68px]" : "w-[240px]"
       )}
     >
@@ -131,7 +137,7 @@ export function AdminSidebar() {
         {!collapsed && (
           <Link
             href="/"
-            className="flex items-center gap-3 rounded-chip px-3 py-2 text-[13px] font-medium text-footer-muted transition-colors duration-150 hover:bg-footer-hover hover:text-footer-fg"
+            className="flex items-center gap-3 rounded-chip px-3 py-2 type-meta font-medium text-footer-muted transition-colors duration-150 hover:bg-footer-hover hover:text-footer-fg"
           >
             <Store className="h-4 w-4 flex-none" strokeWidth={1.9} />
             Ver la tienda

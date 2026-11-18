@@ -30,7 +30,7 @@ function PhoneLink({ phone }: { phone: string }) {
   return (
     <a
       href={`tel:${phone.replace(/\s+/g, "")}`}
-      className="inline-flex items-center gap-2 rounded-full bg-crema-100 px-4 py-2 text-[14px] font-semibold text-espresso-900 transition-colors duration-150 hover:bg-crema-200"
+      className="inline-flex items-center gap-2 rounded-full bg-crema-100 px-4 py-2 type-body font-semibold text-espresso-900 transition-colors duration-150 hover:bg-crema-200"
     >
       <Phone className="h-4 w-4" strokeWidth={2} />
       <span className="tabular">{phone}</span>
@@ -126,14 +126,14 @@ export function DeliveryDetail({ delivery, isAssignedCourier }: DeliveryDetailPr
     <div className="flex flex-col gap-4">
       <SectionCard
         title="Siguiente paso"
-        aside={delivery.attempts > 0 ? <span className="text-[12.5px] text-ink-subtle">{delivery.attempts} intento(s) fallido(s)</span> : undefined}
+        aside={delivery.attempts > 0 ? <span className="type-meta text-ink-subtle">{delivery.attempts} intento(s) fallido(s)</span> : undefined}
       >
         <div className="flex items-center gap-3">
           <StatusChip {...DELIVERY_STATUS_META[delivery.status]} size="md" />
-          <p className="text-[13.5px] leading-[1.55] text-ink-muted">{STEP_HINT[delivery.status]}</p>
+          <p className="type-body leading-[1.55] text-ink-muted">{STEP_HINT[delivery.status]}</p>
         </div>
         {delivery.failedReason && delivery.status === "failed" && (
-          <p className="mt-3 rounded-field bg-danger-soft px-3 py-2 text-[12.5px] text-danger">{delivery.failedReason}</p>
+          <p className="mt-3 rounded-field bg-danger-soft px-3 py-2 type-meta text-danger">{delivery.failedReason}</p>
         )}
         {targets.length > 0 && (
           <div className="mt-4 grid gap-2 sm:grid-cols-2">
@@ -142,7 +142,6 @@ export function DeliveryDetail({ delivery, isAssignedCourier }: DeliveryDetailPr
                 key={to}
                 variant={to === "failed" ? "danger-soft" : "primary"}
                 size="lg"
-                className="rounded-full"
                 isPending={pending === to}
                 isDisabled={pending !== null}
                 onPress={() => press(to)}
@@ -161,7 +160,7 @@ export function DeliveryDetail({ delivery, isAssignedCourier }: DeliveryDetailPr
           <PhoneLink phone={delivery.recipientPhone} />
         </div>
         {(delivery.customerName !== delivery.recipientName || delivery.customerPhone !== delivery.recipientPhone) && (
-          <p className="mt-3 text-[12.5px] text-ink-muted">
+          <p className="mt-3 type-meta text-ink-muted">
             Pedido de {delivery.customerName} · <span className="tabular">{delivery.customerPhone}</span>
           </p>
         )}
@@ -175,7 +174,7 @@ export function DeliveryDetail({ delivery, isAssignedCourier }: DeliveryDetailPr
               href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapsQuery)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-tostado-700 hover:underline"
+              className="inline-flex items-center gap-1.5 type-meta font-semibold text-tostado-700 hover:underline"
             >
               <Navigation className="h-3.5 w-3.5" strokeWidth={2} />
               Cómo llegar
@@ -190,27 +189,27 @@ export function DeliveryDetail({ delivery, isAssignedCourier }: DeliveryDetailPr
               {delivery.address.line1}
               {delivery.address.line2 && <>, {delivery.address.line2}</>}
               {delivery.address.neighborhood && <>, {delivery.address.neighborhood}</>}
-              {delivery.zoneName && <span className="block text-[13.5px] text-ink-muted">Zona: {delivery.zoneName}</span>}
+              {delivery.zoneName && <span className="block type-body text-ink-muted">Zona: {delivery.zoneName}</span>}
               {delivery.address.reference && (
-                <span className="block text-[13.5px] text-ink-muted">Ref.: {delivery.address.reference}</span>
+                <span className="block type-body text-ink-muted">Ref.: {delivery.address.reference}</span>
               )}
             </span>
           </address>
         ) : (
-          <p className="text-[13.5px] text-ink-muted">Sin dirección registrada.</p>
+          <p className="type-body text-ink-muted">Sin dirección registrada.</p>
         )}
         {delivery.orderNotes && (
-          <p className="mt-3 rounded-field bg-cream-50 px-3 py-2 text-[12.5px] leading-[1.55] text-ink-muted">
+          <p className="mt-3 rounded-field bg-cream-50 px-3 py-2 type-meta leading-[1.55] text-ink-muted">
             <span className="font-semibold text-ink">Nota del cliente: </span>
             {delivery.orderNotes}
           </p>
         )}
       </SectionCard>
 
-      <SectionCard title="Artículos" aside={<span className="tabular text-[12.5px] text-ink-subtle">{delivery.lines.length}</span>}>
+      <SectionCard title="Artículos" aside={<span className="tabular type-meta text-ink-subtle">{delivery.lines.length}</span>}>
         <ul className="divide-y divide-line-soft">
           {delivery.lines.map((line, i) => (
-            <li key={i} className="flex items-center justify-between gap-3 py-2 text-[14px]">
+            <li key={i} className="flex items-center justify-between gap-3 py-2 type-body">
               <span className="text-ink">
                 {line.productName}
                 {line.variantName && <span className="text-ink-subtle"> · {line.variantName}</span>}
@@ -224,7 +223,7 @@ export function DeliveryDetail({ delivery, isAssignedCourier }: DeliveryDetailPr
       <SectionCard title="Cobro">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-[13px] text-ink-muted">{delivery.paymentMethodName}</p>
+            <p className="type-meta text-ink-muted">{delivery.paymentMethodName}</p>
             <p className="num-display mt-1 text-[24px] leading-none text-espresso-900">
               {mustCollect ? (
                 <Money value={delivery.amountToCollect} currency={delivery.paymentCurrency} />
@@ -236,7 +235,7 @@ export function DeliveryDetail({ delivery, isAssignedCourier }: DeliveryDetailPr
           <StatusChip {...PAYMENT_STATUS_META[delivery.paymentStatus as PaymentStatus]} />
         </div>
         {mustCollect && delivery.status !== "delivered" && (
-          <p className="mt-3 text-[12.5px] leading-[1.55] text-ink-muted">
+          <p className="mt-3 type-meta leading-[1.55] text-ink-muted">
             Cobra este monto al entregar y regístralo al marcar la entrega como entregada.
           </p>
         )}
@@ -250,7 +249,6 @@ export function DeliveryDetail({ delivery, isAssignedCourier }: DeliveryDetailPr
               <Button
                 variant="outline"
                 size="sm"
-                className="rounded-full"
                 isDisabled={pending !== null}
                 onPress={() => setAsking("proof")}
               >
@@ -271,20 +269,20 @@ export function DeliveryDetail({ delivery, isAssignedCourier }: DeliveryDetailPr
               <img src={proofSrc} alt={`Prueba de entrega de ${delivery.orderNo}`} className="aspect-[4/3] max-h-[360px] w-full object-cover" loading="lazy" />
             </button>
           ) : (
-            <p className="flex items-center gap-2 text-[13.5px] text-ink-muted">
+            <p className="flex items-center gap-2 type-body text-ink-muted">
               <ImageOff className="h-4 w-4 text-ink-subtle" strokeWidth={1.9} />
               Esta entrega se cerró sin foto de prueba.
             </p>
           )}
           {delivery.deliveredAt && (
-            <p className="tabular mt-3 text-[12.5px] text-ink-muted">Entregada {fmtDateTime(delivery.deliveredAt)}</p>
+            <p className="tabular mt-3 type-meta text-ink-muted">Entregada {fmtDateTime(delivery.deliveredAt)}</p>
           )}
         </SectionCard>
       )}
 
       {delivery.events.length > 0 && (
         <SectionCard title="Historial">
-          <ol className="flex flex-col gap-2 text-[12.5px]">
+          <ol className="flex flex-col gap-2 type-meta">
             {delivery.events.map((e) => (
               <li key={e.eventId} className="flex items-start justify-between gap-3">
                 <span className="text-ink-muted">

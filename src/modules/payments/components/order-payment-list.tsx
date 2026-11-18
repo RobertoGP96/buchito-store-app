@@ -26,7 +26,7 @@ function AmountCell({ row }: { row: OrderPaymentRow }) {
     <div className="flex flex-col items-end">
       <Money value={row.amountBase} className="font-semibold text-ink" />
       {foreign && (
-        <span className="text-[11.5px] text-ink-subtle">
+        <span className="type-caption text-ink-subtle">
           <Money value={row.amountTendered} currency={row.currency} /> · tasa{" "}
           <span className="tabular">{row.exchangeRate}</span>
         </span>
@@ -45,7 +45,7 @@ function Totals({ result }: { result: OrderPaymentsResult }) {
         <p className="num-display mt-2 text-[24px] leading-none text-espresso-900">
           <Money value={result.totalBase} />
         </p>
-        <p className="mt-1.5 text-[12px] text-ink-muted">
+        <p className="mt-1.5 type-caption text-ink-muted">
           {result.rows.length} {result.rows.length === 1 ? "cobro" : "cobros"}
           {result.truncated ? " (listado recortado)" : ""}
         </p>
@@ -56,7 +56,7 @@ function Totals({ result }: { result: OrderPaymentsResult }) {
           <p className="num-display mt-2 text-[24px] leading-none text-espresso-900">
             <Money value={t.amount} currency={t.currency} />
           </p>
-          <p className="mt-1.5 text-[12px] text-ink-muted">Suma de lo entregado en esa moneda.</p>
+          <p className="mt-1.5 type-caption text-ink-muted">Suma de lo entregado en esa moneda.</p>
         </div>
       ))}
     </div>
@@ -79,7 +79,7 @@ export function OrderPaymentList({ result, activeRange }: OrderPaymentListProps)
           <Link href={`/admin/pedidos/${r.orderId}`} className="font-semibold text-tostado-700 hover:underline">
             {r.orderNo}
           </Link>
-          <p className="text-[12px] text-ink-subtle">{r.customerName}</p>
+          <p className="type-caption text-ink-subtle">{r.customerName}</p>
         </div>
       ),
     },
@@ -89,7 +89,7 @@ export function OrderPaymentList({ result, activeRange }: OrderPaymentListProps)
       cell: (r) => (
         <div className="min-w-0">
           <p className="text-ink">{r.methodName}</p>
-          {r.reference && <p className="tabular text-[12px] text-ink-subtle">Ref. {r.reference}</p>}
+          {r.reference && <p className="tabular type-caption text-ink-subtle">Ref. {r.reference}</p>}
         </div>
       ),
     },

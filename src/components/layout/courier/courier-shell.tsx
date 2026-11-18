@@ -17,7 +17,7 @@ interface CourierShellProps {
 }
 
 const TAB =
-  "flex flex-col items-center justify-center gap-1 rounded-chip py-1.5 text-[10.5px] font-semibold transition-colors duration-150";
+  "flex flex-col items-center justify-center gap-1 rounded-chip py-1.5 type-micro font-semibold transition-colors duration-150";
 
 /** App del mensajero: cabecera compacta, una sola columna y cuatro secciones
  *  (entregas, historial, ganancias, perfil) en tabs inferiores en móvil y
@@ -59,7 +59,7 @@ export function CourierShell({ userName, children }: CourierShellProps) {
           </nav>
 
           <div className="ml-auto flex items-center gap-1">
-            <p className="hidden max-w-[140px] truncate text-[12.5px] font-semibold text-ink-muted sm:block">
+            <p className="hidden max-w-[140px] truncate type-meta font-semibold text-ink-muted sm:block">
               {userName}
             </p>
             <NotificationsBell audience="courier" tone="light" inboxHref="/mensajero/notificaciones" />

@@ -190,7 +190,6 @@ export function ComboForm({ combo, variants, currencies }: ComboFormProps) {
             <Button
               variant="ghost"
               size="sm"
-              className="rounded-full"
               onPress={() => append({ variantId: "", qty: 1 })}
             >
               <Plus className="h-4 w-4" strokeWidth={2.2} />
@@ -228,7 +227,7 @@ export function ComboForm({ combo, variants, currencies }: ComboFormProps) {
         <div className="grid gap-4 border-t border-line pt-4 sm:grid-cols-2">
           <FormTextField control={control} name="price" label="Precio del combo" type="number" step="0.01" min={0} isRequired />
           <FormSelect control={control} name="priceCurrencyId" label="Moneda del precio" options={currencyOptions} isRequired />
-          <div className="rounded-field bg-cream-50 px-4 py-3 text-[13px] text-ink-muted sm:col-span-2">
+          <div className="rounded-field bg-cream-50 px-4 py-3 type-meta text-ink-muted sm:col-span-2">
             {summary.count === 0 ? (
               "Añade productos para ver cuánto ahorra el cliente."
             ) : summary.regular == null ? (
@@ -284,7 +283,6 @@ export function ComboForm({ combo, variants, currencies }: ComboFormProps) {
             type="submit"
             form={FORM_ID}
             variant="primary"
-            className="rounded-full"
             isPending={isSubmitting}
             isDisabled={isSubmitting}
           >

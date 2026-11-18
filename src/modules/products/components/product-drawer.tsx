@@ -85,7 +85,7 @@ function ProductDrawerContent({
         className="z-10 h-9 w-9 rounded-full bg-canvas/90 text-ink shadow-card hover:bg-canvas"
       />
 
-      <Drawer.Body className="m-0 p-0 text-[14px] text-ink">
+      <Drawer.Body className="m-0 p-0 type-body text-ink">
         <ImageCarousel
           images={selection.slides}
           index={selection.slide}

@@ -40,7 +40,7 @@ export function AdminNavList({ exclude = [], layout = "list", onNavigate }: Admi
                     onClick={onNavigate}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "flex items-center gap-3 rounded-field border-[1.5px] px-3.5 py-3 text-[13px] font-semibold transition-colors duration-150",
+                      "flex items-center gap-3 rounded-field border-[1.5px] px-3.5 py-3 type-meta font-semibold transition-colors duration-150",
                       layout === "list" && "border-transparent py-2.5",
                       active
                         ? "border-tostado-700 bg-crema-100 text-tostado-700"

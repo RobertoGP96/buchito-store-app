@@ -27,11 +27,11 @@ export function PaymentContactCard({ order, href, amount }: PaymentContactCardPr
       title: "Realiza el pago",
       body: (
         <>
-          <p className="text-[13.5px] text-ink">
+          <p className="type-body text-ink">
             {order.paymentMethodName} · <Money value={amount} currency={order.paymentCurrency} className="font-semibold" />
           </p>
           {order.paymentInstructions && (
-            <p className="mt-2 rounded-chip bg-cream-50 px-3 py-2 text-[12.5px] leading-[1.6] break-words text-ink-muted">
+            <p className="mt-2 rounded-chip bg-cream-50 px-3 py-2 type-meta leading-[1.6] break-words text-ink-muted">
               {order.paymentInstructions}
             </p>
           )}
@@ -41,7 +41,7 @@ export function PaymentContactCard({ order, href, amount }: PaymentContactCardPr
     {
       title: "Envíanos el comprobante por WhatsApp",
       body: (
-        <p className="text-[13px] leading-[1.6] text-ink-muted">
+        <p className="type-meta leading-[1.6] text-ink-muted">
           El mensaje ya lleva tu número de pedido; adjunta la captura o foto del pago.
         </p>
       ),
@@ -50,7 +50,7 @@ export function PaymentContactCard({ order, href, amount }: PaymentContactCardPr
       ? {
           title: "Confirmamos tu pedido",
           body: (
-            <p className="text-[13px] leading-[1.6] text-ink-muted">
+            <p className="type-meta leading-[1.6] text-ink-muted">
               En cuanto verifiquemos el pago lo confirmamos y te avisamos.
             </p>
           ),
@@ -58,7 +58,7 @@ export function PaymentContactCard({ order, href, amount }: PaymentContactCardPr
       : {
           title: "Registramos tu pago",
           body: (
-            <p className="text-[13px] leading-[1.6] text-ink-muted">
+            <p className="type-meta leading-[1.6] text-ink-muted">
               En cuanto lo verifiquemos quedará anotado en tu pedido.
             </p>
           ),
@@ -74,11 +74,11 @@ export function PaymentContactCard({ order, href, amount }: PaymentContactCardPr
       <ol className="mt-5 flex flex-col gap-4">
         {steps.map((step, index) => (
           <li key={step.title} className="flex gap-3">
-            <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-crema-100 text-[12.5px] font-semibold text-tostado-700">
+            <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-crema-100 type-meta font-semibold text-tostado-700">
               {index + 1}
             </span>
             <div className="min-w-0 flex-1">
-              <p className="text-[14px] font-semibold text-ink">{step.title}</p>
+              <p className="type-body font-semibold text-ink">{step.title}</p>
               <div className="mt-1">{step.body}</div>
             </div>
           </li>
@@ -87,7 +87,7 @@ export function PaymentContactCard({ order, href, amount }: PaymentContactCardPr
       <WhatsappLink href={href} size="lg" className="mt-6 w-full sm:w-auto">
         Escribir por WhatsApp
       </WhatsappLink>
-      <p className="mt-3 text-[12px] leading-[1.6] text-ink-subtle">
+      <p className="mt-3 type-caption leading-[1.6] text-ink-subtle">
         WhatsApp se abre en una pestaña nueva; este resumen se queda aquí.
       </p>
     </section>

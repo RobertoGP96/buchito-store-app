@@ -27,7 +27,7 @@ export function LowStock({ rows, total, threshold }: LowStockProps) {
       footer={
         hasRows ? (
           <>
-            <p className="tabular text-[12.5px] text-ink-muted">
+            <p className="tabular type-meta text-ink-muted">
               {total} {total === 1 ? "variante" : "variantes"} en total
               {outOfStock > 0 && (
                 <>
@@ -62,8 +62,8 @@ export function LowStock({ rows, total, threshold }: LowStockProps) {
               <li key={v.variantId}>
                 <DashboardRow href={`/admin/productos/${v.productId}`}>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-[13.5px] font-medium text-ink">{v.productName}</p>
-                    <p className="mt-0.5 truncate text-[12px] text-ink-subtle">
+                    <p className="truncate type-body font-medium text-ink">{v.productName}</p>
+                    <p className="mt-0.5 truncate type-caption text-ink-subtle">
                       {v.variantName ? `${v.variantName} · ` : ""}
                       <span className="tabular">{v.sku}</span>
                     </p>
@@ -76,7 +76,7 @@ export function LowStock({ rows, total, threshold }: LowStockProps) {
                   </div>
                   <span
                     className={cn(
-                      "tabular flex-none rounded-full px-2.5 py-1 text-[12.5px] font-semibold",
+                      "tabular flex-none rounded-full px-2.5 py-1 type-meta font-semibold",
                       out ? "bg-danger-soft text-danger" : "bg-warn-soft text-warn"
                     )}
                   >

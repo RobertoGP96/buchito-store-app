@@ -42,7 +42,7 @@ export function ResponsiveFormDialog({
                   {title}
                 </Modal.Heading>
                 {description && (
-                  <p className="mt-1 text-[13px] leading-[1.6] text-ink-muted">
+                  <p className="mt-1 type-meta leading-[1.6] text-ink-muted">
                     {description}
                   </p>
                 )}
@@ -67,7 +67,7 @@ export function ResponsiveFormDialog({
                 {title}
               </Drawer.Heading>
               {description && (
-                <p className="mt-1 text-[13px] leading-[1.6] text-ink-muted">
+                <p className="mt-1 type-meta leading-[1.6] text-ink-muted">
                   {description}
                 </p>
               )}

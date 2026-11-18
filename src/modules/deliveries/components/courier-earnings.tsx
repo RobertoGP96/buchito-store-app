@@ -40,18 +40,18 @@ export function CourierEarnings({ earnings, deliveryFee, unpaid, payments }: Cou
 
       <SectionCard title="Pendiente de liquidar" aside={unpaid.length > 0 ? <Money value={earnings.pendingFees} className="font-semibold text-espresso-900" /> : undefined}>
         {unpaid.length === 0 ? (
-          <p className="text-[13.5px] text-ink-muted">No tienes entregas sin liquidar.</p>
+          <p className="type-body text-ink-muted">No tienes entregas sin liquidar.</p>
         ) : (
           <ul className="divide-y divide-line-soft">
             {unpaid.map((d) => (
               <li key={d.deliveryId}>
                 <Link
                   href={`/mensajero/entregas/${d.deliveryId}`}
-                  className="flex items-center justify-between gap-3 py-2.5 text-[14px]"
+                  className="flex items-center justify-between gap-3 py-2.5 type-body"
                 >
                   <span className="min-w-0">
                     <span className="font-semibold text-ink">{d.orderNo}</span>
-                    {d.deliveredAt && <span className="tabular block text-[12.5px] text-ink-muted">{fmtDateTime(d.deliveredAt)}</span>}
+                    {d.deliveredAt && <span className="tabular block type-meta text-ink-muted">{fmtDateTime(d.deliveredAt)}</span>}
                   </span>
                   <span className="flex items-center gap-2">
                     <Money value={d.courierFee} className="font-semibold text-espresso-900" />
@@ -77,10 +77,10 @@ export function CourierEarnings({ earnings, deliveryFee, unpaid, payments }: Cou
         ) : (
           <ul className="divide-y divide-line-soft">
             {payments.map((p) => (
-              <li key={p.courierPaymentId} className="flex items-start justify-between gap-3 py-2.5 text-[14px]">
+              <li key={p.courierPaymentId} className="flex items-start justify-between gap-3 py-2.5 type-body">
                 <div className="min-w-0">
                   <p className="tabular font-semibold text-ink">{fmtDate(p.paidAt)}</p>
-                  <p className="text-[12.5px] text-ink-muted">
+                  <p className="type-meta text-ink-muted">
                     {p.deliveryCount} {p.deliveryCount === 1 ? "entrega" : "entregas"}
                     {p.notes && <span> · {p.notes}</span>}
                   </p>

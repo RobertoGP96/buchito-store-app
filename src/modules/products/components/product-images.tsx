@@ -51,7 +51,7 @@ export function ProductImages({ productId, images }: ProductImagesProps) {
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="eyebrow">Fotos del producto</p>
-          <p className="mt-1 text-[12.5px] text-ink-subtle">
+          <p className="mt-1 type-meta text-ink-subtle">
             La primera es la portada en el catálogo. Hasta 10 fotos.
           </p>
         </div>
@@ -96,7 +96,7 @@ export function ProductImages({ productId, images }: ProductImagesProps) {
                   <ProductImage src={image.url} alt={image.alt ?? ""} sizes="(max-width: 640px) 50vw, 200px" />
                 </span>
                 {index === 0 && (
-                  <span className="absolute top-2 left-2 inline-flex items-center gap-1 rounded-full bg-tostado-700 px-2 py-1 text-[10.5px] font-semibold text-on-tostado">
+                  <span className="absolute top-2 left-2 inline-flex items-center gap-1 rounded-full bg-tostado-700 px-2 py-1 type-micro font-semibold text-on-tostado">
                     <Star className="h-3 w-3" strokeWidth={2.2} />
                     Portada
                   </span>

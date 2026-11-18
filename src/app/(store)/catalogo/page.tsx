@@ -72,7 +72,7 @@ async function CatalogResults({ q, category }: { q: string; category: string }) 
 
   return (
     <>
-      <p className="tabular text-[12.5px] text-ink-subtle">
+      <p className="tabular type-meta text-ink-subtle">
         {products.length} {products.length === 1 ? "producto" : "productos"}
       </p>
       <ProductGrid>

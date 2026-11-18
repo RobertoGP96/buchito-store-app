@@ -7,12 +7,12 @@ function fmtRate(value: number): string {
 
 export function RateHistoryList({ history, baseCode }: { history: RateHistoryRow[]; baseCode: string }) {
   if (history.length === 0) {
-    return <p className="text-[12.5px] text-ink-subtle">Sin cambios registrados.</p>;
+    return <p className="type-meta text-ink-subtle">Sin cambios registrados.</p>;
   }
   return (
     <ol className="flex flex-col divide-y divide-line-soft">
       {history.map((h) => (
-        <li key={h.historyId} className="flex items-start justify-between gap-4 py-2.5 text-[12.5px]">
+        <li key={h.historyId} className="flex items-start justify-between gap-4 py-2.5 type-meta">
           <div className="min-w-0">
             <p className="tabular font-medium text-ink">
               {h.oldRate != null && (

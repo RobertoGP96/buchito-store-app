@@ -218,7 +218,7 @@ export function NotificationsBell({ audience, tone, inboxHref }: NotificationsBe
         <Popover.Content placement="bottom end" offset={8} className="w-[360px] max-w-[calc(100vw-24px)]">
           <Popover.Dialog aria-label="Notificaciones" className="p-0">
             <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-2.5">
-              <p className="text-[14px] font-semibold text-ink">Notificaciones</p>
+              <p className="type-body font-semibold text-ink">Notificaciones</p>
               {unread > 0 && (
                 <MarkAllReadButton upToId={upToId} label="Marcar leídas" variant="ghost" onDone={markAllLocally} />
               )}

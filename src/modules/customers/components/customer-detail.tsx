@@ -55,7 +55,7 @@ export function CustomerDetail({ customer }: { customer: CustomerDetailData }) {
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div className="flex flex-col gap-4 lg:order-2">
         <SectionCard title="Datos">
-          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-[13.5px]">
+          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 type-body">
             <Field label="Nombre" value={customer.name} />
             <Field
               label="Teléfono"
@@ -74,7 +74,7 @@ export function CustomerDetail({ customer }: { customer: CustomerDetailData }) {
 
         <SectionCard title="Cuenta">
           {customer.user ? (
-            <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-[13.5px]">
+            <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 type-body">
               <Field label="Correo" value={customer.user.email} />
               <Field label="Rol" value={ROLE_LABELS[customer.user.role]} />
               <Field
@@ -88,7 +88,7 @@ export function CustomerDetail({ customer }: { customer: CustomerDetailData }) {
               />
             </dl>
           ) : (
-            <p className="text-[13.5px] text-ink-muted">
+            <p className="type-body text-ink-muted">
               Compra como invitado. Si se registra con este teléfono, sus pedidos se enlazan a la cuenta.
             </p>
           )}
@@ -102,11 +102,11 @@ export function CustomerDetail({ customer }: { customer: CustomerDetailData }) {
       <div className="flex flex-col gap-4 lg:order-1">
         <SectionCard title="Direcciones">
           {customer.addresses.length === 0 ? (
-            <p className="text-[13.5px] text-ink-muted">Sin direcciones guardadas.</p>
+            <p className="type-body text-ink-muted">Sin direcciones guardadas.</p>
           ) : (
             <ul className="flex flex-col gap-3">
               {customer.addresses.map((a) => (
-                <li key={a.addressId} className="flex items-start gap-2 text-[13.5px] leading-[1.6] text-ink">
+                <li key={a.addressId} className="flex items-start gap-2 type-body leading-[1.6] text-ink">
                   <MapPin className="mt-1 h-4 w-4 flex-none text-tostado-700" strokeWidth={2} />
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">

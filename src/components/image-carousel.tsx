@@ -244,7 +244,7 @@ export function ImageCarousel({
                 <ProductImage src={image.url} alt={image.alt} sizes={sizes} priority={priority && i === 0} />
               </span>
               {image.caption && (
-                <span className="pointer-events-none absolute bottom-3 left-3 max-w-[55%] truncate rounded-full bg-canvas/90 px-2.5 py-1.5 text-[11px] leading-none font-semibold text-ink shadow-card">
+                <span className="pointer-events-none absolute bottom-3 left-3 max-w-[55%] truncate rounded-full bg-canvas/90 px-2.5 py-1.5 type-micro leading-none font-semibold text-ink shadow-card">
                   {image.caption}
                 </span>
               )}

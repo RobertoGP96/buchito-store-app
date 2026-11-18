@@ -2,18 +2,11 @@ import { Inbox, ReceiptText } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { Money } from "@/components/money";
 import { StatusChip } from "@/components/status-chip";
-import { fmtDateTime } from "@/lib/format";
+import { fmtDateTime, initials } from "@/lib/format";
 import { ORDER_STATUS_META } from "@/modules/orders/lib/labels";
 import { PAYMENT_STATUS_META } from "@/modules/payments/lib/labels";
 import type { RecentOrderRow } from "../queries/dashboard-queries";
 import { DashboardCard, DashboardRow } from "./dashboard-card";
-
-/** Dos iniciales del cliente para el avatar de la fila. */
-function initials(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  const letters = parts.slice(0, 2).map((p) => p[0]?.toUpperCase() ?? "");
-  return letters.join("") || "?";
-}
 
 export function RecentOrders({ rows }: { rows: RecentOrderRow[] }) {
   return (
@@ -35,20 +28,20 @@ export function RecentOrders({ rows }: { rows: RecentOrderRow[] }) {
           {rows.map((o) => (
             <li key={o.orderId}>
               <DashboardRow href={`/admin/pedidos/${o.orderId}`}>
-                <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-crema-100 text-[12px] font-semibold text-tostado-700">
+                <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-crema-100 type-caption font-semibold text-tostado-700">
                   {initials(o.customerName)}
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                    <span className="tabular text-[13.5px] font-semibold text-ink">{o.orderNo}</span>
+                    <span className="tabular type-body font-semibold text-ink">{o.orderNo}</span>
                     <StatusChip {...ORDER_STATUS_META[o.status]} />
                     <StatusChip {...PAYMENT_STATUS_META[o.paymentStatus]} />
                   </div>
-                  <p className="mt-1 truncate text-[13px] text-ink-muted">{o.customerName}</p>
+                  <p className="mt-1 truncate type-meta text-ink-muted">{o.customerName}</p>
                 </div>
                 <div className="flex-none text-right">
-                  <Money value={o.total} className="block text-[14px] font-semibold text-ink" />
-                  <span className="tabular mt-0.5 block text-[11.5px] text-ink-subtle">{fmtDateTime(o.createdAt)}</span>
+                  <Money value={o.total} className="block type-body font-semibold text-ink" />
+                  <span className="tabular mt-0.5 block type-caption text-ink-subtle">{fmtDateTime(o.createdAt)}</span>
                 </div>
               </DashboardRow>
             </li>

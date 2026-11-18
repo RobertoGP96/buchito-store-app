@@ -117,7 +117,7 @@ export function TwoFactorLoginStep({ challenge, callbackUrl, onBack }: TwoFactor
     >
       <div>
         <h2 className="eyebrow">Verificación en dos pasos</h2>
-        <p className="mt-1 text-[13.5px] leading-[1.65] text-ink-muted">{description}</p>
+        <p className="mt-1 type-body leading-[1.65] text-ink-muted">{description}</p>
       </div>
 
       {mode === "otp" ? (
@@ -157,7 +157,7 @@ export function TwoFactorLoginStep({ challenge, callbackUrl, onBack }: TwoFactor
         {isSubmitting ? "Verificando…" : "Verificar"}
       </Button>
 
-      <div className="flex flex-col items-center gap-2 text-[13px]">
+      <div className="flex flex-col items-center gap-2 type-meta">
         {challenge.method === "email" && mode === "otp" && (
           <button type="button" onClick={() => void resend()} disabled={cooldown > 0 || isResending} className={LINK_CLASS}>
             {cooldown > 0 ? `Reenviar código (${cooldown} s)` : isResending ? "Enviando…" : "Reenviar código"}

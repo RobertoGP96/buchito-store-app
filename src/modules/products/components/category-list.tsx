@@ -89,7 +89,7 @@ export function CategoryList({ rows, heading }: { rows: CategoryRow[]; heading?:
           {r.depth > 0 && <CornerDownRight className="h-3.5 w-3.5 flex-none text-ink-faint" strokeWidth={1.9} />}
           <div className="min-w-0">
             <p className="font-semibold text-ink">{r.name}</p>
-            <p className="text-[12px] text-ink-subtle">{r.slug}</p>
+            <p className="type-caption text-ink-subtle">{r.slug}</p>
           </div>
         </div>
       ),
@@ -146,7 +146,7 @@ export function CategoryList({ rows, heading }: { rows: CategoryRow[]; heading?:
             ]}
             actions={
               <>
-                <Button variant="outline" size="sm" className="rounded-full" onPress={() => openEdit(r)}>
+                <Button variant="outline" size="sm" onPress={() => openEdit(r)}>
                   <Pencil className="h-3.5 w-3.5" strokeWidth={1.9} />
                   Editar
                 </Button>

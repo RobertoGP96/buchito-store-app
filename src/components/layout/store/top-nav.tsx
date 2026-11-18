@@ -44,7 +44,7 @@ export function TopNav({ user }: { user: NavUser | null }) {
   // página asoma por debajo en los rincones, así que no lleva borde ni blur.
   return (
     <header className="on-brand sticky top-0 z-40 rounded-b-[22px] bg-nav text-nav-fg shadow-float md:rounded-b-[26px]">
-      <div className="mx-auto flex h-16 w-full max-w-[1200px] items-center gap-5 px-5 md:h-[68px] md:gap-7 md:px-6">
+      <div className="mx-auto flex h-16 w-full max-w-[1120px] items-center gap-5 px-5 md:h-[68px] md:gap-7 md:px-6">
         <BrandLogo tone="on-brand" compact />
 
         <nav aria-label="Principal" className="hidden items-center gap-6 md:flex">

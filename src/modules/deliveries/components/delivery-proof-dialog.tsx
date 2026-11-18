@@ -104,14 +104,13 @@ export function DeliveryProofDialog({
       size="sm"
       footer={
         <div className="flex w-full items-center justify-end gap-2">
-          <Button variant="ghost" className="rounded-full" isDisabled={busy} onPress={() => onOpenChange(false)}>
+          <Button variant="ghost" isDisabled={busy} onPress={() => onOpenChange(false)}>
             Cancelar
           </Button>
           <Button
             type="submit"
             form={FORM_ID}
             variant="primary"
-            className="rounded-full"
             isPending={busy}
             isDisabled={invalid || busy}
           >
@@ -125,10 +124,10 @@ export function DeliveryProofDialog({
         <input ref={galleryRef} type="file" accept="image/*" className="sr-only" onChange={onFile} />
 
         <div>
-          <p className="text-[13px] font-semibold text-ink">
+          <p className="type-meta font-semibold text-ink">
             Foto de prueba{requirePhoto ? "" : <span className="font-normal text-ink-subtle"> · opcional</span>}
           </p>
-          <p className="mt-1 text-[12.5px] leading-[1.55] text-ink-muted">
+          <p className="mt-1 type-meta leading-[1.55] text-ink-muted">
             Una foto del paquete entregado (en la puerta o en manos del cliente) queda guardada como prueba.
           </p>
 
@@ -158,7 +157,7 @@ export function DeliveryProofDialog({
                 onClick={() => pick(cameraRef.current)}
                 disabled={busy}
                 className={cn(
-                  "flex flex-col items-center justify-center gap-2 rounded-field border-[1.5px] border-dashed border-rule bg-cream px-3 py-5 text-[13px] font-semibold text-ink transition-colors duration-150 hover:border-tostado-700",
+                  "flex flex-col items-center justify-center gap-2 rounded-field border-[1.5px] border-dashed border-rule bg-cream px-3 py-5 type-meta font-semibold text-ink transition-colors duration-150 hover:border-tostado-700",
                   busy && "pointer-events-none opacity-60"
                 )}
               >
@@ -170,7 +169,7 @@ export function DeliveryProofDialog({
                 onClick={() => pick(galleryRef.current)}
                 disabled={busy}
                 className={cn(
-                  "flex flex-col items-center justify-center gap-2 rounded-field border-[1.5px] border-dashed border-rule bg-cream px-3 py-5 text-[13px] font-semibold text-ink transition-colors duration-150 hover:border-tostado-700",
+                  "flex flex-col items-center justify-center gap-2 rounded-field border-[1.5px] border-dashed border-rule bg-cream px-3 py-5 type-meta font-semibold text-ink transition-colors duration-150 hover:border-tostado-700",
                   busy && "pointer-events-none opacity-60"
                 )}
               >
@@ -180,7 +179,7 @@ export function DeliveryProofDialog({
             </div>
           )}
           {preview && !busy && (
-            <div className="mt-2 flex gap-3 text-[12.5px] font-semibold text-tostado-700">
+            <div className="mt-2 flex gap-3 type-meta font-semibold text-tostado-700">
               <button type="button" onClick={() => pick(cameraRef.current)} className="hover:underline">
                 Repetir foto
               </button>
@@ -196,7 +195,7 @@ export function DeliveryProofDialog({
             <Label>Monto cobrado</Label>
             <div className="relative">
               <Input type="number" inputMode="decimal" step="0.01" min={0} className="pr-16" />
-              <span className="tabular pointer-events-none absolute inset-y-0 right-4 flex items-center text-[12px] font-semibold text-ink-subtle">
+              <span className="tabular pointer-events-none absolute inset-y-0 right-4 flex items-center type-caption font-semibold text-ink-subtle">
                 {askAmount.currencyCode}
               </span>
             </div>

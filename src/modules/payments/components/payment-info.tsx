@@ -31,7 +31,7 @@ export function PaymentInfo({ methods }: PaymentInfoProps) {
         <p className="eyebrow">Métodos de pago</p>
         <h2 className="font-display mt-2 text-[20px] leading-tight text-espresso-900 md:text-[24px]">Cómo puedes pagar</h2>
         {methods.length === 0 ? (
-          <p className="mt-4 text-[13.5px] text-ink-muted">La tienda todavía no ha publicado sus formas de pago.</p>
+          <p className="mt-4 type-body text-ink-muted">La tienda todavía no ha publicado sus formas de pago.</p>
         ) : (
           <ul className="mt-5 grid gap-3 sm:grid-cols-2">
             {methods.map((method) => {
@@ -43,7 +43,7 @@ export function PaymentInfo({ methods }: PaymentInfoProps) {
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="text-[14.5px] font-semibold text-ink">{method.name}</p>
-                    <p className="mt-0.5 text-[12.5px] text-ink-muted">
+                    <p className="mt-0.5 type-meta text-ink-muted">
                       {PAYMENT_KIND_LABELS[method.kind]} · pagas en{" "}
                       <span className="tabular font-semibold text-ink">{method.currency.code}</span>
                       {method.surchargePercent != null && method.surchargePercent > 0 && (
@@ -51,7 +51,7 @@ export function PaymentInfo({ methods }: PaymentInfoProps) {
                       )}
                     </p>
                     {method.instructions && (
-                      <p className="mt-2 rounded-chip bg-cream-50 px-3 py-2 text-[12.5px] leading-[1.6] text-ink-muted">
+                      <p className="mt-2 rounded-chip bg-cream-50 px-3 py-2 type-meta leading-[1.6] text-ink-muted">
                         {method.instructions}
                       </p>
                     )}
@@ -66,7 +66,7 @@ export function PaymentInfo({ methods }: PaymentInfoProps) {
       <section className="rounded-card bg-canvas p-5 shadow-card">
         <p className="eyebrow">Monedas</p>
         <h2 className="font-display mt-2 text-[18px] leading-tight text-espresso-900">Precios y tasa del día</h2>
-        <p className="mt-2.5 text-[13px] leading-[1.6] text-ink-muted">
+        <p className="mt-2.5 type-meta leading-[1.6] text-ink-muted">
           Los precios de la tienda están en <span className="tabular font-semibold text-ink">{base.code}</span>
           {base.name ? ` (${base.name})` : ""}. Si pagas en otra moneda se convierte con la tasa vigente al hacer el
           pedido, y esa tasa queda fijada en tu pedido.
@@ -78,7 +78,7 @@ export function PaymentInfo({ methods }: PaymentInfoProps) {
           ))}
         </dl>
         {others.length === 0 && (
-          <p className="mt-3 text-[12.5px] text-ink-subtle">Por ahora la tienda solo acepta su moneda base.</p>
+          <p className="mt-3 type-meta text-ink-subtle">Por ahora la tienda solo acepta su moneda base.</p>
         )}
       </section>
     </div>
@@ -98,7 +98,7 @@ function CurrencyRow({
   base?: CurrencyInfo;
 }) {
   return (
-    <div className="flex items-center justify-between gap-4 py-2.5 text-[13.5px]">
+    <div className="flex items-center justify-between gap-4 py-2.5 type-body">
       <dt className="min-w-0">
         <span className="tabular font-semibold text-ink">{currency.code}</span>
         <span className="ml-2 truncate text-ink-subtle">{label}</span>

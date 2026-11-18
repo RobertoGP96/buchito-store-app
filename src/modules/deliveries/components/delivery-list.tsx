@@ -28,7 +28,7 @@ function ProofLink({ url, orderNo, deliveredAt }: { url: string; orderNo: string
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="mt-1 inline-flex items-center gap-1 text-[12px] font-semibold text-tostado-700 hover:underline"
+        className="mt-1 inline-flex items-center gap-1 type-caption font-semibold text-tostado-700 hover:underline"
       >
         <Camera className="h-3.5 w-3.5" strokeWidth={1.9} />
         Ver foto de entrega
@@ -63,7 +63,7 @@ function AssignControl({
   const canAssign = delivery.status === "pending" || delivery.status === "failed";
   const canUnassign = delivery.status === "assigned";
 
-  if (!canAssign && !canUnassign) return <span className="text-[12.5px] text-ink-subtle">{delivery.courierName ?? "—"}</span>;
+  if (!canAssign && !canUnassign) return <span className="type-meta text-ink-subtle">{delivery.courierName ?? "—"}</span>;
 
   const run = async () => {
     setPending(true);
@@ -103,7 +103,7 @@ function AssignControl({
               {couriers.map((c) => (
                 <ListBox.Item key={c.courierId} id={String(c.courierId)} textValue={c.fullName}>
                   {c.fullName}
-                  <span className="ml-2 text-[12px] text-ink-subtle">
+                  <span className="ml-2 type-caption text-ink-subtle">
                     {VEHICLE_LABELS[c.vehicle]} · {c.openDeliveries} en curso
                   </span>
                   <ListBox.ItemIndicator />
@@ -116,7 +116,6 @@ function AssignControl({
       <Button
         variant={canUnassign ? "outline" : "primary"}
         size="sm"
-        className="rounded-full"
         isPending={pending}
         isDisabled={pending || (canAssign && !courierId)}
         onPress={() => void run()}
@@ -138,7 +137,7 @@ export function DeliveryList({ rows, couriers, activeStatus }: DeliveryListProps
           <Link href={`/admin/pedidos/${r.orderId}`} className="font-semibold text-tostado-700 hover:underline">
             {r.orderNo}
           </Link>
-          <p className="text-[12px] text-ink-subtle">
+          <p className="type-caption text-ink-subtle">
             {r.recipientName} · <span className="tabular">{r.recipientPhone}</span>
           </p>
           {r.proofPhotoUrl && <ProofLink url={r.proofPhotoUrl} orderNo={r.orderNo} deliveredAt={r.deliveredAt} />}

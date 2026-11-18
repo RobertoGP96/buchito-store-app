@@ -38,7 +38,7 @@ export function CurrencySwitcher({ className }: CurrencySwitcherProps) {
           {currencies.map((currency) => (
             <Dropdown.Item key={currency.code} id={currency.code} textValue={currency.code}>
               <span className="tabular font-semibold">{currency.code}</span>
-              <span className="ml-2 text-[12px] text-ink-subtle">
+              <span className="ml-2 type-caption text-ink-subtle">
                 {currency.name ?? ""}
                 {currency.currencyId === base.currencyId && " · base"}
               </span>

@@ -42,7 +42,7 @@ export default async function CourierProfilePage() {
             </span>
             <div className="min-w-0">
               <p className="truncate text-[15px] font-semibold text-ink">{profile.fullName}</p>
-              <p className="truncate text-[12.5px] text-ink-subtle">{profile.email}</p>
+              <p className="truncate type-meta text-ink-subtle">{profile.email}</p>
             </div>
           </div>
           {/* La clave remonta el botón (y cierra su diálogo) cuando los datos cambian. */}
@@ -51,7 +51,7 @@ export default async function CourierProfilePage() {
             profile={{ fullName: profile.fullName, phone: profile.phone }}
           />
         </div>
-        <dl className="mt-5 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-[13px]">
+        <dl className="mt-5 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 type-meta">
           <dt className="text-ink-subtle">Teléfono</dt>
           <dd className="tabular font-medium text-ink">{profile.phone}</dd>
           <dt className="text-ink-subtle">Vehículo</dt>

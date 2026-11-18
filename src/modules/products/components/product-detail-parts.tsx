@@ -126,7 +126,7 @@ export function ProductAvailability({ variant, className }: { variant: CatalogVa
     <div className={cn("flex flex-wrap items-center gap-x-3 gap-y-1", className)}>
       <StockLabel stock={variant.stock} unit={variant.unit} />
       {variant.unit !== "unit" && (
-        <span className="text-[12px] leading-none text-ink-subtle">
+        <span className="type-caption leading-none text-ink-subtle">
           Se vende en pasos de {fmtQty(variant.qtyStep, variant.unit)}
         </span>
       )}
@@ -176,7 +176,7 @@ export function ProductDescription({ product, className }: { product: CatalogPro
   return (
     <div className={cn("border-t border-line pt-6", className)}>
       <p className="eyebrow">Descripción</p>
-      <p className="mt-2.5 text-[14px] leading-[1.7] text-pretty text-ink-muted">{product.description}</p>
+      <p className="mt-2.5 type-body leading-[1.7] text-pretty text-ink-muted">{product.description}</p>
     </div>
   );
 }
@@ -197,7 +197,7 @@ export function ProductSpecs({
   return (
     <dl
       className={cn(
-        "grid grid-cols-[auto_minmax(0,1fr)] gap-x-6 gap-y-2 border-t border-line pt-6 text-[13.5px]",
+        "grid grid-cols-[auto_minmax(0,1fr)] gap-x-6 gap-y-2 border-t border-line pt-6 type-body",
         className
       )}
     >

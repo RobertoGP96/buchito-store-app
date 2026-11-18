@@ -30,7 +30,7 @@ export default async function CombosPage() {
           />
         ) : (
           <>
-            <p className="tabular text-[12.5px] text-ink-subtle">
+            <p className="tabular type-meta text-ink-subtle">
               {combos.length} {combos.length === 1 ? "combo" : "combos"}
             </p>
             <ProductGrid>

@@ -25,14 +25,14 @@ function PriceCell({ row }: { row: AdminComboRow }) {
         <Money value={row.price} currency={row.priceCurrency} />
       </span>
       {row.regularPriceBase != null && row.regularPriceBase > (row.priceBase ?? 0) && (
-        <span className="text-[11.5px] text-ink-subtle">
+        <span className="type-caption text-ink-subtle">
           <span className="line-through">
             <Money value={row.regularPriceBase} />
           </span>
           {row.savingsPct > 0 && <span className="ml-1 font-semibold text-ok">−{row.savingsPct}%</span>}
         </span>
       )}
-      {row.priceBase == null && <span className="text-[11.5px] font-medium text-warn">Sin tasa</span>}
+      {row.priceBase == null && <span className="type-caption font-medium text-warn">Sin tasa</span>}
     </div>
   );
 }
@@ -51,7 +51,7 @@ function Availability({ row }: { row: AdminComboRow }) {
   return (
     <span className={out ? "tabular font-semibold text-danger" : "tabular font-semibold text-ink"}>
       {row.available}
-      {out && <span className="ml-1.5 text-[11px] font-medium">Agotado</span>}
+      {out && <span className="ml-1.5 type-micro font-medium">Agotado</span>}
     </span>
   );
 }
@@ -82,7 +82,7 @@ export function ComboList({ rows, heading }: { rows: AdminComboRow[]; heading?: 
             <Link href={`/admin/combos/${r.comboId}`} className="font-semibold text-ink hover:text-tostado-700">
               {r.name}
             </Link>
-            <p className="line-clamp-1 text-[12px] text-ink-subtle">{itemsSummary(r)}</p>
+            <p className="line-clamp-1 type-caption text-ink-subtle">{itemsSummary(r)}</p>
           </div>
         </div>
       ),

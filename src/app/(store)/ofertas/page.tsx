@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { BadgePercent } from "lucide-react";
+import { BadgePercent, Gift } from "lucide-react";
 import { ButtonLink } from "@/components/button-link";
 import { EmptyState } from "@/components/empty-state";
 import { ProductCard } from "@/components/product-card";
@@ -8,6 +8,7 @@ import { ScreenHeader } from "@/components/screen-header";
 import { ComboCard } from "@/modules/combos/components/combo-card";
 import { getCatalogCombos } from "@/modules/combos/queries/combo-catalog-queries";
 import { getOnSaleProducts } from "@/modules/products/queries/catalog-queries";
+import { SectionHeader } from "@/components/section-header";
 
 export const metadata: Metadata = { title: "Ofertas" };
 export const dynamic = "force-dynamic";
@@ -38,17 +39,16 @@ export default async function OffersPage() {
           <>
             {products.length > 0 && (
               <section>
-                <div className="flex items-end justify-between gap-4">
-                  <div>
-                    <p className="eyebrow">Rebajados</p>
-                    <h2 className="font-display mt-2 text-[20px] leading-tight text-espresso-900 md:text-[24px]">
-                      Productos con descuento
-                    </h2>
-                  </div>
-                  <p className="tabular text-[12.5px] text-ink-subtle">
-                    {products.length} {products.length === 1 ? "producto" : "productos"}
-                  </p>
-                </div>
+                <SectionHeader
+                  eyebrow="Rebajados"
+                  icon={BadgePercent}
+                  title="Productos con descuento"
+                  action={
+                    <p className="tabular type-meta text-ink-subtle">
+                      {products.length} {products.length === 1 ? "producto" : "productos"}
+                    </p>
+                  }
+                />
                 <ProductGrid className="mt-5">
                   {products.map((product, i) => (
                     <ProductGridCell key={product.productId}>
@@ -61,17 +61,16 @@ export default async function OffersPage() {
 
             {savingCombos.length > 0 && (
               <section>
-                <div className="flex items-end justify-between gap-4">
-                  <div>
-                    <p className="eyebrow">Combos</p>
-                    <h2 className="font-display mt-2 text-[20px] leading-tight text-espresso-900 md:text-[24px]">
-                      Paquetes que ahorran
-                    </h2>
-                  </div>
-                  <ButtonLink href="/combos" variant="ghost" size="sm">
-                    Ver todos
-                  </ButtonLink>
-                </div>
+                <SectionHeader
+                  eyebrow="Combos"
+                  icon={Gift}
+                  title="Paquetes que ahorran"
+                  action={
+                    <ButtonLink href="/combos" variant="ghost" size="sm">
+                      Ver todos
+                    </ButtonLink>
+                  }
+                />
                 <ProductGrid className="mt-5">
                   {savingCombos.map((combo) => (
                     <ProductGridCell key={combo.comboId}>

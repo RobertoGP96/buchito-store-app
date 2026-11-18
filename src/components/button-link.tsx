@@ -19,8 +19,8 @@ const VARIANTS: Record<ButtonLinkVariant, string> = {
 // Mismas alturas que el `Button` de HeroUI (40/36px, y 36/32px en `sm`) para
 // que un enlace y un botón vecinos midan igual. `lg` es el CTA de la tienda.
 const SIZES: Record<ButtonLinkSize, string> = {
-  sm: "h-9 px-3.5 text-[13px] md:h-8",
-  default: "h-10 px-4 text-[14px] md:h-9",
+  sm: "h-9 px-3.5 type-meta md:h-8",
+  default: "h-10 px-4 type-body md:h-9",
   lg: "h-12 px-7 text-[15px]",
 };
 

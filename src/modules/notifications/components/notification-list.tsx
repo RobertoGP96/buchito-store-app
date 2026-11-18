@@ -98,16 +98,16 @@ export function NotificationList({
                   <Icon className="h-4 w-4" strokeWidth={1.9} />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className={cn("block text-[13.5px] leading-snug text-ink", isRead ? "font-medium" : "font-semibold")}>
+                  <span className={cn("block type-body leading-snug text-ink", isRead ? "font-medium" : "font-semibold")}>
                     {item.title}
                   </span>
-                  <span className="mt-0.5 line-clamp-2 block text-[12.5px] leading-[1.5] text-ink-muted">{item.body}</span>
+                  <span className="mt-0.5 line-clamp-2 block type-meta leading-[1.5] text-ink-muted">{item.body}</span>
                   {/* La hora se formatea con la zona de quien pinta: el servidor
                       (UTC en producción) y el navegador pueden diferir. */}
                   <time
                     dateTime={item.createdAt}
                     suppressHydrationWarning
-                    className="tabular mt-1 block text-[11.5px] text-ink-subtle"
+                    className="tabular mt-1 block type-caption text-ink-subtle"
                   >
                     {fmtDateTime(item.createdAt)}
                   </time>
@@ -124,7 +124,7 @@ export function NotificationList({
         })}
       </ul>
       {variant === "page" && items.length >= INBOX_SIZE && (
-        <p className="mt-3 text-center text-[12.5px] text-ink-subtle">
+        <p className="mt-3 text-center type-meta text-ink-subtle">
           Se muestran las últimas {INBOX_SIZE} notificaciones.
         </p>
       )}

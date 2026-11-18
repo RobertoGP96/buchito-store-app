@@ -92,7 +92,7 @@ export function CatalogFilters({ categories, activeSlug, query }: CatalogFilters
           placeholder="Buscar productos"
           aria-label="Buscar productos"
           // 16px en móvil: por debajo, Safari de iOS amplía la página al enfocar.
-          className="min-w-0 flex-1 bg-transparent text-base text-ink outline-none placeholder:text-ink-subtle md:text-[13.5px]"
+          className="min-w-0 flex-1 bg-transparent text-base text-ink outline-none placeholder:text-ink-subtle md:type-body"
         />
         {value && (
           <button

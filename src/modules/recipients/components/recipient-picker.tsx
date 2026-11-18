@@ -39,11 +39,11 @@ export function RecipientPicker({ recipients, value, onChange, labelledBy }: Rec
             </span>
             <span className="min-w-0">
               <span className="flex flex-wrap items-center gap-2">
-                <span className="text-[14px] font-semibold text-ink">{r.name}</span>
+                <span className="type-body font-semibold text-ink">{r.name}</span>
                 {r.isDefault && <StatusChip label="Principal" tone="info" />}
               </span>
-              <span className="tabular mt-0.5 block text-[12.5px] text-ink-muted">{r.phone}</span>
-              <RecipientAddress address={r} className="mt-1 block text-[12.5px] leading-[1.55] text-ink-muted" />
+              <span className="tabular mt-0.5 block type-meta text-ink-muted">{r.phone}</span>
+              <RecipientAddress address={r} className="mt-1 block type-meta leading-[1.55] text-ink-muted" />
             </span>
           </button>
         );
@@ -59,8 +59,8 @@ export function RecipientPicker({ recipients, value, onChange, labelledBy }: Rec
           {isNew ? <Check className="h-3 w-3" strokeWidth={3} /> : <Plus className="h-3 w-3" strokeWidth={3} />}
         </span>
         <span className="min-w-0">
-          <span className="block text-[14px] font-semibold text-ink">Nuevo destinatario</span>
-          <span className="mt-0.5 block text-[12.5px] text-ink-muted">
+          <span className="block type-body font-semibold text-ink">Nuevo destinatario</span>
+          <span className="mt-0.5 block type-meta text-ink-muted">
             Otra persona u otra dirección. Se guarda para la próxima vez.
           </span>
         </span>

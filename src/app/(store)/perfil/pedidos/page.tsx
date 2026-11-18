@@ -44,7 +44,7 @@ export default async function MyOrdersPage() {
                       <StatusChip {...ORDER_STATUS_META[order.status]} />
                       <StatusChip {...PAYMENT_STATUS_META[order.paymentStatus]} />
                     </div>
-                    <p className="tabular mt-1 text-[12.5px] text-ink-subtle">
+                    <p className="tabular mt-1 type-meta text-ink-subtle">
                       {fmtDateTime(order.createdAt)} · {FULFILLMENT_LABELS[order.fulfillment]} · {order.lineCount}{" "}
                       {order.lineCount === 1 ? "artículo" : "artículos"}
                     </p>

@@ -39,8 +39,8 @@ export function PaymentMethodPicker({ methods, value, onChange, labelledBy }: Pa
               {checked && <Check className="h-3 w-3" strokeWidth={3} />}
             </span>
             <span className="min-w-0">
-              <span className="block text-[14px] font-semibold text-ink">{method.name}</span>
-              <span className="mt-0.5 block text-[12.5px] text-ink-muted">
+              <span className="block type-body font-semibold text-ink">{method.name}</span>
+              <span className="mt-0.5 block type-meta text-ink-muted">
                 {PAYMENT_KIND_LABELS[method.kind]} · pagas en{" "}
                 <span className="tabular font-semibold">{method.currency.code}</span>
                 {method.surchargePercent != null && method.surchargePercent > 0 && (
@@ -48,7 +48,7 @@ export function PaymentMethodPicker({ methods, value, onChange, labelledBy }: Pa
                 )}
               </span>
               {checked && method.instructions && (
-                <span className="mt-2 block rounded-chip bg-canvas px-3 py-2 text-[12.5px] leading-[1.6] text-ink-muted">
+                <span className="mt-2 block rounded-chip bg-canvas px-3 py-2 type-meta leading-[1.6] text-ink-muted">
                   {method.instructions}
                 </span>
               )}

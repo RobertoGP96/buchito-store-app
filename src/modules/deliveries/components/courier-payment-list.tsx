@@ -34,7 +34,7 @@ function Balances({ balances, onPay }: { balances: CourierBalanceRow[]; onPay: (
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <p className="truncate text-[14.5px] font-semibold text-ink">{b.fullName}</p>
-              <p className="text-[12px] text-ink-subtle">
+              <p className="type-caption text-ink-subtle">
                 Tarifa <Money value={b.deliveryFee} /> por entrega
               </p>
             </div>
@@ -45,19 +45,18 @@ function Balances({ balances, onPay }: { balances: CourierBalanceRow[]; onPay: (
             <p className={cn("num-display mt-1 text-[24px] leading-none", b.pendingFees > 0 ? "text-espresso-900" : "text-ink-subtle")}>
               <Money value={b.pendingFees} />
             </p>
-            <p className="mt-1 text-[12px] text-ink-muted">
+            <p className="mt-1 type-caption text-ink-muted">
               {b.pendingCount} {b.pendingCount === 1 ? "entrega completada" : "entregas completadas"} sin liquidar
             </p>
           </div>
           <div className="flex items-end justify-between gap-3 border-t border-line pt-3">
-            <p className="text-[12px] text-ink-subtle">
+            <p className="type-caption text-ink-subtle">
               Pagado <Money value={b.paidTotal} className="font-medium text-ink-muted" />
               {b.lastPaidAt && <span className="block">Último pago {fmtDate(b.lastPaidAt)}</span>}
             </p>
             <Button
               variant="primary"
               size="sm"
-              className="rounded-full"
               isDisabled={b.pendingCount === 0}
               onPress={() => onPay(b.courierId)}
             >
@@ -77,7 +76,7 @@ function AmountCell({ row }: { row: CourierPaymentRow }) {
     <div className="flex flex-col items-end">
       <Money value={row.amountBase} className="font-semibold text-ink" />
       {differs && (
-        <span className="text-[11.5px] text-ink-subtle">
+        <span className="type-caption text-ink-subtle">
           tarifas <Money value={row.feesBase} />
         </span>
       )}
@@ -129,7 +128,7 @@ export function CourierPaymentList({ balances, result, activeRange }: CourierPay
         <p className="num-display mt-2 text-[24px] leading-none text-espresso-900">
           <Money value={result.totalBase} />
         </p>
-        <p className="mt-1.5 text-[12px] text-ink-muted">
+        <p className="mt-1.5 type-caption text-ink-muted">
           {result.rows.length} {result.rows.length === 1 ? "pago" : "pagos"} en el periodo
         </p>
       </div>

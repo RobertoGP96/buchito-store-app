@@ -155,7 +155,7 @@ export function StockAdjustForm({ open, onOpenChange, variant }: StockAdjustForm
           <p className="eyebrow">Últimos movimientos</p>
           <ul className="mt-2 divide-y divide-line-soft">
             {variant.recentMovements.map((m) => (
-              <li key={m.movementId} className="flex items-center justify-between gap-3 py-2 text-[12.5px]">
+              <li key={m.movementId} className="flex items-center justify-between gap-3 py-2 type-meta">
                 <div className="min-w-0">
                   <p className="font-medium text-ink">
                     {STOCK_MOVEMENT_TYPE_LABELS[m.type]}
@@ -173,7 +173,7 @@ export function StockAdjustForm({ open, onOpenChange, variant }: StockAdjustForm
                   <p className={cn("font-semibold", m.type === "exit" ? "text-danger" : "text-ink")}>
                     {movementDelta(m.type, m.quantity)}
                   </p>
-                  <p className="text-[11.5px] text-ink-subtle">quedan {fmtQty(m.stockAfter, variant.unit)}</p>
+                  <p className="type-caption text-ink-subtle">quedan {fmtQty(m.stockAfter, variant.unit)}</p>
                 </div>
               </li>
             ))}

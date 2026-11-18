@@ -38,8 +38,9 @@ export function ProductDetail({ product }: { product: CatalogProduct }) {
             </Link>
           </>
         )}
-        <ChevronRight className="h-3.5 w-3.5 text-ink-faint" strokeWidth={2} aria-hidden />
-        <span aria-current="page" className="min-w-0 truncate text-ink-muted">
+        {/* El nombre ya es el h1 justo debajo: en móvil la miga se queda en la ruta. */}
+        <ChevronRight className="hidden h-3.5 w-3.5 text-ink-faint sm:block" strokeWidth={2} aria-hidden />
+        <span aria-current="page" className="hidden min-w-0 truncate text-ink-muted sm:inline">
           {product.name}
         </span>
       </nav>

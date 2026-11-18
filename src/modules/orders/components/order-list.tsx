@@ -28,7 +28,7 @@ export function OrderList({ rows, activeStatus, counts }: OrderListProps) {
       header: "Pedido",
       isRowHeader: true,
       cell: (r) => (
-        <Link href={`/admin/pedidos/${r.orderId}`} className="font-semibold text-tostado-700 hover:underline">
+        <Link href={`/admin/pedidos/${r.orderId}`} className="tabular font-semibold whitespace-nowrap text-tostado-700 hover:underline">
           {r.orderNo}
         </Link>
       ),
@@ -39,7 +39,7 @@ export function OrderList({ rows, activeStatus, counts }: OrderListProps) {
       cell: (r) => (
         <div className="min-w-0">
           <p className="font-medium text-ink">{r.customerName}</p>
-          <p className="tabular text-[12px] text-ink-subtle">{r.customerPhone}</p>
+          <p className="tabular type-caption text-ink-subtle">{r.customerPhone}</p>
         </div>
       ),
     },
@@ -52,7 +52,7 @@ export function OrderList({ rows, activeStatus, counts }: OrderListProps) {
         <div>
           <Money value={r.total} className="font-semibold" />
           {r.paymentCurrency.code !== undefined && (
-            <p className="text-[11.5px] text-ink-subtle">
+            <p className="type-caption text-ink-subtle">
               <Money value={r.totalInPaymentCurrency} currency={r.paymentCurrency} /> · {r.paymentMethodName}
             </p>
           )}
@@ -87,7 +87,7 @@ export function OrderList({ rows, activeStatus, counts }: OrderListProps) {
             className={cn(CHIP_BASE, activeStatus === status ? CHIP_ON : CHIP_OFF)}
           >
             {ORDER_STATUS_META[status].label}
-            {counts[status] > 0 && <span className="ml-1.5 text-[11px] opacity-70">{counts[status]}</span>}
+            {counts[status] > 0 && <span className="ml-1.5 type-micro opacity-70">{counts[status]}</span>}
             <LinkPending />
           </Link>
         ))}

@@ -57,14 +57,13 @@ export function TwoFactorDisableDialog({ open, onOpenChange }: TwoFactorDisableD
       size="sm"
       footer={
         <div className="flex w-full items-center justify-end gap-2">
-          <Button variant="ghost" className="rounded-full" isDisabled={isSubmitting} onPress={() => close(false)}>
+          <Button variant="ghost" isDisabled={isSubmitting} onPress={() => close(false)}>
             Cancelar
           </Button>
           <Button
             type="submit"
             form={FORM_ID}
             variant="danger"
-            className="rounded-full"
             isPending={isSubmitting}
             isDisabled={isSubmitting}
           >
