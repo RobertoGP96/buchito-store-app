@@ -128,3 +128,19 @@ export function Timeline({ steps, className }: { steps: TimelineStep[]; classNam
     </ol>
   );
 }
+
+/** Título numerado de un paso (checkout). Es el `h2` de la sección: acepta `id`
+ *  para que el grupo de controles lo use de etiqueta. */
+export function StepHeading({ step, id, children }: { step: number; id?: string; children: ReactNode }) {
+  return (
+    <h2 id={id} className="flex items-center gap-2.5">
+      <span
+        aria-hidden
+        className="tabular type-meta flex h-7 w-7 flex-none items-center justify-center rounded-full bg-tostado-700 font-bold text-on-tostado"
+      >
+        {step}
+      </span>
+      <span className="font-display type-subheading text-espresso-900">{children}</span>
+    </h2>
+  );
+}

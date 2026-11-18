@@ -89,22 +89,31 @@ export function ProductBadges({
   );
 }
 
-export function ProductPrice({ variant, className }: { variant: CatalogVariant; className?: string }) {
+export function ProductPrice({
+  variant,
+  size = "md",
+  className,
+}: {
+  variant: CatalogVariant;
+  /** `lg` en la ficha completa, donde el precio manda sobre el título. */
+  size?: "md" | "lg";
+  className?: string;
+}) {
   const { base } = useCurrency();
   const unitSuffix = perUnitSuffix(variant.unit);
   return (
     <div className={cn("flex flex-wrap items-baseline gap-x-3 gap-y-1", className)} aria-live="polite">
-      <p className="num-display text-[26px] leading-none text-espresso-900">
+      <p className={cn("num-display text-espresso-900", size === "lg" ? "text-[30px] md:text-[34px]" : "text-[26px]")}>
         <Money value={variant.price} />
-        {unitSuffix && <span className="ml-1.5 text-[14px] font-medium text-ink-subtle">{unitSuffix}</span>}
+        {unitSuffix && <span className="type-body ml-1.5 font-medium text-ink-subtle">{unitSuffix}</span>}
       </p>
       {variant.compareAtPrice != null && variant.compareAtPrice > variant.price && (
-        <p className="text-[14px] font-medium text-ink-subtle line-through">
+        <p className="type-body font-medium text-ink-subtle line-through">
           <Money value={variant.compareAtPrice} />
         </p>
       )}
       {variant.origCurrency.currencyId !== base.currencyId && (
-        <p className="text-[12px] text-ink-subtle">
+        <p className="type-caption w-full text-ink-subtle">
           Precio en <Money value={variant.origPrice} currency={variant.origCurrency} /> a la tasa del día
         </p>
       )}
