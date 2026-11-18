@@ -225,7 +225,9 @@ export function TwoFactorSetupDialog({ open, onOpenChange, emailAvailable }: Two
                 width={200}
                 height={200}
                 unoptimized
-                className="rounded-xl bg-white p-2 shadow-card"
+                // Blanco literal a propósito: un lector de QR necesita el fondo
+                // claro también con el tema oscuro.
+                className="rounded-field bg-white p-2 shadow-card"
               />
               <div className="w-full text-center">
                 <p className="text-[12.5px] text-ink-muted">¿No puedes escanear? Escribe esta clave en la app:</p>

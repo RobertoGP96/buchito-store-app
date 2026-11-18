@@ -94,7 +94,7 @@ export function ImageUploader({
           }}
           className={cn(
             "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-field border-[1.5px] border-dashed px-4 py-6 text-center transition-colors duration-150",
-            dragging ? "border-tostado-700 bg-crema-100" : "border-rule bg-page hover:border-tostado-700",
+            dragging ? "border-tostado-700 bg-crema-100" : "border-rule bg-cream hover:border-tostado-700",
             (disabled || uploading) && "pointer-events-none opacity-60"
           )}
         >

@@ -42,7 +42,7 @@ function Balances({ balances, onPay }: { balances: CourierBalanceRow[]; onPay: (
           </div>
           <div>
             <p className="eyebrow">Por pagar</p>
-            <p className={cn("tabular font-display mt-1 text-[24px] leading-none", b.pendingFees > 0 ? "text-espresso-900" : "text-ink-subtle")}>
+            <p className={cn("num-display mt-1 text-[24px] leading-none", b.pendingFees > 0 ? "text-espresso-900" : "text-ink-subtle")}>
               <Money value={b.pendingFees} />
             </p>
             <p className="mt-1 text-[12px] text-ink-muted">
@@ -126,7 +126,7 @@ export function CourierPaymentList({ balances, result, activeRange }: CourierPay
 
       <div className="rounded-card bg-canvas p-4 shadow-card sm:max-w-xs">
         <p className="eyebrow">Total pagado</p>
-        <p className="tabular font-display mt-2 text-[24px] leading-none text-espresso-900">
+        <p className="num-display mt-2 text-[24px] leading-none text-espresso-900">
           <Money value={result.totalBase} />
         </p>
         <p className="mt-1.5 text-[12px] text-ink-muted">

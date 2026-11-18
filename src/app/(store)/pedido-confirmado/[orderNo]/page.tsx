@@ -91,6 +91,7 @@ export default async function OrderConfirmedPage({ params }: OrderConfirmedPageP
       <ScreenHeader
         eyebrow={copy.eyebrow}
         title={order.orderNo}
+        numericTitle
         description={
           !contact
             ? copy.description

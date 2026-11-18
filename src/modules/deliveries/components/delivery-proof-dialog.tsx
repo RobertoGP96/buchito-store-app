@@ -133,7 +133,7 @@ export function DeliveryProofDialog({
           </p>
 
           {preview ? (
-            <div className="relative mt-3 overflow-hidden rounded-field bg-page">
+            <div className="relative mt-3 overflow-hidden rounded-field bg-cream">
               {/* eslint-disable-next-line @next/next/no-img-element -- object URL local, sin optimizar */}
               <img src={preview} alt="Vista previa de la foto de prueba" className="max-h-[260px] w-full object-cover" />
               {uploading && (
@@ -158,7 +158,7 @@ export function DeliveryProofDialog({
                 onClick={() => pick(cameraRef.current)}
                 disabled={busy}
                 className={cn(
-                  "flex flex-col items-center justify-center gap-2 rounded-field border-[1.5px] border-dashed border-rule bg-page px-3 py-5 text-[13px] font-semibold text-ink transition-colors duration-150 hover:border-tostado-700",
+                  "flex flex-col items-center justify-center gap-2 rounded-field border-[1.5px] border-dashed border-rule bg-cream px-3 py-5 text-[13px] font-semibold text-ink transition-colors duration-150 hover:border-tostado-700",
                   busy && "pointer-events-none opacity-60"
                 )}
               >
@@ -170,7 +170,7 @@ export function DeliveryProofDialog({
                 onClick={() => pick(galleryRef.current)}
                 disabled={busy}
                 className={cn(
-                  "flex flex-col items-center justify-center gap-2 rounded-field border-[1.5px] border-dashed border-rule bg-page px-3 py-5 text-[13px] font-semibold text-ink transition-colors duration-150 hover:border-tostado-700",
+                  "flex flex-col items-center justify-center gap-2 rounded-field border-[1.5px] border-dashed border-rule bg-cream px-3 py-5 text-[13px] font-semibold text-ink transition-colors duration-150 hover:border-tostado-700",
                   busy && "pointer-events-none opacity-60"
                 )}
               >

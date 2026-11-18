@@ -31,8 +31,8 @@ function SidebarLink({ entry, collapsed }: { entry: NavEntry; collapsed: boolean
           "flex items-center gap-3 rounded-chip text-[13px] font-medium transition-colors duration-150",
           collapsed ? "h-10 w-10 justify-center" : "px-3 py-2",
           active
-            ? "bg-white/10 font-semibold text-footer-fg"
-            : "text-footer-muted hover:bg-white/5 hover:text-footer-fg"
+            ? "bg-footer-active font-semibold text-footer-fg"
+            : "text-footer-muted hover:bg-footer-hover hover:text-footer-fg"
         )}
       >
         <Icon className="h-4 w-4 flex-none" strokeWidth={active ? 2.1 : 1.9} />
@@ -57,7 +57,7 @@ function SidebarSection({ section, collapsed }: { section: NavSection; collapsed
           onClick={() => toggleSection(section.id)}
           aria-expanded={open}
           aria-controls={bodyId}
-          className="eyebrow flex w-full items-center justify-between rounded-chip px-3 py-2 text-caramelo-500 transition-colors duration-150 hover:bg-white/5"
+          className="eyebrow flex w-full items-center justify-between rounded-chip px-3 py-2 text-caramelo-500 transition-colors duration-150 hover:bg-footer-hover"
         >
           <span>{section.label}</span>
           <ChevronDown
@@ -131,7 +131,7 @@ export function AdminSidebar() {
         {!collapsed && (
           <Link
             href="/"
-            className="flex items-center gap-3 rounded-chip px-3 py-2 text-[13px] font-medium text-footer-muted transition-colors duration-150 hover:bg-white/5 hover:text-footer-fg"
+            className="flex items-center gap-3 rounded-chip px-3 py-2 text-[13px] font-medium text-footer-muted transition-colors duration-150 hover:bg-footer-hover hover:text-footer-fg"
           >
             <Store className="h-4 w-4 flex-none" strokeWidth={1.9} />
             Ver la tienda
@@ -143,7 +143,7 @@ export function AdminSidebar() {
             onClick={toggleCollapsed}
             aria-label={collapsed ? "Expandir menú" : "Contraer menú"}
             title={collapsed ? "Expandir menú" : "Contraer menú"}
-            className="flex h-9 w-9 items-center justify-center rounded-full text-footer-muted transition-colors duration-150 hover:bg-white/10 hover:text-footer-fg"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-footer-muted transition-colors duration-150 hover:bg-footer-active hover:text-footer-fg"
           >
             {collapsed ? (
               <ChevronsRight className="h-4 w-4" strokeWidth={2} />

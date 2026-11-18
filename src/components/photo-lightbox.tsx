@@ -27,7 +27,7 @@ export function PhotoLightbox({ open, onOpenChange, src, alt, title, caption }: 
               </Modal.Header>
             )}
             <Modal.Body className="flex flex-col items-center gap-3">
-              <div className="flex w-full items-center justify-center overflow-hidden rounded-field bg-page">
+              <div className="flex w-full items-center justify-center overflow-hidden rounded-field bg-cream">
                 {/* eslint-disable-next-line @next/next/no-img-element -- foto del bucket servida por /media, sin optimizar */}
                 <img src={src} alt={alt} className="max-h-[75dvh] w-auto max-w-full object-contain" />
               </div>

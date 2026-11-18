@@ -150,11 +150,11 @@ export function OrderDetail({ order, actions, paymentActions, customerActions, d
             {order.paymentSurcharge > 0 && <Row label="Recargo de pago" value={<Money value={order.paymentSurcharge} />} />}
             <div className="flex items-center justify-between gap-4 border-t border-line pt-2 text-[15px]">
               <dt className="font-semibold text-ink">Total</dt>
-              <dd className="font-display text-espresso-900"><Money value={order.total} /></dd>
+              <dd className="num-display text-espresso-900"><Money value={order.total} /></dd>
             </div>
           </dl>
           {profit && (
-            <dl className="mt-3 flex flex-col gap-2 rounded-field bg-page px-4 py-3">
+            <dl className="mt-3 flex flex-col gap-2 rounded-field bg-cream-50 px-4 py-3">
               <Row label="Costo de la mercancía" value={<Money value={profit.cost} />} />
               <Row
                 label="Ganancia bruta"
@@ -286,7 +286,7 @@ export function OrderDetail({ order, actions, paymentActions, customerActions, d
             </dl>
           )}
           {order.notes && (
-            <p className="mt-3 rounded-field bg-page px-3 py-2 text-[12.5px] text-ink-muted">{order.notes}</p>
+            <p className="mt-3 rounded-field bg-cream-50 px-3 py-2 text-[12.5px] text-ink-muted">{order.notes}</p>
           )}
         </Section>
       </div>

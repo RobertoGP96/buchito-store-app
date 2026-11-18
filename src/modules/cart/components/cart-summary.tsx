@@ -43,7 +43,7 @@ export function CartSummary({ totals, paymentCurrency, children }: CartSummaryPr
       <div className="mt-4 flex items-end justify-between gap-4 border-t border-line pt-4">
         <span className="text-[14px] font-semibold text-ink">Total</span>
         <div className="text-right">
-          <p className="font-display text-[22px] leading-none text-espresso-900">
+          <p className="num-display text-[22px] leading-none text-espresso-900">
             <Money value={totals.total} />
           </p>
           {paymentCurrency && totals.totalInPaymentCurrency != null && (

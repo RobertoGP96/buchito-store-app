@@ -54,7 +54,7 @@ function StatTile({ tile }: { tile: Tile }) {
         className={cn(
           "flex h-9 w-9 items-center justify-center rounded-chip",
           featured
-            ? "bg-white/12 text-brand-tile-fg"
+            ? "bg-brand-tile-fg/12 text-brand-tile-fg"
             : tile.tone === "warn"
               ? "bg-warn-soft text-warn"
               : tile.tone === "bad"
@@ -69,7 +69,7 @@ function StatTile({ tile }: { tile: Tile }) {
       <div className="min-w-0">
         <p
           className={cn(
-            "tabular font-display truncate text-[22px] leading-none md:text-[26px]",
+            "num-display truncate text-[22px] leading-none md:text-[26px]",
             featured ? "text-brand-tile-fg" : tile.tone === "bad" ? "text-danger" : tile.tone === "good" ? "text-ok" : "text-espresso-900"
           )}
         >

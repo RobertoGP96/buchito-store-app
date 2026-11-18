@@ -8,16 +8,19 @@ interface ScreenHeaderProps {
   eyebrow?: string;
   description?: string;
   backHref?: string;
+  /** El título es un folio o un número: va en Figtree tabular, no en la serif. */
+  numericTitle?: boolean;
   children?: ReactNode;
 }
 
 /** Cabecera de pantalla de la tienda. Va dentro del ancho de página (1120px)
- *  y sin fondo propio: la página es crema y las cards blancas ponen el contraste. */
+ *  y sin fondo propio: el titular en serif es lo que abre la pantalla. */
 export function ScreenHeader({
   title,
   eyebrow,
   description,
   backHref,
+  numericTitle = false,
   children,
 }: ScreenHeaderProps) {
   return (
@@ -42,14 +45,15 @@ export function ScreenHeader({
           {eyebrow && <p className="eyebrow">{eyebrow}</p>}
           <h1
             className={cn(
-              "font-display text-[26px] leading-[1.05] text-balance text-espresso-900 md:text-[32px]",
+              "type-title text-balance text-espresso-900",
+              numericTitle ? "num-display" : "font-display",
               eyebrow && "mt-2"
             )}
           >
             {title}
           </h1>
           {description && (
-            <p className="mt-2.5 max-w-[560px] text-[13.5px] leading-[1.65] text-pretty text-ink-muted">
+            <p className="type-body mt-2.5 max-w-[560px] text-pretty text-ink-muted">
               {description}
             </p>
           )}

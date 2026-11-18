@@ -94,7 +94,7 @@ export function ProductPrice({ variant, className }: { variant: CatalogVariant; 
   const unitSuffix = perUnitSuffix(variant.unit);
   return (
     <div className={cn("flex flex-wrap items-baseline gap-x-3 gap-y-1", className)} aria-live="polite">
-      <p className="font-display text-[26px] leading-none text-espresso-900">
+      <p className="num-display text-[26px] leading-none text-espresso-900">
         <Money value={variant.price} />
         {unitSuffix && <span className="ml-1.5 text-[14px] font-medium text-ink-subtle">{unitSuffix}</span>}
       </p>

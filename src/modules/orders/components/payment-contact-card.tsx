@@ -31,7 +31,7 @@ export function PaymentContactCard({ order, href, amount }: PaymentContactCardPr
             {order.paymentMethodName} · <Money value={amount} currency={order.paymentCurrency} className="font-semibold" />
           </p>
           {order.paymentInstructions && (
-            <p className="mt-2 rounded-chip bg-page px-3 py-2 text-[12.5px] leading-[1.6] break-words text-ink-muted">
+            <p className="mt-2 rounded-chip bg-cream-50 px-3 py-2 text-[12.5px] leading-[1.6] break-words text-ink-muted">
               {order.paymentInstructions}
             </p>
           )}

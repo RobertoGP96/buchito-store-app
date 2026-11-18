@@ -289,7 +289,7 @@ export function ImageCarousel({
                   >
                     <span
                       className={cn(
-                        "block h-1.5 rounded-full bg-white transition-[width,opacity] duration-200",
+                        "block h-1.5 rounded-full bg-on-media transition-[width,opacity] duration-200",
                         i === index ? "w-4" : "w-1.5 opacity-50"
                       )}
                     />

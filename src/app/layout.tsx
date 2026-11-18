@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Figtree } from "next/font/google";
+import { Figtree, Fraunces } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider, THEME_INIT_SCRIPT } from "@/lib/theme";
 import { STORE_NAME } from "@/lib/config";
@@ -13,6 +13,15 @@ const figtree = Figtree({
   subsets: ["latin"],
   variable: "--font-figtree",
   display: "swap",
+});
+
+// Solo titulares (`font-display`). Variable con tamaño óptico: el mismo archivo
+// afina el trazo en un h1 de 46px y lo engrosa en un título de card.
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-fraunces",
+  display: "swap",
+  axes: ["opsz"],
 });
 
 export const metadata: Metadata = {
@@ -38,7 +47,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="es" className={figtree.variable} suppressHydrationWarning>
+    <html lang="es" className={`${figtree.variable} ${fraunces.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>

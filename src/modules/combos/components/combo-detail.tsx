@@ -63,7 +63,7 @@ export function ComboDetail({ combo }: { combo: CatalogCombo }) {
           <h1 className="font-display mt-2 text-[26px] leading-[1.1] text-espresso-900 md:text-[32px]">{combo.name}</h1>
 
           <div className="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <p className="font-display text-[26px] leading-none text-espresso-900">
+            <p className="num-display text-[26px] leading-none text-espresso-900">
               <Money value={combo.price} />
             </p>
             {combo.regularPrice > combo.price && (

@@ -51,7 +51,7 @@ export function PaymentInfo({ methods }: PaymentInfoProps) {
                       )}
                     </p>
                     {method.instructions && (
-                      <p className="mt-2 rounded-chip bg-page px-3 py-2 text-[12.5px] leading-[1.6] text-ink-muted">
+                      <p className="mt-2 rounded-chip bg-cream-50 px-3 py-2 text-[12.5px] leading-[1.6] text-ink-muted">
                         {method.instructions}
                       </p>
                     )}

@@ -42,7 +42,7 @@ function Totals({ result }: { result: OrderPaymentsResult }) {
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
       <div className="rounded-card bg-canvas p-4 shadow-card">
         <p className="eyebrow">Total cobrado</p>
-        <p className="tabular font-display mt-2 text-[24px] leading-none text-espresso-900">
+        <p className="num-display mt-2 text-[24px] leading-none text-espresso-900">
           <Money value={result.totalBase} />
         </p>
         <p className="mt-1.5 text-[12px] text-ink-muted">
@@ -53,7 +53,7 @@ function Totals({ result }: { result: OrderPaymentsResult }) {
       {foreign.map((t) => (
         <div key={t.currency.currencyId} className="rounded-card bg-canvas p-4 shadow-card">
           <p className="eyebrow">Recibido en {t.currency.code}</p>
-          <p className="tabular font-display mt-2 text-[24px] leading-none text-espresso-900">
+          <p className="num-display mt-2 text-[24px] leading-none text-espresso-900">
             <Money value={t.amount} currency={t.currency} />
           </p>
           <p className="mt-1.5 text-[12px] text-ink-muted">Suma de lo entregado en esa moneda.</p>

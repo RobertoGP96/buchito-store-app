@@ -143,14 +143,14 @@ function KpiTile({ tile }: { tile: Tile }) {
       {featured && (
         <span
           aria-hidden
-          className="pointer-events-none absolute -top-10 -right-10 h-32 w-32 rounded-full bg-white/8"
+          className="pointer-events-none absolute -top-10 -right-10 h-32 w-32 rounded-full bg-brand-tile-fg/8"
         />
       )}
       <div className="relative flex items-start justify-between">
         <span
           className={cn(
             "flex h-9 w-9 items-center justify-center rounded-chip",
-            featured ? "bg-white/12 text-brand-tile-fg" : warn ? "bg-warn-soft text-warn" : "bg-crema-100 text-tostado-700"
+            featured ? "bg-brand-tile-fg/12 text-brand-tile-fg" : warn ? "bg-warn-soft text-warn" : "bg-crema-100 text-tostado-700"
           )}
         >
           <Icon className="h-[18px] w-[18px]" strokeWidth={1.9} />
@@ -167,7 +167,7 @@ function KpiTile({ tile }: { tile: Tile }) {
       <div className="relative min-w-0">
         <p
           className={cn(
-            "tabular font-display truncate text-[24px] leading-none md:text-[28px]",
+            "num-display truncate text-[24px] leading-none md:text-[28px]",
             featured ? "text-brand-tile-fg" : warn ? "text-warn" : "text-espresso-900"
           )}
         >

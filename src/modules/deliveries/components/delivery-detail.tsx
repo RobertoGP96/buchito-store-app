@@ -211,7 +211,7 @@ export function DeliveryDetail({ delivery, isAssignedCourier }: DeliveryDetailPr
           <p className="text-[13.5px] text-ink-muted">Sin dirección registrada.</p>
         )}
         {delivery.orderNotes && (
-          <p className="mt-3 rounded-field bg-page px-3 py-2 text-[12.5px] leading-[1.55] text-ink-muted">
+          <p className="mt-3 rounded-field bg-cream-50 px-3 py-2 text-[12.5px] leading-[1.55] text-ink-muted">
             <span className="font-semibold text-ink">Nota del cliente: </span>
             {delivery.orderNotes}
           </p>
@@ -236,7 +236,7 @@ export function DeliveryDetail({ delivery, isAssignedCourier }: DeliveryDetailPr
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-[13px] text-ink-muted">{delivery.paymentMethodName}</p>
-            <p className="font-display mt-1 text-[24px] leading-none text-espresso-900">
+            <p className="num-display mt-1 text-[24px] leading-none text-espresso-900">
               {mustCollect ? (
                 <Money value={delivery.amountToCollect} currency={delivery.paymentCurrency} />
               ) : (
@@ -275,7 +275,7 @@ export function DeliveryDetail({ delivery, isAssignedCourier }: DeliveryDetailPr
             <button
               type="button"
               onClick={() => setViewingProof(true)}
-              className="block w-full overflow-hidden rounded-field bg-page"
+              className="block w-full overflow-hidden rounded-field bg-cream"
               aria-label="Ver la foto de prueba en grande"
             >
               {/* eslint-disable-next-line @next/next/no-img-element -- foto del bucket servida por /media, sin optimizar */}

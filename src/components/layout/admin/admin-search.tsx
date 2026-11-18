@@ -285,7 +285,7 @@ export function AdminSearch({ className }: AdminSearchProps) {
         onClick={() => setOpen(true)}
         aria-label="Buscar en el panel"
         className={cn(
-          "hidden h-9 items-center gap-2 rounded-full border-[1.5px] border-line bg-page pr-2 pl-3 text-[13px] text-ink-subtle transition-colors duration-150 hover:border-tostado-700/40 hover:text-ink-muted md:flex md:w-[260px] lg:w-[320px]",
+          "hidden h-9 items-center gap-2 rounded-full border-[1.5px] border-line bg-cream-50 pr-2 pl-3 text-[13px] text-ink-subtle transition-colors duration-150 hover:border-tostado-700/40 hover:text-ink-muted md:flex md:w-[260px] lg:w-[320px]",
           className
         )}
       >
@@ -353,7 +353,7 @@ export function AdminSearch({ className }: AdminSearchProps) {
                   <button
                     type="button"
                     onClick={close}
-                    className="flex-none rounded-md border border-line bg-page px-1.5 py-0.5 font-sans text-[10.5px] font-semibold text-ink-subtle hover:text-tostado-700"
+                    className="flex-none rounded-md border border-line bg-cream-50 px-1.5 py-0.5 font-sans text-[10.5px] font-semibold text-ink-subtle hover:text-tostado-700"
                   >
                     Esc
                   </button>
@@ -401,7 +401,7 @@ export function AdminSearch({ className }: AdminSearchProps) {
                             <span
                               className={cn(
                                 "flex h-8 w-8 flex-none items-center justify-center rounded-[10px]",
-                                active ? "bg-canvas text-tostado-700" : "bg-page text-ink-muted"
+                                active ? "bg-canvas text-tostado-700" : "bg-cream text-ink-muted"
                               )}
                             >
                               <Icon className="h-4 w-4" strokeWidth={1.9} />
